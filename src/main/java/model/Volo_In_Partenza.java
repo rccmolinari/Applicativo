@@ -17,5 +17,7 @@ public class Volo_In_Partenza extends Volo {
         super(codice_Volo, compagnia, data, orario, ritardo, stato_Volo, "Napoli", destinazione, lista_Prenotazioni);
         this.gate = gate;
     }
+    public Volo_In_Partenza() {
+    }
 
 }
