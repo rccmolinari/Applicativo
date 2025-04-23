@@ -18,4 +18,6 @@ public class Volo_In_Partenza extends Volo {
         this.gate = gate;
     }
 
+    public Volo_In_Partenza() {}
+
 }

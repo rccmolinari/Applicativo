@@ -27,5 +27,6 @@ public class Utente_Generico extends Utente {
         this.lista_Prenotazioni = lista_Prenotazioni;
     }
 
-
+    public Utente_Generico() {
+    }
 }
