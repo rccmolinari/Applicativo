@@ -17,8 +17,8 @@ public class Main {
         a1.setLogin("");
         u2.cerca_Prenotazione(0);
         volo.setCodice_Volo(1);
-        v1.getCodice_Volo();
-        v2.getGate();
+        v1.setCodice_Volo(1);
+        v2.setGate(2);
         System.out.println("Ciao! non ci sono errori");
 
     }
