@@ -20,6 +20,5 @@ public class Volo_In_Partenza extends Volo {
     public Volo_In_Partenza() {
     }
 
-    public Volo_In_Partenza() {}
 
 }
