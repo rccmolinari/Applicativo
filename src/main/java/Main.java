@@ -10,6 +10,15 @@ public class Main {
         Volo volo = new Volo();
         Volo_In_Arrivo v1 = new Volo_In_Arrivo();
         Volo_In_Partenza v2 = new Volo_In_Partenza();
+        p.setNome("");
+        b.setPrenotazione(null);
+        p1.setNumero_Assegnato(0);
+        u1.setLogin("");
+        a1.setLogin("");
+        u2.cerca_Prenotazione(0);
+        volo.setCodice_Volo(1);
+        v1.setCodice_Volo(1);
+        v2.setGate(2);
         System.out.println("Ciao! non ci sono errori");
 
     }
