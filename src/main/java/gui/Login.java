@@ -23,7 +23,6 @@ public class Login {
             @Override
             public void mouseClicked(MouseEvent e) {
                 login.setEnabled(true);
-                login.setText(null);
             }});
         password.addMouseListener(new MouseAdapter() {
             @Override
@@ -35,14 +34,16 @@ public class Login {
         INVIOButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(INVIOButton);
-                String username = login.getText();
-                frame.setContentPane(new DashBoardUser(username).getHomePage());
-                frame.setLocationRelativeTo(null);
-                frame.setVisible(true);
-                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                //SwingUtilities.getWindowAncestor(INVIOButton).setVisible(false);
-                frame.pack();
+                if (login.getText() != null && !(login.getText().equals("email/id" )) && password.getText() != null && !(password.getText().equals("password"))) {
+                    JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(INVIOButton);
+                    String username = login.getText();
+                    frame.setContentPane(new DashBoardUser(username).getHomePage());
+                    frame.setLocationRelativeTo(null);
+                    frame.setVisible(true);
+                    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                    //SwingUtilities.getWindowAncestor(INVIOButton).setVisible(false);
+                    frame.pack();
+                }
             }
         });
     }

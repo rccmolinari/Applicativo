@@ -1,39 +1,39 @@
 package gui;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 
 public class DashBoardUser {
     private JPanel homePage;
     private JPanel welcomePanel;
     private JPanel welcomeText;
-    private JButton ADMINButton;
+    private JButton LOGOUTUSER;
     private JLabel welcomeTextLabel;
-    private JButton prenotaVoloButton;
-    private JButton voliButton;
-    private JButton cercaNPrenotazioneButton;
-    private JButton segnalaNSmarrimentoButton;
+    private JComboBox comboBox1;
+    private JLabel outputLabel;
     private String username;
 
 
     public DashBoardUser(String username) {
+        comboBox1.setModel(new DefaultComboBoxModel(new String[] {"", "Visualizza Voli", "Prenota Volo", "Cerca Prenotazione", "Segnala Smarrimento"}));
         this.username = username;
+        comboBox1.setEnabled(true);
+        outputLabel.setVisible(false);
+        comboBox1.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                String item = e.getItem().toString();
+                outputLabel.setVisible(true);
+
+                outputLabel.setText("Hai scelto "+item+"... work in progress king");
+
+            }
+        });
         welcomeTextLabel.setText("Bentornato "+username+" nella homepage dell'aereoporto di Napoli");
-        ADMINButton.addActionListener(new ActionListener() {
+        LOGOUTUSER.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(ADMINButton);
-                frame.setResizable(false);
-                String username = getUsername();
-                if(username.equals("admin")) {
-                    frame.setContentPane(new DashBoardAdmin(username).getDashboardAdminPage());
-                    frame.setLocationRelativeTo(null);
-                    frame.setVisible(true);
-                    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                    //SwingUtilities.getWindowAncestor(INVIOButton).setVisible(false);
-                    frame.pack();
-                }
+               System.exit(0);
             }
         });
     }
@@ -76,5 +76,9 @@ public class DashBoardUser {
 
     public void setWelcomePanel(JPanel welcomePanel) {
         this.welcomePanel = welcomePanel;
+    }
+
+    private void createUIComponents() {
+        // TODO: place custom component creation code here
     }
 }
