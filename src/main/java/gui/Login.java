@@ -22,6 +22,7 @@ public class Login {
         login.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                login.setText(null);
                 login.setEnabled(true);
             }});
         password.addMouseListener(new MouseAdapter() {
@@ -34,15 +35,27 @@ public class Login {
         INVIOButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (login.getText() != null && !(login.getText().equals("email/id" )) && password.getText() != null && !(password.getText().equals("password"))) {
-                    JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(INVIOButton);
-                    String username = login.getText();
-                    frame.setContentPane(new DashBoardUser(username).getHomePage());
-                    frame.setLocationRelativeTo(null);
-                    frame.setVisible(true);
-                    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                    //SwingUtilities.getWindowAncestor(INVIOButton).setVisible(false);
-                    frame.pack();
+                if (login.getText() != null && !(login.getText().equals("email/id")) && password.getText() != null && !(password.getText().equals("password"))) {
+                    if(login.getText().equals("admin") && password.getText().equals("admin")) {
+                        System.out.println(login.getText() + " " + password.getText());
+                        JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(INVIOButton);
+                        String username = login.getText();
+                        frame.setContentPane(new DashBoardAdmin(username).getDashboardAdminPage());
+                        frame.setLocationRelativeTo(null);
+                        frame.setVisible(true);
+                        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                        //SwingUtilities.getWindowAncestor(INVIOButton).setVisible(false);
+                        frame.pack();
+                    } else {
+                        JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(INVIOButton);
+                        String username = login.getText();
+                        frame.setContentPane(new DashBoardUser(username).getHomePage());
+                        frame.setLocationRelativeTo(null);
+                        frame.setVisible(true);
+                        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                        //SwingUtilities.getWindowAncestor(INVIOButton).setVisible(false);
+                        frame.pack();
+                    }
                 }
             }
         });
