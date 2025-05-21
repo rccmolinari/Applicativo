@@ -2,6 +2,8 @@ package gui;
 
 import javax.swing.*;
 import java.awt.event.*;
+import java.awt.BorderLayout;
+
 
 public class DashBoardUser {
     private JPanel homePage;
@@ -12,21 +14,31 @@ public class DashBoardUser {
     private JComboBox comboBox1;
     private JLabel outputLabel;
     private String username;
-
+    private JDialog choiceDialog = null;
 
     public DashBoardUser(String username) {
-        comboBox1.setModel(new DefaultComboBoxModel(new String[] {"", "Visualizza Voli", "Prenota Volo", "Cerca Prenotazione", "Segnala Smarrimento"}));
+        String [] choices = {"", "Visualizza Voli", "Prenota Volo", "Cerca Prenotazione", "Segnala Smarrimento"};
+        comboBox1.setModel(new DefaultComboBoxModel(choices));
         this.username = username;
         comboBox1.setEnabled(true);
         outputLabel.setVisible(false);
         comboBox1.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
-                String item = e.getItem().toString();
-                outputLabel.setVisible(true);
-
-                outputLabel.setText("Hai scelto "+item+"... work in progress king");
-
+                if(e.getStateChange() == ItemEvent.SELECTED) {
+                    String selected = (String) comboBox1.getSelectedItem();
+                    JPanel panel = new JPanel(new BorderLayout());
+                    JLabel label = new JLabel(selected+" work in progress king...");
+                    label.setHorizontalAlignment(SwingConstants.CENTER);
+                    panel.add(label, BorderLayout.CENTER);
+                    choiceDialog = new JDialog();
+                    JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(comboBox1);
+                    choiceDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+                    choiceDialog.setContentPane(panel);
+                    choiceDialog.setSize(300, 150);
+                    choiceDialog.setLocationRelativeTo(frame);
+                    choiceDialog.setVisible(true);
+                }
             }
         });
         welcomeTextLabel.setText("Bentornato "+username+" nella homepage dell'aereoporto di Napoli");
@@ -76,6 +88,38 @@ public class DashBoardUser {
 
     public void setWelcomePanel(JPanel welcomePanel) {
         this.welcomePanel = welcomePanel;
+    }
+
+    public JButton getLOGOUTUSER() {
+        return LOGOUTUSER;
+    }
+
+    public void setLOGOUTUSER(JButton LOGOUTUSER) {
+        this.LOGOUTUSER = LOGOUTUSER;
+    }
+
+    public JComboBox getComboBox1() {
+        return comboBox1;
+    }
+
+    public void setComboBox1(JComboBox comboBox1) {
+        this.comboBox1 = comboBox1;
+    }
+
+    public JLabel getOutputLabel() {
+        return outputLabel;
+    }
+
+    public void setOutputLabel(JLabel outputLabel) {
+        this.outputLabel = outputLabel;
+    }
+
+    public JDialog getChoiceDialog() {
+        return choiceDialog;
+    }
+
+    public void setChoiceDialog(JDialog choiceDialog) {
+        this.choiceDialog = choiceDialog;
     }
 
     private void createUIComponents() {

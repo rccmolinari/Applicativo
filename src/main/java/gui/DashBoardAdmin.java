@@ -1,6 +1,7 @@
 package gui;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -17,7 +18,8 @@ public class DashBoardAdmin {
     private JButton LOGOUTUSER;
     private JComboBox comboBox1;
     private JLabel outputLabel;
-
+    private JDialog choiceDialog = null;
+    private String username;
     public JLabel getAdminLabel() {
         return adminLabel;
     }
@@ -90,31 +92,41 @@ public class DashBoardAdmin {
         this.username = username;
     }
 
-    private String username;
 
     public DashBoardAdmin(String username) {
-        comboBox1.setModel(new DefaultComboBoxModel(new String[] {"", "Visualizza Voli", "Inserisci Volo", "Aggiorna Volo", "Modifica Gate", "Aggiorna Bagaglio", "Visualizza Smarrimento"}));
-        this.username = username;
-        comboBox1.setEnabled(true);
-        outputLabel.setVisible(false);
-        comboBox1.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                String item = e.getItem().toString();
-                outputLabel.setVisible(true);
+            String [] choices = {"", "Visualizza Voli", "Prenota Volo", "Cerca Prenotazione", "Segnala Smarrimento"};
+            comboBox1.setModel(new DefaultComboBoxModel(choices));
+            this.username = username;
+            comboBox1.setEnabled(true);
+            outputLabel.setVisible(false);
+            comboBox1.addItemListener(new ItemListener() {
+                @Override
+                public void itemStateChanged(ItemEvent e) {
+                    if(e.getStateChange() == ItemEvent.SELECTED) {
+                        String selected = (String) comboBox1.getSelectedItem();
+                        JPanel panel = new JPanel(new BorderLayout());
+                        JLabel label = new JLabel(selected+" work in progress king...");
+                        label.setHorizontalAlignment(SwingConstants.CENTER);
+                        panel.add(label, BorderLayout.CENTER);
+                        choiceDialog = new JDialog();
+                        JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(comboBox1);
+                        choiceDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+                        choiceDialog.setContentPane(panel);
+                        choiceDialog.setSize(300, 150);
+                        choiceDialog.setLocationRelativeTo(frame);
+                        choiceDialog.setVisible(true);
+                    }
+                }
+            });
+            welcomeTextLabel.setText("Bentornato "+username+" nella homepage dell'aereoporto di Napoli");
+            LOGOUTUSER.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    System.exit(0);
+                }
+            });
+        }
 
-                outputLabel.setText("Hai scelto "+item+"... work in progress king");
-
-            }
-        });
-        welcomeTextLabel.setText("Bentornato "+username+" nella homepage dell'aereoporto di Napoli");
-        LOGOUTUSER.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.exit(0);
-            }
-        });
-    }
 
     public JPanel getDashboardAdminPage() {
         return dashboardAdminPage;
@@ -123,4 +135,7 @@ public class DashBoardAdmin {
     public void setDashboardAdminPage(JPanel dashboardAdminPage) {
         this.dashboardAdminPage = dashboardAdminPage;
     }
-}
+
+    public JDialog getChoiceDialog() {
+        return choiceDialog;
+    }}
