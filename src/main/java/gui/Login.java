@@ -8,36 +8,36 @@ import java.awt.event.MouseEvent;
 
 public class Login {
     private JTextField login;
-    private JTextField password;
     private JButton INVIOButton;
     private JPanel mainPanel;
     private JPanel textPanel;
     private JPanel loginPanel;
+    private JPasswordField passwordField1;
 
     public Login() {
         login.setText("email/id");
-        password.setText("password");
+        passwordField1.setText("password");
         login.setEnabled(false);
-        password.setEnabled(false);
+        passwordField1.setEnabled(false);
         login.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 login.setText(null);
                 login.setEnabled(true);
             }});
-        password.addMouseListener(new MouseAdapter() {
+        passwordField1.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                password.setEnabled(true);
-                password.setText(null);
+                passwordField1.setEnabled(true);
+                passwordField1.setText(null);
             }});
 
         INVIOButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (login.getText() != null && !(login.getText().equals("email/id")) && password.getText() != null && !(password.getText().equals("password"))) {
-                    if(login.getText().equals("admin") && password.getText().equals("admin")) {
-                        System.out.println(login.getText() + " " + password.getText());
+                if (login.getText() != null && !(login.getText().equals("email/id")) && passwordField1.getText() != null && !(passwordField1.getText().equals("password"))) {
+                    if(login.getText().equals("admin") && passwordField1.getText().equals("admin")) {
+                        System.out.println(login.getText() + " " + passwordField1.getText());
                         JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(INVIOButton);
                         String username = login.getText();
                         frame.setContentPane(new DashBoardAdmin(username).getDashboardAdminPage());
@@ -74,12 +74,12 @@ public class Login {
         this.login = login;
     }
 
-    public JTextField getPassword() {
-        return password;
+    public JPasswordField getPassword() {
+        return passwordField1;
     }
 
-    public void setPassword(JTextField password) {
-        this.password = password;
+    public void setPassword(JPasswordField password) {
+        this.passwordField1 = password;
     }
 
     public JButton getINVIOButton() {
