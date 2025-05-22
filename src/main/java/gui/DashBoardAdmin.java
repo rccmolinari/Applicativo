@@ -118,7 +118,7 @@ public class DashBoardAdmin {
                     }
                 }
             });
-            welcomeTextLabel.setText("Bentornato "+username+" nella homepage dell'aereoporto di Napoli");
+            welcomeTextLabel.setText("ID: "+username);
             LOGOUTUSER.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
