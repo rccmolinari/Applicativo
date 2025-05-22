@@ -1,5 +1,6 @@
 package model;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Estende {@link Utente} per rappsentare un utente generico che può eddettuare prenotazioni.
@@ -34,21 +35,25 @@ public class Utente_Generico extends Utente {
      *
      * @param volo the volo
      */
-    public void prenota_Volo(Volo volo) {}
+    public void prenota_Volo(Volo volo, Passeggero p) {}
 
     /**
      * Cerca una prenotazione tramite il nome del passeggero.
      *
      * @param nome_Passeggero the nome passeggero
      */
-    public void cerca_Prenotazione(String nome_Passeggero) {}
+    public Prenotazione cerca_Prenotazione(String nome_Passeggero) {
+        return null;
+    }
 
     /**
      * Cerca una prenotazione in base al codice del volo.
      *
      * @param codice_Volo the codice volo
      */
-    public void cerca_Prenotazione(int codice_Volo) {}
+    public Prenotazione cerca_Prenotazione(int codice_Volo) {
+        return null;
+    }
 
     /**
      * Segnala lo smarrimento di un bagaglio.
@@ -68,6 +73,11 @@ public class Utente_Generico extends Utente {
     public Utente_Generico(String login, String password, ArrayList<Volo> lista_Prenotazioni) {
         super(login, password);
         this.lista_Prenotazioni = lista_Prenotazioni;
+    }
+
+    @Override
+    public List<Volo> visualizza_Voli(List<Volo> voli) {
+        return voli;
     }
 
     /**

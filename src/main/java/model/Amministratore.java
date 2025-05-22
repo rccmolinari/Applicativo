@@ -1,5 +1,7 @@
 package model;
 
+import java.util.List;
+
 /**
  * Classe rappresentante l'amministratore dell'aereoporto, uno dei possibili utenti del sistema.
  */
@@ -24,21 +26,22 @@ public class Amministratore extends Utente {
      *
      * @param volo the volo
      */
-    public void modifica_Gate(Volo volo) {}
+    public void modifica_Gate(Volo_In_Partenza volo) {}
 
     /**
      * Aggiorna lo stato di un bagaglio.
      *
      * @param bagaglio the bagaglio
      */
-    public void aggiorna_Bagaglio(Bagaglio bagaglio) {}
+    public void aggiorna_Bagaglio(Bagaglio bagaglio, Stato_Bagaglio stato) {}
 
     /**
      * Visualizza lo smarrimento di un bagaglio.
      *
-     * @param bagaglio the bagaglio
      */
-    public void visualizza_Smarrimento(Bagaglio bagaglio) {}
+    public List<Bagaglio> visualizza_Smarrimento() {
+        return null;
+    }
 
     /**
      * Costruttore di default.

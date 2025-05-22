@@ -1,5 +1,7 @@
 package gui;
 
+import controller.Controller;
+
 import javax.swing.*;
 import java.awt.event.*;
 import java.awt.BorderLayout;
@@ -15,8 +17,10 @@ public class DashBoardUser {
     private JLabel outputLabel;
     private String username;
     private JDialog choiceDialog = null;
+    private Controller controller;
 
-    public DashBoardUser(String username) {
+    public DashBoardUser(String username, Controller controller) {
+        this.controller = controller;
         String [] choices = {"", "Visualizza Voli", "Prenota Volo", "Cerca Prenotazione", "Segnala Smarrimento"};
         comboBox1.setModel(new DefaultComboBoxModel(choices));
         this.username = username;

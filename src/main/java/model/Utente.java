@@ -1,5 +1,7 @@
 package model;
 
+import java.util.List;
+
 /**
  * Rappresenta un utente base del sistema.
  * Contiene credenziali di accesso e funzionalità comuni a tutti gli utenti.
@@ -56,8 +58,8 @@ public class Utente {
      *
      * @return the string
      */
-    public String visualizza_Voli() {
-        return "";
+    public List<Volo> visualizza_Voli(List<Volo> voli) {
+        return voli;
     }
 
     /**

@@ -17,11 +17,28 @@ public class Sistema {
 
     }
 
-    public boolean authenticateUser(String email, String password) {
-        for (Utente utente : utenti)
-            if (utente.getLogin().equals(email) && utente.getPassword().equals(password)) {
-                return true;
-            }
-        return false;
+    public Utente authenticateUser(String email, String password) {
+       if (email.equals("admin") && password.equals("admin")) {
+           return new Amministratore(email, password);
+       } else if (email.equals("user") && password.equals("user")) {
+           return new Utente(email, password);
+       }
+       return null;
     }
+
+
+    public Utente getuserbylogin(String login, String password) {
+        for(Utente utente : utenti) {
+            if (utente.getLogin().equals(login) && utente.getPassword().equals(password)) {
+                return utente;
+            }
+        }
+        return null;
+    }
+
+    public List<Volo> getVoliDisponibili() {
+        return null;
+    }
+
+
 }

@@ -1,5 +1,7 @@
 package gui;
 
+import controller.Controller;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -20,6 +22,8 @@ public class DashBoardAdmin {
     private JLabel outputLabel;
     private JDialog choiceDialog = null;
     private String username;
+    private Controller controller;
+
     public JLabel getAdminLabel() {
         return adminLabel;
     }
@@ -93,7 +97,8 @@ public class DashBoardAdmin {
     }
 
 
-    public DashBoardAdmin(String username) {
+    public DashBoardAdmin(String username, Controller controller) {
+            this.controller = controller;
             String [] choices = {"", "Visualizza Voli", "Prenota Volo", "Cerca Prenotazione", "Segnala Smarrimento"};
             comboBox1.setModel(new DefaultComboBoxModel(choices));
             this.username = username;
