@@ -1,14 +1,11 @@
 package gui;
 
-import javax.naming.ldap.Control;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import controller.Controller;
-import model.Amministratore;
-import model.Utente;
 
 public class Login {
     private JTextField login;
@@ -17,6 +14,7 @@ public class Login {
     private JPanel textPanel;
     private JPanel loginPanel;
     private JPasswordField passwordField1;
+    private JButton REGISTRATIButton;
     private Controller controller;
 
     public Login() {
@@ -46,36 +44,100 @@ public class Login {
         INVIOButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String username = login.getText();
-                String password = new String(passwordField1.getPassword());
+            String username = login.getText();
+            String password = new String(passwordField1.getPassword());
+            controller.login(username, password);
+            if(controller.getUser() != null || controller.getAdmin() != null) {
+            JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(INVIOButton);
+            JPanel content;
 
-                if (username != null && !username.equals("email/id") && password != null && !password.equals("password")) {
-                        Utente utente = controller.login(username, password);
+            if (controller.getUser() == null) {
+                content = new DashBoardAdmin(username, controller).getDashboardAdminPage();
+            } else {
+                content = new DashBoardUser(username, controller).getHomePage();
+            }
+            frame.setContentPane(content);
+            frame.setLocationRelativeTo(null);
+            frame.setVisible(true);
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.pack();
+            } else {
+            JOptionPane.showMessageDialog(null, "Login Failed" + "\n" +
+                    " Le uniche credenziali disponibili sono \n" +
+                    " user, user \n" +
+                    " admin, admin");
+        }
 
-                        if(utente != null) {
-                        JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(INVIOButton);
-                        JPanel content;
+        }
+    });
+        REGISTRATIButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JDialog dialog = new JDialog();
+                dialog.setTitle("Registrazione Utente");
+                dialog.setModal(true);
+                dialog.setSize(400, 400);
+                dialog.setLocationRelativeTo(null);
 
-                        if (utente instanceof Amministratore) {
-                            content = new DashBoardAdmin(username, controller).getDashboardAdminPage();
-                        } else {
-                            content = new DashBoardUser(username, controller).getHomePage();
+                JPanel panel = new JPanel();
+                panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+
+                JTextField emailField = new JTextField();
+                JPasswordField passwordField = new JPasswordField();
+                JTextField idDocField = new JTextField();
+                JTextField nomeField = new JTextField();
+                JTextField cognomeField = new JTextField();
+                JTextField dataNascitaField = new JTextField();
+
+                panel.add(new JLabel("Email/Username"));
+                panel.add(emailField);
+                panel.add(new JLabel("Password"));
+                panel.add(passwordField);
+                panel.add(new JLabel("ID Documento"));
+                panel.add(idDocField);
+                panel.add(new JLabel("Nome"));
+                panel.add(nomeField);
+                panel.add(new JLabel("Cognome"));
+                panel.add(cognomeField);
+                panel.add(new JLabel("Data di nascita (formato: yyyy-mm-dd)"));
+                panel.add(dataNascitaField);
+
+                JButton confermaButton = new JButton("Conferma Registrazione");
+                panel.add(confermaButton);
+
+                dialog.setContentPane(panel);
+
+                confermaButton.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent ev) {
+                        String email = emailField.getText().trim();
+                        String password = new String(passwordField.getPassword()).trim();
+                        String idDoc = idDocField.getText().trim();
+                        String nome = nomeField.getText().trim();
+                        String cognome = cognomeField.getText().trim();
+                        String dataNascita = dataNascitaField.getText().trim();
+
+                        if (email.isEmpty() || password.isEmpty() || idDoc.isEmpty() || nome.isEmpty() || cognome.isEmpty() || dataNascita.isEmpty()) {
+                            JOptionPane.showMessageDialog(dialog, "Tutti i campi sono obbligatori!");
+                            return;
                         }
-                        frame.setContentPane(content);
-                        frame.setLocationRelativeTo(null);
-                        frame.setVisible(true);
-                        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                        frame.pack();
-                    } else {
-                        JOptionPane.showMessageDialog(null, "Login Failed" + "\n" +
-                                " Le uniche credenziali disponibili sono \n" +
-                                " user, user \n" +
-                                " admin, admin");
+
+                        boolean successo = controller.registraUtente(email, password, idDoc, nome, cognome, dataNascita);
+
+                        if (successo) {
+                            JOptionPane.showMessageDialog(dialog, "Registrazione completata!");
+                            dialog.dispose();
+                        } else {
+                            JOptionPane.showMessageDialog(dialog, "Registrazione fallita: utente già esistente?");
+                        }
                     }
-                }
+                });
+                dialog.setVisible(true);
             }
         });
-    }
+
+
+}
 
 
     private void createUIComponents() {

@@ -30,18 +30,8 @@ public class DashBoardUser {
             @Override
             public void itemStateChanged(ItemEvent e) {
                 if(e.getStateChange() == ItemEvent.SELECTED) {
-                    String selected = (String) comboBox1.getSelectedItem();
-                    JPanel panel = new JPanel(new BorderLayout());
-                    JLabel label = new JLabel(selected+" work in progress king...");
-                    label.setHorizontalAlignment(SwingConstants.CENTER);
-                    panel.add(label, BorderLayout.CENTER);
-                    choiceDialog = new JDialog();
-                    JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(comboBox1);
-                    choiceDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-                    choiceDialog.setContentPane(panel);
-                    choiceDialog.setSize(300, 150);
-                    choiceDialog.setLocationRelativeTo(frame);
-                    choiceDialog.setVisible(true);
+                    controller.selectedItem((String) e.getItem(),DashBoardUser.this);
+
                 }
             }
         });

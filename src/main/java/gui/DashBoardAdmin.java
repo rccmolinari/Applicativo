@@ -56,6 +56,8 @@ public class DashBoardAdmin {
         this.welcomeText = welcomeText;
     }
 
+
+
     public JLabel getWelcomeTextLabel() {
         return welcomeTextLabel;
     }
@@ -107,22 +109,12 @@ public class DashBoardAdmin {
             comboBox1.addItemListener(new ItemListener() {
                 @Override
                 public void itemStateChanged(ItemEvent e) {
-                    if(e.getStateChange() == ItemEvent.SELECTED) {
-                        String selected = (String) comboBox1.getSelectedItem();
-                        JPanel panel = new JPanel(new BorderLayout());
-                        JLabel label = new JLabel(selected+" work in progress king...");
-                        label.setHorizontalAlignment(SwingConstants.CENTER);
-                        panel.add(label, BorderLayout.CENTER);
-                        choiceDialog = new JDialog();
-                        JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(comboBox1);
-                        choiceDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-                        choiceDialog.setContentPane(panel);
-                        choiceDialog.setSize(300, 150);
-                        choiceDialog.setLocationRelativeTo(frame);
-                        choiceDialog.setVisible(true);
+                    if (e.getStateChange() == ItemEvent.SELECTED) {
+                        controller.selectedItem((String) e.getItem(), DashBoardAdmin.this);
                     }
                 }
             });
+
             welcomeTextLabel.setText("ID: "+username);
             LOGOUTUSER.addActionListener(new ActionListener() {
                 @Override
@@ -143,4 +135,11 @@ public class DashBoardAdmin {
 
     public JDialog getChoiceDialog() {
         return choiceDialog;
-    }}
+    }
+    public void setChoiceDialog(JDialog choiceDialog) {
+        this.choiceDialog = choiceDialog;
+    }
+
+}
+
+

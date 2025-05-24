@@ -20,10 +20,9 @@ public class Sistema {
     public Utente authenticateUser(String email, String password) {
        if (email.equals("admin") && password.equals("admin")) {
            return new Amministratore(email, password);
-       } else if (email.equals("user") && password.equals("user")) {
+       } else {
            return new Utente(email, password);
        }
-       return null;
     }
 
 
