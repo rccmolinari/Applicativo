@@ -8,79 +8,107 @@ import java.awt.event.MouseEvent;
 import controller.Controller;
 
 public class Login {
-    // Campo per inserire username o email
+
+    // Campo di testo per inserire username o email dell'utente
     private JTextField login;
-    // Bottone per confermare il login
+
+    // Bottone per confermare il login (submit)
     private JButton INVIOButton;
-    // Pannello principale che contiene tutta la UI di login
+
+    // Pannello principale che contiene tutta l'interfaccia grafica della schermata di login
     private JPanel mainPanel;
-    // Pannelli secondari per organizzare meglio la UI
+
+    // Pannelli secondari usati per organizzare la UI in modo più ordinato e gestibile
     private JPanel textPanel;
     private JPanel loginPanel;
-    // Campo password con i classici puntini nascosti
+
+    // Campo per l'inserimento della password, con caratteri nascosti (puntini)
     private JPasswordField passwordField1;
-    // Bottone per aprire la schermata di registrazione
+
+    // Bottone che permette di aprire la schermata di registrazione (per utenti nuovi)
     private JButton REGISTRATIButton;
-    // Controller che gestisce la logica di login e registrazione
+
+    // Riferimento al controller che gestisce la logica di login e registrazione,
+    // separando la UI dalla logica applicativa (pattern MVC)
     private Controller controller;
 
+    /**
+     * Costruttore della classe Login.
+     * Qui si inizializza la GUI, si settano placeholder, si configurano i listener per gli eventi
+     * e si crea il controller che gestirà le operazioni di login e registrazione.
+     */
     public Login() {
-        // Creo il controller per poter chiamare le funzioni di login e registrazione
+        // Creo un'istanza del controller per poter chiamare le funzioni di login e registrazione
         controller = new Controller();
 
-        // Qui metto dei placeholder iniziali, ma disabilito i campi così l’utente li deve cliccare per scrivere
+        // Imposto un testo "placeholder" nei campi login e password
+        // ma disabilito i campi per costringere l'utente a cliccarci sopra per poter scrivere
         login.setText("email/id");
         passwordField1.setText("password");
         login.setEnabled(false);
         passwordField1.setEnabled(false);
 
-        // Quando clicchi nel campo login, cancello il testo e abilito la scrittura
+        // Aggiungo un listener per il click del mouse sul campo login
         login.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                // Quando l'utente clicca, svuoto il testo placeholder
                 login.setText(null);
+                // E abilito il campo per poter scrivere
                 login.setEnabled(true);
             }
         });
 
-        // Stessa cosa per la password, al clic si abilita il campo e si svuota il testo
+        // Simile al campo login, aggiungo listener al campo password
         passwordField1.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                // Abilito il campo password e cancello il placeholder
                 passwordField1.setEnabled(true);
                 passwordField1.setText(null);
             }
         });
 
-        // Quando premi il bottone “Invio” provo a fare il login chiamando il controller
+        // Configuro l'azione da fare quando si preme il bottone "INVIO"
         INVIOButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Prendo username e password dai campi
+                // Prendo i dati inseriti dall'utente nei campi
                 String username = login.getText();
+                // Per la password uso getPassword() perché è più sicuro di getText()
+                // Poi converto l'array di char in stringa
                 String password = new String(passwordField1.getPassword());
-                // Provo il login
+
+                // Chiamo il metodo di login del controller
                 controller.login(username, password);
-                // Se il login va a buon fine (c’è utente o admin)
+
+                // Controllo se il login è andato a buon fine, cioè se c'è un utente o un admin loggato
                 if(controller.getUser() != null || controller.getAdmin() != null) {
-                    // Prendo il frame principale attuale
+                    // Prendo il JFrame che contiene il bottone INVIO
                     JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(INVIOButton);
                     JPanel content;
 
-                    // Se è admin, carico la sua dashboard, altrimenti la home dell’utente
+                    // Se non c'è utente ma c'è admin, carico la dashboard admin,
+                    // altrimenti carico la home page dell'utente normale
                     if (controller.getUser() == null) {
                         content = new DashBoardAdmin(username, controller).getDashboardAdminPage();
                     } else {
                         content = new DashBoardUser(username, controller).getHomePage();
                     }
-                    // Aggiorno il contenuto della finestra con la dashboard giusta
+
+                    // Imposto il pannello con la dashboard corretta come contenuto del frame
                     frame.setContentPane(content);
+                    // Centrare la finestra al centro dello schermo
                     frame.setLocationRelativeTo(null);
+                    // Rendo visibile la finestra aggiornata
                     frame.setVisible(true);
+                    // Imposto la chiusura dell'app alla chiusura della finestra
                     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                    // Adatto la dimensione del frame al nuovo contenuto
                     frame.pack();
                 } else {
-                    // Se il login fallisce, mostro un messaggio di errore con le credenziali di prova
+                    // Se login fallisce, mostro un messaggio di errore
+                    // e fornisco anche delle credenziali di prova per testing
                     JOptionPane.showMessageDialog(null, "Login Failed" + "\n" +
                             " Le uniche credenziali disponibili sono \n" +
                             " user, user \n" +
@@ -89,20 +117,27 @@ public class Login {
             }
         });
 
-        // Se clicchi su “Registrati” apro la schermata di registrazione tramite il controller
+        // Se clicchi su "REGISTRATI", chiamo il metodo per aprire l'interfaccia di registrazione
         REGISTRATIButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                // Passo questa istanza di Login al controller per gestire la transizione
                 controller.interfacciaRegistrazione(Login.this);
             }
         });
     }
 
-    // Metodo vuoto usato da IntelliJ o altri tool per creare componenti personalizzati
+    /**
+     * Metodo vuoto richiesto da IntelliJ o altri tool per creare componenti personalizzati.
+     * Qui si potrebbe implementare la creazione manuale di componenti Swing se necessario.
+     */
     private void createUIComponents() {
     }
 
-    // Qui sotto tutti i getter e setter per accedere e modificare i componenti da altre parti
+    // --- Getter e Setter ---
+    // Consentono di accedere e modificare i componenti UI da altre classi,
+    // utile per aggiornare la UI o recuperarne dati.
+
     public JTextField getLogin() {
         return login;
     }

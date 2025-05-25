@@ -1,22 +1,29 @@
 package controller;
 
 import model.*;
-
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.*;
 import gui.*;
-
 import javax.swing.*;
 
 public class Controller {
-    // Variabili per memorizzare l'utente corrente: può essere un Utente o un Amministratore
+    // Variabili d'istanza per tenere traccia dell'utente connesso.
+    // Può essere un Utente "normale" o un Amministratore.
+    // Inoltre c'è un riferimento a Utente_Generico, forse per una classe base o interfaccia.
     private Utente user;
     private Amministratore admin;
     private Utente_Generico utente;
 
-    // Metodo per gestire il login: se login e password sono "admin" crea un Amministratore, altrimenti un Utente generico
+    /**
+     * Metodo di login molto semplice:
+     * - Se l'username e password sono "admin" viene creato un oggetto Amministratore.
+     * - Altrimenti viene creato un oggetto Utente generico.
+     *
+     * Questo metodo gestisce la distinzione tra tipi di utenti ma senza autenticazione reale.
+     * In un'applicazione reale servirebbe una verifica su database o altro sistema persistente.
+     */
     public void login(String login, String password) {
         if (login.equals("admin") && password.equals("admin")) {
             this.admin = new Amministratore(login, password);
@@ -25,28 +32,33 @@ public class Controller {
         }
     }
 
-    // Metodo per gestire la selezione di un elemento nel dashboard utente e mostrare la finestra corrispondente
+    /**
+     * Metodo per gestire l'interazione con il dashboard dell'utente normale.
+     * In base all'elemento selezionato (ad esempio "Visualizza Voli", "Prenota Volo", ecc),
+     * costruisce dinamicamente un pannello Swing che viene mostrato in una finestra di dialogo.
+     *
+     * Vengono creati campi di input (JTextField) e pulsanti per le azioni.
+     * Quando l'utente clicca sul pulsante, viene mostrato un messaggio di conferma e si chiude la finestra.
+     *
+     * Il codice usa uno switch-case per scegliere quale UI costruire.
+     * La UI è piuttosto semplice, senza validazione o collegamenti a backend.
+     */
     public void selectedItem(String item, DashBoardUser d) {
-        // Ottiene l'elemento selezionato nella ComboBox
         String selected = (String) d.getComboBox1().getSelectedItem();
 
-        // Crea un pannello di base con sfondo scuro
         JPanel panel = new JPanel();
         panel.setBackground(new Color(43, 48, 52));
-
-        // Etichetta di default per azioni non implementate
         JLabel label = new JLabel(selected + " work in progress king...");
         label.setHorizontalAlignment(SwingConstants.CENTER);
         label.setForeground(Color.WHITE);
 
-        // Prepara una nuova finestra di dialogo (modal)
         d.setChoiceDialog(new JDialog());
         JDialog dialog = d.getChoiceDialog();
 
-        // Switch sulle possibili azioni dell'utente
         switch (item) {
             case "Visualizza Voli":
-                // Layout a griglia con 5 pulsanti per 5 voli fittizi
+                // Mostra 5 pulsanti, uno per ogni volo fittizio.
+                // Potrebbe essere migliorato con dati reali da modello.
                 panel.setLayout(new GridLayout(1, 5, 5, 5));
                 for (int i = 1; i <= 5; i++) {
                     JButton button = creaBottoneConAzione("Volo " + i, "Hai selezionato il volo " + i, dialog);
@@ -55,7 +67,8 @@ public class Controller {
                 break;
 
             case "Prenota Volo":
-                // Form di prenotazione con campi per dati personali e codice volo + bottone prenota
+                // Form semplice per inserire dati di prenotazione con vari campi testuali.
+                // Non c'è validazione sui dati inseriti, né salvataggio reale.
                 panel.setLayout(new GridLayout(6, 1, 5, 5));
                 panel.add(creaCampo("Id_Documento"));
                 panel.add(creaCampo("Data_Nascita"));
@@ -66,26 +79,26 @@ public class Controller {
                 break;
 
             case "Cerca Prenotazione":
-                // Campo per inserire numero biglietto e bottone cerca
+                // Campo per inserire il numero del biglietto e bottone per ricerca
                 panel.setLayout(new GridLayout(2, 1, 5, 5));
                 panel.add(creaCampo("Numero Biglietto"));
                 panel.add(creaBottoneConAzione("Cerca", "Prenotazione trovata", dialog));
                 break;
 
             case "Segnala Smarrimento":
-                // Campo per codice bagaglio e bottone invia segnalazione
+                // Permette all'utente di segnalare un bagaglio smarrito.
                 panel.setLayout(new GridLayout(2, 1, 5, 5));
                 panel.add(creaCampo("Codice Bagaglio"));
                 panel.add(creaBottoneConAzione("Invia segnalazione", "Segnalazione inviata", dialog));
                 break;
 
             default:
-                // Per altre opzioni mostra messaggio di lavoro in corso
+                // Per opzioni non gestite mostra messaggio di "work in progress"
                 panel.setLayout(new BorderLayout());
                 panel.add(label, BorderLayout.CENTER);
         }
 
-        // Configura la finestra di dialogo e la mostra centrata rispetto alla finestra principale
+        // Configura e mostra il dialog modale centrato rispetto alla finestra padre.
         JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(d.getComboBox1());
         dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         dialog.setContentPane(panel);
@@ -94,9 +107,17 @@ public class Controller {
         dialog.setVisible(true);
     }
 
-    // Metodo simile per il dashboard amministratore, con opzioni differenti
+    /**
+     * Metodo simile a quello per l'utente, ma per il dashboard amministratore.
+     * Offre funzionalità più complesse, come inserimento, aggiornamento voli, modifica gate,
+     * aggiornamento bagagli e visualizzazione degli smarrimenti.
+     *
+     * Anche qui l'interfaccia è costruita dinamicamente e si limita a mostrare messaggi di conferma.
+     * Un sistema reale dovrebbe collegare questi input ai modelli e al backend per modifiche persistenti.
+     */
     public void selectedItem(String item, DashBoardAdmin d) {
         String selected = (String) d.getComboBox1().getSelectedItem();
+
         JPanel panel = new JPanel();
         panel.setBackground(new Color(43, 48, 52));
         JLabel label = new JLabel(selected + " work in progress king...");
@@ -116,7 +137,7 @@ public class Controller {
                 break;
 
             case "Inserisci Volo":
-                // Form per inserire un nuovo volo con i relativi dati e bottone inserisci
+                // Form per inserire i dati di un nuovo volo
                 panel.setLayout(new GridLayout(6, 1, 5, 5));
                 panel.add(creaCampo("Codice Volo"));
                 panel.add(creaCampo("Destinazione"));
@@ -127,7 +148,7 @@ public class Controller {
                 break;
 
             case "Aggiorna Volo":
-                // Form per aggiornare un volo esistente
+                // Form per aggiornare i dettagli di un volo esistente
                 panel.setLayout(new GridLayout(3, 1, 5, 5));
                 panel.add(creaCampo("Codice Volo"));
                 panel.add(creaCampo("Nuova Destinazione / Data / Ora"));
@@ -135,7 +156,7 @@ public class Controller {
                 break;
 
             case "Modifica Gate":
-                // Form per modificare il gate di un volo
+                // Cambia il gate di partenza di un volo
                 panel.setLayout(new GridLayout(3, 1, 5, 5));
                 panel.add(creaCampo("Codice Volo"));
                 panel.add(creaCampo("Nuovo Gate"));
@@ -143,7 +164,7 @@ public class Controller {
                 break;
 
             case "Aggiorna Bagaglio":
-                // Form per aggiornare lo stato di un bagaglio
+                // Permette di aggiornare lo stato di un bagaglio smarrito o ritrovato
                 panel.setLayout(new GridLayout(3, 1, 5, 5));
                 panel.add(creaCampo("ID Bagaglio"));
                 panel.add(creaCampo("Nuovo Stato"));
@@ -151,7 +172,7 @@ public class Controller {
                 break;
 
             case "Visualizza Smarrimenti":
-                // Mostra in una textarea l'elenco degli smarrimenti
+                // Mostra una textarea con la lista degli smarrimenti, non editabile
                 panel.setLayout(new BorderLayout());
                 JTextArea textArea = new JTextArea("Elenco smarrimenti...");
                 textArea.setEditable(false);
@@ -165,7 +186,6 @@ public class Controller {
                 panel.add(label, BorderLayout.CENTER);
         }
 
-        // Configurazione e visualizzazione della finestra di dialogo
         JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(d.getComboBox1());
         dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         dialog.setContentPane(panel);
@@ -174,7 +194,11 @@ public class Controller {
         dialog.setVisible(true);
     }
 
-    // Metodo per creare un JTextField con colore di sfondo e testo bianco
+    /**
+     * Metodo helper per creare JTextField con colori personalizzati
+     * Sfondo grigio e testo bianco per migliorare la leggibilità su sfondo scuro.
+     * Il testo passato è usato come "placeholder" che però non scompare se si scrive.
+     */
     private JTextField creaCampo(String placeholder) {
         JTextField field = new JTextField(placeholder);
         field.setBackground(new Color(107, 112, 119));
@@ -182,10 +206,15 @@ public class Controller {
         return field;
     }
 
-    // Metodo per creare un JButton con azione associata: mostra un messaggio e chiude il dialog
+    /**
+     * Metodo helper per creare JButton con azione associata.
+     * Al click mostra un messaggio di conferma (JOptionPane) e chiude la finestra di dialogo.
+     *
+     * Questo semplifica la gestione degli eventi, ma non esegue azioni reali.
+     */
     private JButton creaBottoneConAzione(String testo, String messaggio, JDialog dialog) {
         JButton btn = new JButton(testo);
-        btn.setBackground(new Color(255, 162, 35));
+        btn.setBackground(new Color(255, 162, 35));  // Colore arancione vivace per evidenziare il bottone
         btn.setForeground(Color.BLACK);
         btn.addActionListener(e -> {
             JOptionPane.showMessageDialog(null, messaggio, "Info", JOptionPane.INFORMATION_MESSAGE);
@@ -194,43 +223,44 @@ public class Controller {
         return btn;
     }
 
-    // Getter e setter per gli oggetti utente e amministratore
+    // Getter e setter per gestire gli utenti attivi nel controller
     public Utente getUser() {
         return user;
     }
-
     public void setUser(Utente user) {
         this.user = user;
     }
-
     public Amministratore getAdmin() {
         return admin;
     }
-
     public void setAdmin(Amministratore admin) {
         this.admin = admin;
     }
-
     public Utente_Generico getUtente() {
         return utente;
     }
-
     public void setUtente(Utente_Generico utente) {
         this.utente = utente;
     }
 
-    // Metodo per mostrare la finestra di registrazione utente
+    /**
+     * Metodo che crea una finestra di dialogo modale per la registrazione di un nuovo utente.
+     * Contiene campi di testo per email, password, dati personali.
+     *
+     * La conferma verifica che nessun campo sia vuoto e simula la registrazione chiamando
+     * un metodo che può rigettare registrazioni con email "admin" o email vuote.
+     *
+     * Non c'è collegamento reale a un database, quindi è una simulazione.
+     */
     public void interfacciaRegistrazione(Login l) {
         JDialog dialog = new JDialog();
         dialog.setTitle("Registrazione Utente");
         dialog.setModal(true);
 
-        // Pannello con sfondo scuro e layout a griglia verticale
         JPanel panel = new JPanel();
         panel.setBackground(new Color(43, 48, 52));
         panel.setLayout(new GridLayout(13, 1, 5, 5));
 
-        // Etichette e campi testo per i dati richiesti
         JLabel labelEmail = new JLabel("Email/Username");
         labelEmail.setForeground(Color.WHITE);
         JTextField emailField = creaCampo(null);
@@ -253,16 +283,10 @@ public class Controller {
         labelCognome.setForeground(Color.WHITE);
         JTextField cognomeField = creaCampo(null);
 
-        JLabel labelDataNascita = new JLabel("Data di nascita (formato: yyyy-mm-dd)");
+        JLabel labelDataNascita = new JLabel("Data Nascita (aaaa-mm-gg)");
         labelDataNascita.setForeground(Color.WHITE);
         JTextField dataNascitaField = creaCampo(null);
 
-        // Bottone per confermare la registrazione
-        JButton confermaButton = new JButton("Conferma Registrazione");
-        confermaButton.setBackground(new Color(255, 162, 35));
-        confermaButton.setForeground(Color.BLACK);
-
-        // Aggiunge tutti gli elementi al pannello
         panel.add(labelEmail);
         panel.add(emailField);
         panel.add(labelPassword);
@@ -275,38 +299,35 @@ public class Controller {
         panel.add(cognomeField);
         panel.add(labelDataNascita);
         panel.add(dataNascitaField);
-        panel.add(confermaButton);
+
+        JButton registrati = new JButton("Registrati");
+        registrati.setBackground(new Color(255, 162, 35));
+        registrati.setForeground(Color.BLACK);
+
+        registrati.addActionListener(e -> {
+            if (emailField.getText().isEmpty() || passwordField.getPassword().length == 0
+                    || idDocField.getText().isEmpty() || nomeField.getText().isEmpty()
+                    || cognomeField.getText().isEmpty() || dataNascitaField.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Compila tutti i campi", "Errore", JOptionPane.ERROR_MESSAGE);
+            } else {
+                try {
+                    // Simula la registrazione utente tramite un metodo di Login
+                    registraUtente(emailField.getText(), new String(passwordField.getPassword()), idDocField.getText(),
+                            nomeField.getText(), cognomeField.getText(), dataNascitaField.getText());
+                    JOptionPane.showMessageDialog(null, "Registrazione effettuata con successo!", "Info",
+                            JOptionPane.INFORMATION_MESSAGE);
+                    dialog.dispose();
+                } catch (IllegalArgumentException ex) {
+                    JOptionPane.showMessageDialog(null, ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        panel.add(registrati);
 
         dialog.setContentPane(panel);
         dialog.pack();
         dialog.setLocationRelativeTo(null);
-
-        // Aggiunge azione al bottone: verifica campi e chiama metodo di registrazione
-        confermaButton.addActionListener(ev -> {
-            String email = emailField.getText().trim();
-            String password = new String(passwordField.getPassword()).trim();
-            String idDoc = idDocField.getText().trim();
-            String nome = nomeField.getText().trim();
-            String cognome = cognomeField.getText().trim();
-            String dataNascita = dataNascitaField.getText().trim();
-
-            // Controlla se tutti i campi sono riempiti
-            if (email.isEmpty() || password.isEmpty() || idDoc.isEmpty() || nome.isEmpty() || cognome.isEmpty() || dataNascita.isEmpty()) {
-                JOptionPane.showMessageDialog(dialog, "Tutti i campi sono obbligatori!");
-                return;
-            }
-
-            // Chiama la funzione che simula la registrazione (qui semplice controllo su email)
-            boolean successo = registraUtente(email, password, idDoc, nome, cognome, dataNascita);
-
-            if (successo) {
-                JOptionPane.showMessageDialog(dialog, "Registrazione completata!");
-                dialog.dispose();
-            } else {
-                JOptionPane.showMessageDialog(dialog, "Registrazione fallita: utente già esistente?");
-            }
-        });
-
         dialog.setVisible(true);
     }
 
