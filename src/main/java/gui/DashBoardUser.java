@@ -3,8 +3,8 @@ package gui;
 import controller.Controller;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.*;
-import java.awt.BorderLayout;
 
 
 public class DashBoardUser {
@@ -25,6 +25,8 @@ public class DashBoardUser {
         comboBox1.setModel(new DefaultComboBoxModel(choices));
         this.username = username;
         comboBox1.setEnabled(true);
+        comboBox1.setBackground(new Color(107, 112, 119));
+        comboBox1.setForeground(new Color(0, 0, 0));
         outputLabel.setVisible(false);
         comboBox1.addItemListener(new ItemListener() {
             @Override

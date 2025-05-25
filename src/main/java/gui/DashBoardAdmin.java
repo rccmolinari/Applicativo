@@ -101,11 +101,11 @@ public class DashBoardAdmin {
 
     public DashBoardAdmin(String username, Controller controller) {
             this.controller = controller;
-            String [] choices = {"", "Visualizza Voli", "Prenota Volo", "Cerca Prenotazione", "Segnala Smarrimento"};
-            comboBox1.setModel(new DefaultComboBoxModel(choices));
+            String [] choices = {"", "Visualizza Voli", "Inserisci Volo", "Aggiorna Volo", "Modifica Gate","Aggiorna Bagaglio","Modifica Gate","Visualizza Smarrimenti"};
             this.username = username;
             comboBox1.setEnabled(true);
             outputLabel.setVisible(false);
+            comboBox1.setModel(new DefaultComboBoxModel(choices));
             comboBox1.addItemListener(new ItemListener() {
                 @Override
                 public void itemStateChanged(ItemEvent e) {

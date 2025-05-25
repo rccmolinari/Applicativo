@@ -73,66 +73,7 @@ public class Login {
         REGISTRATIButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JDialog dialog = new JDialog();
-                dialog.setTitle("Registrazione Utente");
-                dialog.setModal(true);
-                dialog.setSize(400, 400);
-                dialog.setLocationRelativeTo(null);
-
-                JPanel panel = new JPanel();
-                panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-
-                JTextField emailField = new JTextField();
-                JPasswordField passwordField = new JPasswordField();
-                JTextField idDocField = new JTextField();
-                JTextField nomeField = new JTextField();
-                JTextField cognomeField = new JTextField();
-                JTextField dataNascitaField = new JTextField();
-
-                panel.add(new JLabel("Email/Username"));
-                panel.add(emailField);
-                panel.add(new JLabel("Password"));
-                panel.add(passwordField);
-                panel.add(new JLabel("ID Documento"));
-                panel.add(idDocField);
-                panel.add(new JLabel("Nome"));
-                panel.add(nomeField);
-                panel.add(new JLabel("Cognome"));
-                panel.add(cognomeField);
-                panel.add(new JLabel("Data di nascita (formato: yyyy-mm-dd)"));
-                panel.add(dataNascitaField);
-
-                JButton confermaButton = new JButton("Conferma Registrazione");
-                panel.add(confermaButton);
-
-                dialog.setContentPane(panel);
-
-                confermaButton.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent ev) {
-                        String email = emailField.getText().trim();
-                        String password = new String(passwordField.getPassword()).trim();
-                        String idDoc = idDocField.getText().trim();
-                        String nome = nomeField.getText().trim();
-                        String cognome = cognomeField.getText().trim();
-                        String dataNascita = dataNascitaField.getText().trim();
-
-                        if (email.isEmpty() || password.isEmpty() || idDoc.isEmpty() || nome.isEmpty() || cognome.isEmpty() || dataNascita.isEmpty()) {
-                            JOptionPane.showMessageDialog(dialog, "Tutti i campi sono obbligatori!");
-                            return;
-                        }
-
-                        boolean successo = controller.registraUtente(email, password, idDoc, nome, cognome, dataNascita);
-
-                        if (successo) {
-                            JOptionPane.showMessageDialog(dialog, "Registrazione completata!");
-                            dialog.dispose();
-                        } else {
-                            JOptionPane.showMessageDialog(dialog, "Registrazione fallita: utente già esistente?");
-                        }
-                    }
-                });
-                dialog.setVisible(true);
+            controller.interfacciaRegistrazione(Login.this);
             }
         });
 
