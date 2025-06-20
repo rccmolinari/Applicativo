@@ -1,0 +1,440 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 17.5 (Ubuntu 17.5-1.pgdg24.04+1)
+-- Dumped by pg_dump version 17.5 (Ubuntu 17.5-1.pgdg24.04+1)
+
+-- Started on 2025-06-20 17:03:47 CEST
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET transaction_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
+-- TOC entry 218 (class 1259 OID 16628)
+-- Name: amministratore; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.amministratore (
+    username character varying(20) NOT NULL,
+    password character varying(20) NOT NULL
+);
+
+
+ALTER TABLE public.amministratore OWNER TO postgres;
+
+--
+-- TOC entry 225 (class 1259 OID 16715)
+-- Name: bagaglio; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.bagaglio (
+    id_bagaglio integer NOT NULL,
+    codice_bagaglio integer NOT NULL,
+    stato_bagaglio character varying(20),
+    id_prenotazione integer,
+    CONSTRAINT bagaglio_stato_bagaglio_check CHECK (((stato_bagaglio)::text = ANY ((ARRAY['caricato'::character varying, 'ritirabile'::character varying])::text[])))
+);
+
+
+ALTER TABLE public.bagaglio OWNER TO postgres;
+
+--
+-- TOC entry 224 (class 1259 OID 16714)
+-- Name: bagaglio_id_bagaglio_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.bagaglio_id_bagaglio_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.bagaglio_id_bagaglio_seq OWNER TO postgres;
+
+--
+-- TOC entry 3506 (class 0 OID 0)
+-- Dependencies: 224
+-- Name: bagaglio_id_bagaglio_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.bagaglio_id_bagaglio_seq OWNED BY public.bagaglio.id_bagaglio;
+
+
+--
+-- TOC entry 219 (class 1259 OID 16633)
+-- Name: passeggero; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.passeggero (
+    id_documento character varying(10) NOT NULL,
+    nome character varying(20) NOT NULL,
+    cognome character varying(20) NOT NULL
+);
+
+
+ALTER TABLE public.passeggero OWNER TO postgres;
+
+--
+-- TOC entry 223 (class 1259 OID 16689)
+-- Name: prenotazione; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.prenotazione (
+    id_prenotazione integer NOT NULL,
+    username character varying(50),
+    password character varying(50),
+    documento_passeggero character varying(10),
+    numero_biglietto character varying(20),
+    posto_assegnato character varying(10),
+    stato_bagaglio character varying(20),
+    CONSTRAINT prenotazione_stato_bagaglio_check CHECK (((stato_bagaglio)::text = ANY ((ARRAY['caricato'::character varying, 'ritirabile'::character varying])::text[])))
+);
+
+
+ALTER TABLE public.prenotazione OWNER TO postgres;
+
+--
+-- TOC entry 222 (class 1259 OID 16688)
+-- Name: prenotazione_id_prenotazione_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.prenotazione_id_prenotazione_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.prenotazione_id_prenotazione_seq OWNER TO postgres;
+
+--
+-- TOC entry 3507 (class 0 OID 0)
+-- Dependencies: 222
+-- Name: prenotazione_id_prenotazione_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.prenotazione_id_prenotazione_seq OWNED BY public.prenotazione.id_prenotazione;
+
+
+--
+-- TOC entry 217 (class 1259 OID 16623)
+-- Name: utente_generico; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.utente_generico (
+    username character varying(20) NOT NULL,
+    password character varying(20) NOT NULL
+);
+
+
+ALTER TABLE public.utente_generico OWNER TO postgres;
+
+--
+-- TOC entry 221 (class 1259 OID 16644)
+-- Name: voligestiti; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.voligestiti (
+    username_amministratore character varying(20) NOT NULL,
+    password_amministratore character varying(20) NOT NULL,
+    codice_volo integer NOT NULL
+);
+
+
+ALTER TABLE public.voligestiti OWNER TO postgres;
+
+--
+-- TOC entry 220 (class 1259 OID 16638)
+-- Name: volo; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.volo (
+    codice_volo integer NOT NULL,
+    compagnia character varying(20),
+    data_volo date NOT NULL,
+    orario_previsto time without time zone NOT NULL,
+    ritardo integer,
+    stato_volo character varying(20),
+    tipo_volo character varying(20) NOT NULL,
+    aeroporto_destinazione character varying(20),
+    aeroporto_origine character varying(20),
+    gate character varying(10),
+    CONSTRAINT volo_stato_volo_check CHECK (((stato_volo)::text = ANY ((ARRAY['programmato'::character varying, 'decollato'::character varying, 'late'::character varying, 'cancellato'::character varying])::text[])))
+);
+
+
+ALTER TABLE public.volo OWNER TO postgres;
+
+--
+-- TOC entry 3320 (class 2604 OID 16718)
+-- Name: bagaglio id_bagaglio; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.bagaglio ALTER COLUMN id_bagaglio SET DEFAULT nextval('public.bagaglio_id_bagaglio_seq'::regclass);
+
+
+--
+-- TOC entry 3319 (class 2604 OID 16692)
+-- Name: prenotazione id_prenotazione; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.prenotazione ALTER COLUMN id_prenotazione SET DEFAULT nextval('public.prenotazione_id_prenotazione_seq'::regclass);
+
+
+--
+-- TOC entry 3493 (class 0 OID 16628)
+-- Dependencies: 218
+-- Data for Name: amministratore; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.amministratore (username, password) FROM stdin;
+\.
+
+
+--
+-- TOC entry 3500 (class 0 OID 16715)
+-- Dependencies: 225
+-- Data for Name: bagaglio; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.bagaglio (id_bagaglio, codice_bagaglio, stato_bagaglio, id_prenotazione) FROM stdin;
+\.
+
+
+--
+-- TOC entry 3494 (class 0 OID 16633)
+-- Dependencies: 219
+-- Data for Name: passeggero; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.passeggero (id_documento, nome, cognome) FROM stdin;
+\.
+
+
+--
+-- TOC entry 3498 (class 0 OID 16689)
+-- Dependencies: 223
+-- Data for Name: prenotazione; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.prenotazione (id_prenotazione, username, password, documento_passeggero, numero_biglietto, posto_assegnato, stato_bagaglio) FROM stdin;
+\.
+
+
+--
+-- TOC entry 3492 (class 0 OID 16623)
+-- Dependencies: 217
+-- Data for Name: utente_generico; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.utente_generico (username, password) FROM stdin;
+\.
+
+
+--
+-- TOC entry 3496 (class 0 OID 16644)
+-- Dependencies: 221
+-- Data for Name: voligestiti; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.voligestiti (username_amministratore, password_amministratore, codice_volo) FROM stdin;
+\.
+
+
+--
+-- TOC entry 3495 (class 0 OID 16638)
+-- Dependencies: 220
+-- Data for Name: volo; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.volo (codice_volo, compagnia, data_volo, orario_previsto, ritardo, stato_volo, tipo_volo, aeroporto_destinazione, aeroporto_origine, gate) FROM stdin;
+\.
+
+
+--
+-- TOC entry 3508 (class 0 OID 0)
+-- Dependencies: 224
+-- Name: bagaglio_id_bagaglio_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.bagaglio_id_bagaglio_seq', 1, false);
+
+
+--
+-- TOC entry 3509 (class 0 OID 0)
+-- Dependencies: 222
+-- Name: prenotazione_id_prenotazione_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.prenotazione_id_prenotazione_seq', 1, false);
+
+
+--
+-- TOC entry 3327 (class 2606 OID 16632)
+-- Name: amministratore amministratore_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.amministratore
+    ADD CONSTRAINT amministratore_pkey PRIMARY KEY (username, password);
+
+
+--
+-- TOC entry 3337 (class 2606 OID 16721)
+-- Name: bagaglio bagaglio_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.bagaglio
+    ADD CONSTRAINT bagaglio_pkey PRIMARY KEY (id_bagaglio);
+
+
+--
+-- TOC entry 3329 (class 2606 OID 16637)
+-- Name: passeggero passeggero_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.passeggero
+    ADD CONSTRAINT passeggero_pkey PRIMARY KEY (id_documento);
+
+
+--
+-- TOC entry 3335 (class 2606 OID 16695)
+-- Name: prenotazione prenotazione_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.prenotazione
+    ADD CONSTRAINT prenotazione_pkey PRIMARY KEY (id_prenotazione);
+
+
+--
+-- TOC entry 3325 (class 2606 OID 16627)
+-- Name: utente_generico utente_generico_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.utente_generico
+    ADD CONSTRAINT utente_generico_pkey PRIMARY KEY (username, password);
+
+
+--
+-- TOC entry 3333 (class 2606 OID 16648)
+-- Name: voligestiti voligestiti_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.voligestiti
+    ADD CONSTRAINT voligestiti_pkey PRIMARY KEY (username_amministratore, password_amministratore, codice_volo);
+
+
+--
+-- TOC entry 3331 (class 2606 OID 16643)
+-- Name: volo volo_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.volo
+    ADD CONSTRAINT volo_pkey PRIMARY KEY (codice_volo);
+
+
+--
+-- TOC entry 3345 (class 2606 OID 16722)
+-- Name: bagaglio bagaglio_id_prenotazione_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.bagaglio
+    ADD CONSTRAINT bagaglio_id_prenotazione_fkey FOREIGN KEY (id_prenotazione) REFERENCES public.prenotazione(id_prenotazione) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 3346 (class 2606 OID 16732)
+-- Name: bagaglio fk_bagaglio_prenotazione; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.bagaglio
+    ADD CONSTRAINT fk_bagaglio_prenotazione FOREIGN KEY (id_prenotazione) REFERENCES public.prenotazione(id_prenotazione) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 3338 (class 2606 OID 16737)
+-- Name: voligestiti fk_gestione_amministratore; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.voligestiti
+    ADD CONSTRAINT fk_gestione_amministratore FOREIGN KEY (username_amministratore, password_amministratore) REFERENCES public.amministratore(username, password) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 3339 (class 2606 OID 16742)
+-- Name: voligestiti fk_gestione_volo; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.voligestiti
+    ADD CONSTRAINT fk_gestione_volo FOREIGN KEY (codice_volo) REFERENCES public.volo(codice_volo) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 3342 (class 2606 OID 16727)
+-- Name: prenotazione fk_prenotazione_utente; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.prenotazione
+    ADD CONSTRAINT fk_prenotazione_utente FOREIGN KEY (username, password) REFERENCES public.utente_generico(username, password) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 3343 (class 2606 OID 16701)
+-- Name: prenotazione prenotazione_documento_passeggero_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.prenotazione
+    ADD CONSTRAINT prenotazione_documento_passeggero_fkey FOREIGN KEY (documento_passeggero) REFERENCES public.passeggero(id_documento);
+
+
+--
+-- TOC entry 3344 (class 2606 OID 16696)
+-- Name: prenotazione prenotazione_username_password_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.prenotazione
+    ADD CONSTRAINT prenotazione_username_password_fkey FOREIGN KEY (username, password) REFERENCES public.utente_generico(username, password);
+
+
+--
+-- TOC entry 3340 (class 2606 OID 16654)
+-- Name: voligestiti voligestiti_codice_volo_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.voligestiti
+    ADD CONSTRAINT voligestiti_codice_volo_fkey FOREIGN KEY (codice_volo) REFERENCES public.volo(codice_volo);
+
+
+--
+-- TOC entry 3341 (class 2606 OID 16649)
+-- Name: voligestiti voligestiti_username_amministratore_password_amministrator_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.voligestiti
+    ADD CONSTRAINT voligestiti_username_amministratore_password_amministrator_fkey FOREIGN KEY (username_amministratore, password_amministratore) REFERENCES public.amministratore(username, password);
+
+
+-- Completed on 2025-06-20 17:03:47 CEST
+
+--
+-- PostgreSQL database dump complete
+--
+
