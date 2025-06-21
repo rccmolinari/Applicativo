@@ -11,7 +11,7 @@ public class Passeggero {
     /**
      * The Id documento.
      */
-    protected int idDocumento;
+    protected String idDocumento;
     /**
      * The Nome.
      */
@@ -34,7 +34,7 @@ public class Passeggero {
      *
      * @return the id documento
      */
-    public int getIdDocumento() {
+    public String getIdDocumento() {
         return idDocumento;
     }
 
@@ -43,7 +43,7 @@ public class Passeggero {
      *
      * @param idDocumento the id documento
      */
-    public void setIdDocumento(int idDocumento) {
+    public void setIdDocumento(String idDocumento) {
         this.idDocumento = idDocumento;
     }
 
@@ -128,7 +128,7 @@ public class Passeggero {
      * @param dataNascita       the data nascita
      * @param listaPrenotazioni the lista prenotazioni
      */
-    public Passeggero(int idDocumento, String nome, String cognome, Date dataNascita, ArrayList<Prenotazione> listaPrenotazioni) {
+    public Passeggero(String idDocumento, String nome, String cognome, Date dataNascita, ArrayList<Prenotazione> listaPrenotazioni) {
         this.idDocumento = idDocumento;
         this.nome = nome;
         this.cognome = cognome;

@@ -15,7 +15,7 @@ public class Main {
         Prenotazione p1 = new Prenotazione();
         Utente u1 = new Utente();
         Amministratore a1 = new Amministratore();
-        UtenteGenerico u2 = new UtenteGenerico();
+        //UtenteGenerico u2 = new UtenteGenerico();
         Volo volo = new Volo();
         VoloInArrivo v1 = new VoloInArrivo();
         VoloInPartenza v2 = new VoloInPartenza();
@@ -24,7 +24,7 @@ public class Main {
         p1.setNumeroAssegnato(0);
         u1.setLogin("");
         a1.setLogin("");
-        u2.cercaPrenotazione(0);
+        //u2.cercaPrenotazione(0);
         volo.setCodiceVolo(1);
         v1.setCodiceVolo(1);
         v2.setGate(2);

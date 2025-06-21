@@ -83,14 +83,14 @@ public class Login {
                 controller.login(username, password);
 
                 // Controllo se il login è andato a buon fine, cioè se c'è un utente o un admin loggato
-                if(controller.getUser() != null || controller.getAdmin() != null) {
+                if(controller.getUtente() != null || controller.getAdmin() != null) {
                     // Prendo il JFrame che contiene il bottone INVIO
                     JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(INVIOButton);
                     JPanel content;
 
                     // Se non c'è utente ma c'è admin, carico la dashboard admin,
                     // altrimenti carico la home page dell'utente normale
-                    if (controller.getUser() == null) {
+                    if (controller.getUtente() == null) {
                         content = new DashBoardAdmin(username, controller).getDashboardAdminPage();
                     } else {
                         content = new DashBoardUser(username, controller).getHomePage();

@@ -171,10 +171,10 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
 
         try {
             ps = connection.prepareStatement(
-                    "SELECT b.id_bagaglio, b.stato, b.id_prenotazione, p.numero_biglietto " +
+                    "SELECT b.id_bagaglio, b.stato_bagaglio, b.numero_prenotazione, p.numero_biglietto " +
                             "FROM bagaglio b " +
-                            "JOIN prenotazione p ON b.id_prenotazione = p.id_prenotazione " +
-                            "WHERE b.stato = 'smarrito'"
+                            "JOIN prenotazione p ON b.numero_prenotazione = p.numero_biglietto " +
+                            "WHERE b.stato_bagaglio = 'smarrito'"
             );
 
             rs = ps.executeQuery();
@@ -212,7 +212,7 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
         ResultSet rs = null;
 
         try {
-            ps = connection.prepareStatement("SELECT * FROM volo");
+            ps = connection.prepareStatement("SELECT * FROM volo ORDER BY data_volo, orario_previsto");
             rs = ps.executeQuery();
 
             while (rs.next()) {

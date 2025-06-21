@@ -83,7 +83,8 @@ public class UtenteGenerico extends Utente {
     /**
      * Costruttore di default.
      */
-    public UtenteGenerico() {
+    public UtenteGenerico(String login, String password) {
+        super(login, password);
     }
 
 

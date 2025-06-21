@@ -33,7 +33,7 @@ public class Prenotazione {
     /**
      * The Lista bagagli.
      */
-    protected ArrayList<Bagaglio> listaBagagli;
+    public ArrayList<Bagaglio> listaBagagli = new ArrayList<>();
 
     /**
      * Gets volo.

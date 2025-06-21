@@ -1,6 +1,7 @@
 package controller;
 
 import implementazionePostgresDAO.AmministratoreImplementazionePostgresDAO;
+import implementazionePostgresDAO.UtenteGenericoImplementazionePostgresDAO;
 import model.*;
 import java.awt.*;
 import java.sql.Time;
@@ -13,7 +14,7 @@ import javax.swing.*;
 public class Controller {
     // Variabili d'istanza per tenere traccia dell'utente connesso.
     // Può essere un Utente "normale" o un Amministratore.
-    // Inoltre c'è un riferimento a UtenteGenerico, forse per una classe base o interfaccia.
+    // Inoltre c'è un riferimento a UtenteGenericoDAO, forse per una classe base o interfaccia.
     private Utente user;
     private Amministratore admin;
     private UtenteGenerico utente;
@@ -30,7 +31,7 @@ public class Controller {
         if (login.equals("admin") && password.equals("admin")) {
             this.admin = new Amministratore(login, password);
         } else {
-            this.user = new Utente(login, password);
+            this.utente = new UtenteGenerico(login, password);
         }
     }
 
@@ -58,28 +59,110 @@ public class Controller {
         JDialog dialog = d.getChoiceDialog();
 
         switch (item) {
-            /*case "Visualizza Voli":
-                // Mostra 5 pulsanti, uno per ogni volo fittizio.
-                // Potrebbe essere migliorato con dati reali da modello.
-                panel.setLayout(new GridLayout(1, 5, 5, 5));
-                for (int i = 1; i <= 5; i++) {
-                    JButton button = creaBottoneConAzione("Volo " + i, "Hai selezionato il volo " + i, dialog);
-                    panel.add(button);
+            case "Visualizza Prenotazioni":
+                ArrayList<Prenotazione> prenotazioni = new UtenteGenericoImplementazionePostgresDAO().ListaPrenotazioni(utente);
+
+                String[] colonne = {"Biglietto", "Nome", "Cognome", "Posto", "Stato", "Bagagli"};
+                String[][] dati = new String[prenotazioni.size()][colonne.length];
+
+                for (int i = 0; i < prenotazioni.size(); i++) {
+                    Prenotazione p = prenotazioni.get(i);
+                    Passeggero passeggero = p.getPasseggero();
+                    dati[i] = new String[] {
+                            String.valueOf(p.getNumeroBiglietto()),
+                            passeggero.getNome(),
+                            passeggero.getCognome(),
+                            String.valueOf(p.getNumeroAssegnato()),
+                            p.getStatoPrenotazione().toString(),
+                            String.valueOf(p.getListaBagagli().size())
+                    };
                 }
+
+                JTable tabella = new JTable(dati, colonne);
+                tabella.setEnabled(false);
+                tabella.setFont(new Font("SansSerif", Font.PLAIN, 14));
+                tabella.setBackground(new Color(107, 112, 119));
+                tabella.setForeground(Color.WHITE);
+                tabella.setGridColor(Color.GRAY);
+                tabella.getTableHeader().setFont(new Font("SansSerif", Font.PLAIN, 14));
+                tabella.getTableHeader().setBackground(new Color(60, 63, 65));
+                tabella.getTableHeader().setForeground(Color.WHITE);
+
+                JScrollPane scrollPane = new JScrollPane(tabella);
+                scrollPane.setPreferredSize(new Dimension(600, 300));
+                scrollPane.getViewport().setBackground(new Color(43, 48, 52));
+
+                JDialog popup = new JDialog();
+                popup.setTitle("Prenotazioni Effettuate");
+                popup.setModal(true);
+                popup.setSize(650, 350);
+                popup.setLocationRelativeTo(null);
+
+                JPanel contenitore = new JPanel(new GridBagLayout());
+                contenitore.setBackground(new Color(43, 48, 52));
+                GridBagConstraints gbc = new GridBagConstraints();
+                gbc.fill = GridBagConstraints.BOTH;
+                gbc.weightx = 1;
+                gbc.weighty = 1;
+                contenitore.add(scrollPane, gbc);
+
+                popup.setContentPane(contenitore);
+                popup.setVisible(true);
                 break;
-    */
+
+
+
 
             case "Prenota Volo":
-                // Form semplice per inserire dati di prenotazione con vari campi testuali.
-                // Non c'è validazione sui dati inseriti, né salvataggio reale.
-                panel.setLayout(new GridLayout(6, 1, 5, 5));
-                panel.add(creaCampo("Id_Documento"));
-                panel.add(creaCampo("Data_Nascita"));
-                panel.add(creaCampo("Nome"));
-                panel.add(creaCampo("Cognome"));
-                panel.add(creaCampo("Codice Volo"));
-                //panel.add(creaBottoneConAzione("Prenota", "Prenotazione effettuata", dialog));
+                panel.setLayout(new GridLayout(0, 1, 5, 5));
+
+                JTextField idDocumentoField = creaCampo("Id_Documento");
+                JTextField dataNascitaField = creaCampo("Data_Nascita (yyyy-mm-dd)");
+                JTextField nomeField = creaCampo("Nome");
+                JTextField cognomeField = creaCampo("Cognome");
+                JTextField codiceVoloField = creaCampo("Codice Volo");
+                JTextField numeroBagagliField = creaCampo("Numero Bagagli");
+
+                panel.add(idDocumentoField);
+                panel.add(dataNascitaField);
+                panel.add(nomeField);
+                panel.add(cognomeField);
+                panel.add(codiceVoloField);
+                panel.add(numeroBagagliField);
+
+                panel.add(creaBottoneConAzione("Prenota", () -> {
+                    try {
+                        Passeggero passeggero = new Passeggero();
+                        passeggero.setIdDocumento(idDocumentoField.getText());
+                        passeggero.setNome(nomeField.getText());
+                        passeggero.setCognome(cognomeField.getText());
+                        passeggero.setDataNascita(java.sql.Date.valueOf(dataNascitaField.getText()));
+
+                        Volo volo = new Volo();
+                        volo.setCodiceVolo(Integer.parseInt(codiceVoloField.getText()));
+
+                        int numeroBagagli = Integer.parseInt(numeroBagagliField.getText());
+                        if (numeroBagagli < 0) throw new IllegalArgumentException("Il numero di bagagli deve essere >= 0");
+
+                        ArrayList<Bagaglio> bagagli = new ArrayList<>();
+                        for (int i = 0; i < numeroBagagli; i++) {
+                            Bagaglio b = new Bagaglio();
+                            b.setStatoBagaglio(StatoBagaglio.REGISTRATO);
+                            bagagli.add(b);
+                        }
+
+                        UtenteGenericoImplementazionePostgresDAO dao = new UtenteGenericoImplementazionePostgresDAO();
+                        dao.prenotaVolo(utente, volo, passeggero, bagagli);
+
+                        JOptionPane.showMessageDialog(dialog, "Prenotazione effettuata con " + numeroBagagli + " bagagli.");
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        JOptionPane.showMessageDialog(dialog, "Errore: " + ex.getMessage());
+                    }
+                }, dialog));
+
                 break;
+
 
             case "Cerca Prenotazione":
                 // Campo per inserire il numero del biglietto e bottone per ricerca
@@ -96,9 +179,9 @@ public class Controller {
                 break;
 
             default:
-                // Per opzioni non gestite mostra messaggio di "work in progress"
+                /*
                 panel.setLayout(new BorderLayout());
-                panel.add(label, BorderLayout.CENTER);
+                panel.add(label, BorderLayout.CENTER); */
         }
 
         // Configura e mostra il dialog modale centrato rispetto alla finestra padre.
@@ -149,7 +232,7 @@ public class Controller {
                 JTextField orarioField = creaCampo("Orario Partenza (hh:mm:ss)");
                 JTextField origineField = creaCampo("Origine");
                 JTextField destinazioneField = creaCampo("Destinazione");
-                JTextField gateField = creaCampo("Numero Gate");
+                JTextField gateField = creaCampo("Numero Gate (-1 se non ancora scelto)");
 
                 panel.add(codiceField);
                 panel.add(compagniaField);
@@ -224,7 +307,6 @@ public class Controller {
                     modificaBtn.setForeground(Color.BLACK);
 
                     modificaBtn.addActionListener(ev -> {
-
                         d.getChoiceDialog().dispose();
                         if(v.getDestinazione().equals("NAP")) {
                             VoloInArrivo voloina = (VoloInArrivo) v;
@@ -258,28 +340,88 @@ public class Controller {
             case "Modifica Gate":
                 // Cambia il gate di partenza di un volo
                 panel.setLayout(new GridLayout(3, 1, 5, 5));
-                panel.add(creaCampo("Codice Volo"));
-                panel.add(creaCampo("Nuovo Gate"));
-                //panel.add(creaBottoneConAzione("Modifica", "Gate modificato correttamente", dialog));
+                JTextField codiceFieldGate = creaCampo("Codice Volo");
+                JTextField gateFieldGate = creaCampo("Nuovo Gate");
+                panel.add(codiceFieldGate);
+                panel.add(gateFieldGate);
+                panel.add(creaBottoneConAzione("Inserisci", () -> {
+                    VoloInPartenza volo = new VoloInPartenza();
+                    volo.setCodiceVolo(Integer.parseInt(codiceFieldGate.getText()));
+                    volo.setGate(Integer.parseInt(gateFieldGate.getText()));
+                    new AmministratoreImplementazionePostgresDAO().modificaGate(volo);
+                }, dialog));
                 break;
 
             case "Aggiorna Bagaglio":
                 // Permette di aggiornare lo stato di un bagaglio smarrito o ritrovato
                 panel.setLayout(new GridLayout(3, 1, 5, 5));
-                panel.add(creaCampo("ID Bagaglio"));
-                panel.add(creaCampo("Nuovo Stato"));
-                //panel.add(creaBottoneConAzione("Aggiorna", "Stato bagaglio aggiornato", dialog));
+
+                JTextField codiceBagaglioField = creaCampo("Codice Bagaglio");
+
+// Crea ComboBox con le label dell'enum
+                JComboBox<String> statoComboBox = new JComboBox<>();
+                for (StatoBagaglio s : StatoBagaglio.values()) {
+                    statoComboBox.addItem(s.toString()); // usa il label (es: "registrato", "imbarcato", ecc.)
+                }
+
+                panel.add(codiceBagaglioField);
+                panel.add(statoComboBox);
+
+                panel.add(creaBottoneConAzione("Modifica", () -> {
+                    Bagaglio b = new Bagaglio();
+                    b.setCodiceBagaglio(Integer.parseInt(codiceBagaglioField.getText()));
+                    String statoSelezionato = (String) statoComboBox.getSelectedItem();
+                    try {
+                        StatoBagaglio stato = StatoBagaglio.fromString(statoSelezionato);
+                        b.setStatoBagaglio(stato);
+                        new AmministratoreImplementazionePostgresDAO().aggiornaBagaglio(b,stato);
+                    } catch (IllegalArgumentException ex) {
+                        JOptionPane.showMessageDialog(panel,
+                                "Errore durante l'assegnazione dello stato.",
+                                "Errore", JOptionPane.ERROR_MESSAGE);
+                    }
+                }, dialog));
+
                 break;
 
             case "Visualizza Smarrimenti":
-                // Mostra una textarea con la lista degli smarrimenti, non editabile
-                panel.setLayout(new BorderLayout());
-                JTextArea textArea = new JTextArea("Elenco smarrimenti...");
-                textArea.setEditable(false);
-                textArea.setBackground(new Color(107, 112, 119));
-                textArea.setForeground(Color.WHITE);
-                panel.add(new JScrollPane(textArea), BorderLayout.CENTER);
+                // Recupera la lista dei bagagli smarriti
+                ArrayList<Bagaglio> listaSmarriti = new AmministratoreImplementazionePostgresDAO().visualizzaSmarrimento();
+
+                // Definisci le colonne
+                String[] colonne = { "Codice Bagaglio", "Stato", "Numero Biglietto" };
+
+                // Prepara i dati per la tabella
+                String[][] dati = new String[listaSmarriti.size()][3];
+                for (int i = 0; i < listaSmarriti.size(); i++) {
+                    Bagaglio b = listaSmarriti.get(i);
+                    dati[i][0] = String.valueOf(b.getCodiceBagaglio());
+                    dati[i][1] = b.getStatoBagaglio().toString();
+                    dati[i][2] = String.valueOf(b.getPrenotazione().getNumeroBiglietto());
+                }
+
+                // Crea la JTable
+                JTable tabella = new JTable(dati, colonne);
+                tabella.setEnabled(false);
+                tabella.setBackground(new Color(107, 112, 119));
+                tabella.setForeground(Color.WHITE);
+                tabella.setGridColor(Color.GRAY);
+                tabella.getTableHeader().setBackground(Color.DARK_GRAY);
+                tabella.getTableHeader().setForeground(Color.WHITE);
+
+                // Crea il popup con JScrollPane
+                JDialog popup = new JDialog();
+                popup.setTitle("Bagagli Smarriti");
+                popup.setModal(true);
+                popup.setSize(500, 300);
+                popup.setLocationRelativeTo(null); // centra la finestra
+
+                JScrollPane scrollPane2 = new JScrollPane(tabella);
+                popup.add(scrollPane2);
+
+                popup.setVisible(true);
                 break;
+
 
             default:
                 panel.setLayout(new BorderLayout());
@@ -616,18 +758,18 @@ public class Controller {
         return sistema.getVoliDisponibili();
     }
 
-    public void prenotavolo(UtenteGenerico utente, Volo volo, Passeggero passeggero){
+    public void prenotavolo(UtenteGenericoDAO utente, Volo volo, Passeggero passeggero){
         utente.prenota_Volo(volo, passeggero);
     }
 
-    public Prenotazione cercaPrenotazionePerNome(UtenteGenerico utente, String nome){
+    public Prenotazione cercaPrenotazionePerNome(UtenteGenericoDAO utente, String nome){
         return utente.cerca_Prenotazione(nome);
     }
 
-    public Prenotazione cercaPrenotazionePerCodice(UtenteGenerico utente, int codice){
+    public Prenotazione cercaPrenotazionePerCodice(UtenteGenericoDAO utente, int codice){
         return utente.cerca_Prenotazione(codice);
     }
-    public void segnalaSmarrimento(UtenteGenerico utente, Bagaglio bagaglio){
+    public void segnalaSmarrimento(UtenteGenericoDAO utente, Bagaglio bagaglio){
         utente.segnala_Smarrimento(bagaglio);
     }
 
