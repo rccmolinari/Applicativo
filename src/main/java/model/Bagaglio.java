@@ -8,11 +8,11 @@ public class Bagaglio {
     /**
      * The Codice bagaglio.
      */
-    protected int codice_Bagaglio;
+    protected int codiceBagaglio;
     /**
      * The Stato bagaglio.
      */
-    protected Stato_Bagaglio stato_Bagaglio;
+    protected StatoBagaglio statoBagaglio;
     /**
      * The Prenotazione.
      */
@@ -23,17 +23,17 @@ public class Bagaglio {
      *
      * @return the codice bagaglio
      */
-    public int getCodice_Bagaglio() {
-        return codice_Bagaglio;
+    public int getCodiceBagaglio() {
+        return codiceBagaglio;
     }
 
     /**
      * Sets codice bagaglio.
      *
-     * @param codice_Bagaglio the codice bagaglio
+     * @param codiceBagaglio the codice bagaglio
      */
-    public void setCodice_Bagaglio(int codice_Bagaglio) {
-        this.codice_Bagaglio = codice_Bagaglio;
+    public void setCodiceBagaglio(int codiceBagaglio) {
+        this.codiceBagaglio = codiceBagaglio;
     }
 
     /**
@@ -41,17 +41,17 @@ public class Bagaglio {
      *
      * @return the stato bagaglio
      */
-    public Stato_Bagaglio getStato_Bagaglio() {
-        return stato_Bagaglio;
+    public StatoBagaglio getStatoBagaglio() {
+        return statoBagaglio;
     }
 
     /**
      * Sets stato bagaglio.
      *
-     * @param stato_Bagaglio the stato bagaglio
+     * @param statoBagaglio the stato bagaglio
      */
-    public void setStato_Bagaglio(Stato_Bagaglio stato_Bagaglio) {
-        this.stato_Bagaglio = stato_Bagaglio;
+    public void setStatoBagaglio(StatoBagaglio statoBagaglio) {
+        this.statoBagaglio = statoBagaglio;
     }
 
     /**
@@ -75,15 +75,17 @@ public class Bagaglio {
     /**
      * Instantiates a new Bagaglio.
      *
-     * @param stato_Bagaglio  the stato bagaglio
-     * @param codice_Bagaglio the codice bagaglio
+     * @param statoBagaglio  the stato bagaglio
+     * @param codiceBagaglio the codice bagaglio
      * @param prenotazione    the prenotazione
      */
-    public Bagaglio(Stato_Bagaglio stato_Bagaglio, int codice_Bagaglio, Prenotazione prenotazione) {
-        this.stato_Bagaglio = stato_Bagaglio;
-        this.codice_Bagaglio = codice_Bagaglio;
+    public Bagaglio(StatoBagaglio statoBagaglio, int codiceBagaglio, Prenotazione prenotazione) {
+        this.statoBagaglio = statoBagaglio;
+        this.codiceBagaglio = codiceBagaglio;
         this.prenotazione = prenotazione;
     }
+
+
 
     /**
      * Instantiates a new Bagaglio.

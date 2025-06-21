@@ -1,20 +1,22 @@
 package controller;
 
+import implementazionePostgresDAO.AmministratoreImplementazionePostgresDAO;
 import model.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.*;
+import java.sql.Time;
+import java.util.ArrayList;
+import java.sql.Date;
+
 import gui.*;
 import javax.swing.*;
 
 public class Controller {
     // Variabili d'istanza per tenere traccia dell'utente connesso.
     // Può essere un Utente "normale" o un Amministratore.
-    // Inoltre c'è un riferimento a Utente_Generico, forse per una classe base o interfaccia.
+    // Inoltre c'è un riferimento a UtenteGenerico, forse per una classe base o interfaccia.
     private Utente user;
     private Amministratore admin;
-    private Utente_Generico utente;
+    private UtenteGenerico utente;
 
     /**
      * Metodo di login molto semplice:
@@ -56,7 +58,7 @@ public class Controller {
         JDialog dialog = d.getChoiceDialog();
 
         switch (item) {
-            case "Visualizza Voli":
+            /*case "Visualizza Voli":
                 // Mostra 5 pulsanti, uno per ogni volo fittizio.
                 // Potrebbe essere migliorato con dati reali da modello.
                 panel.setLayout(new GridLayout(1, 5, 5, 5));
@@ -65,6 +67,7 @@ public class Controller {
                     panel.add(button);
                 }
                 break;
+    */
 
             case "Prenota Volo":
                 // Form semplice per inserire dati di prenotazione con vari campi testuali.
@@ -75,21 +78,21 @@ public class Controller {
                 panel.add(creaCampo("Nome"));
                 panel.add(creaCampo("Cognome"));
                 panel.add(creaCampo("Codice Volo"));
-                panel.add(creaBottoneConAzione("Prenota", "Prenotazione effettuata", dialog));
+                //panel.add(creaBottoneConAzione("Prenota", "Prenotazione effettuata", dialog));
                 break;
 
             case "Cerca Prenotazione":
                 // Campo per inserire il numero del biglietto e bottone per ricerca
                 panel.setLayout(new GridLayout(2, 1, 5, 5));
                 panel.add(creaCampo("Numero Biglietto"));
-                panel.add(creaBottoneConAzione("Cerca", "Prenotazione trovata", dialog));
+                //panel.add(creaBottoneConAzione("Cerca", "Prenotazione trovata", dialog));
                 break;
 
             case "Segnala Smarrimento":
                 // Permette all'utente di segnalare un bagaglio smarrito.
                 panel.setLayout(new GridLayout(2, 1, 5, 5));
                 panel.add(creaCampo("Codice Bagaglio"));
-                panel.add(creaBottoneConAzione("Invia segnalazione", "Segnalazione inviata", dialog));
+                //panel.add(creaBottoneConAzione("Invia segnalazione", "Segnalazione inviata", dialog));
                 break;
 
             default:
@@ -116,6 +119,7 @@ public class Controller {
      * Un sistema reale dovrebbe collegare questi input ai modelli e al backend per modifiche persistenti.
      */
     public void selectedItem(String item, DashBoardAdmin d) {
+        AmministratoreImplementazionePostgresDAO a = new AmministratoreImplementazionePostgresDAO();
         String selected = (String) d.getComboBox1().getSelectedItem();
 
         JPanel panel = new JPanel();
@@ -131,36 +135,132 @@ public class Controller {
             case "Visualizza Voli":
                 panel.setLayout(new GridLayout(1, 5, 5, 5));
                 for (int i = 1; i <= 5; i++) {
-                    JButton button = creaBottoneConAzione("Volo " + i, "Hai selezionato Volo " + i, dialog);
-                    panel.add(button);
+                    //JButton button = creaBottoneConAzione("Volo " + i, "Hai selezionato Volo " + i, dialog);
+                    //panel.add(button);
                 }
                 break;
 
             case "Inserisci Volo":
-                // Form per inserire i dati di un nuovo volo
                 panel.setLayout(new GridLayout(6, 1, 5, 5));
-                panel.add(creaCampo("Codice Volo"));
-                panel.add(creaCampo("Destinazione"));
-                panel.add(creaCampo("Data Partenza"));
-                panel.add(creaCampo("Orario Partenza"));
-                panel.add(creaCampo("Numero Gate"));
-                panel.add(creaBottoneConAzione("Inserisci", "Volo inserito correttamente", dialog));
+
+                JTextField codiceField = creaCampo("Codice Volo");
+                JTextField compagniaField = creaCampo("Compagnia");
+                JTextField dataField = creaCampo("Data Partenza (yyyy-mm-dd)");
+                JTextField orarioField = creaCampo("Orario Partenza (hh:mm:ss)");
+                JTextField origineField = creaCampo("Origine");
+                JTextField destinazioneField = creaCampo("Destinazione");
+                JTextField gateField = creaCampo("Numero Gate");
+
+                panel.add(codiceField);
+                panel.add(compagniaField);
+                panel.add(dataField);
+                panel.add(orarioField);
+                panel.add(origineField);
+                panel.add(destinazioneField);
+                panel.add(gateField);
+
+                panel.add(creaBottoneConAzione("Inserisci", () -> {
+                    try {
+                        int codice = Integer.parseInt(codiceField.getText());
+                        String compagnia = compagniaField.getText();
+                        Date data = Date.valueOf(dataField.getText());
+                        Time orario = Time.valueOf(orarioField.getText());
+                        int gate = Integer.parseInt(gateField.getText());
+                        String destinazione = destinazioneField.getText();
+                        String origine = origineField.getText();
+                        if(destinazione.equals("NAP")) {
+                            VoloInArrivo volo = new VoloInArrivo(
+                                    codice,
+                                    compagnia,
+                                    data,
+                                    orario,
+                                    0,
+                                    StatoVolo.PROGRAMMATO,
+                                    origine, // destinazione
+                                    new ArrayList<>()
+                            );
+                            new AmministratoreImplementazionePostgresDAO().inserisciVolo(volo);
+                        } else {
+                            VoloInPartenza volo = new VoloInPartenza(
+                                    codice,
+                                    compagnia,
+                                    data,
+                                    orario,
+                                    0,
+                                    StatoVolo.PROGRAMMATO,
+                                    destinazione, // destinazione
+                                    new ArrayList<>(),
+                                    gate
+                            );
+                            new AmministratoreImplementazionePostgresDAO().inserisciVolo(volo);
+                        }
+
+
+                        JOptionPane.showMessageDialog(null, "Volo inserito correttamente!");
+                        dialog.dispose();
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        JOptionPane.showMessageDialog(null, "Errore: " + ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
+                    }
+                    visualizzaVoli(d);
+                    }, dialog));
                 break;
 
             case "Aggiorna Volo":
-                // Form per aggiornare i dettagli di un volo esistente
-                panel.setLayout(new GridLayout(3, 1, 5, 5));
-                panel.add(creaCampo("Codice Volo"));
-                panel.add(creaCampo("Nuova Destinazione / Data / Ora"));
-                panel.add(creaBottoneConAzione("Aggiorna", "Volo aggiornato correttamente", dialog));
+                ArrayList<Volo> voli = new AmministratoreImplementazionePostgresDAO().visualizzaVoli();
+
+                JPanel listaPanel = new JPanel();
+                listaPanel.setLayout(new GridLayout(voli.size(), 1, 5, 5));
+                listaPanel.setBackground(new Color(43, 48, 52));
+
+                for (Volo v : voli) {
+                    JPanel riga = new JPanel(new FlowLayout(FlowLayout.LEFT));
+                    riga.setBackground(new Color(107, 112, 119));
+
+                    label = new JLabel("Volo " + v.getCodiceVolo() + " → " + v.getDestinazione() + " (" + v.getData() + ")");
+                    label.setForeground(Color.WHITE);
+                    JButton modificaBtn = new JButton("Modifica");
+                    modificaBtn.setBackground(new Color(255, 162, 35));
+                    modificaBtn.setForeground(Color.BLACK);
+
+                    modificaBtn.addActionListener(ev -> {
+
+                        d.getChoiceDialog().dispose();
+                        if(v.getDestinazione().equals("NAP")) {
+                            VoloInArrivo voloina = (VoloInArrivo) v;
+                            mostraPopupModificaVolo(voloina);
+
+                        } else {
+                            VoloInPartenza voloinp = (VoloInPartenza) v;
+                            mostraPopupModificaVolo(voloinp);
+                        }
+                    });
+
+
+                    riga.add(label);
+                    riga.add(modificaBtn);
+                    listaPanel.add(riga);
+                }
+
+                JScrollPane scrollPane = new JScrollPane(listaPanel);
+                scrollPane.setPreferredSize(new Dimension(500, 400));
+
+                JDialog voloDialog = new JDialog();
+                voloDialog.setTitle("Seleziona Volo da Modificare");
+                voloDialog.setModal(true);
+                voloDialog.setContentPane(scrollPane);
+                voloDialog.pack();
+                voloDialog.setLocationRelativeTo(null);
+                voloDialog.setVisible(true);
                 break;
+
 
             case "Modifica Gate":
                 // Cambia il gate di partenza di un volo
                 panel.setLayout(new GridLayout(3, 1, 5, 5));
                 panel.add(creaCampo("Codice Volo"));
                 panel.add(creaCampo("Nuovo Gate"));
-                panel.add(creaBottoneConAzione("Modifica", "Gate modificato correttamente", dialog));
+                //panel.add(creaBottoneConAzione("Modifica", "Gate modificato correttamente", dialog));
                 break;
 
             case "Aggiorna Bagaglio":
@@ -168,7 +268,7 @@ public class Controller {
                 panel.setLayout(new GridLayout(3, 1, 5, 5));
                 panel.add(creaCampo("ID Bagaglio"));
                 panel.add(creaCampo("Nuovo Stato"));
-                panel.add(creaBottoneConAzione("Aggiorna", "Stato bagaglio aggiornato", dialog));
+                //panel.add(creaBottoneConAzione("Aggiorna", "Stato bagaglio aggiornato", dialog));
                 break;
 
             case "Visualizza Smarrimenti":
@@ -212,16 +312,17 @@ public class Controller {
      *
      * Questo semplifica la gestione degli eventi, ma non esegue azioni reali.
      */
-    private JButton creaBottoneConAzione(String testo, String messaggio, JDialog dialog) {
+    private JButton creaBottoneConAzione(String testo, Runnable azione, JDialog dialog) {
         JButton btn = new JButton(testo);
-        btn.setBackground(new Color(255, 162, 35));  // Colore arancione vivace per evidenziare il bottone
+        btn.setBackground(new Color(255, 162, 35));
         btn.setForeground(Color.BLACK);
         btn.addActionListener(e -> {
-            JOptionPane.showMessageDialog(null, messaggio, "Info", JOptionPane.INFORMATION_MESSAGE);
+            azione.run(); // Esegui la query specifica
             dialog.dispose();
         });
         return btn;
     }
+
 
     // Getter e setter per gestire gli utenti attivi nel controller
     public Utente getUser() {
@@ -236,10 +337,10 @@ public class Controller {
     public void setAdmin(Amministratore admin) {
         this.admin = admin;
     }
-    public Utente_Generico getUtente() {
+    public UtenteGenerico getUtente() {
         return utente;
     }
-    public void setUtente(Utente_Generico utente) {
+    public void setUtente(UtenteGenerico utente) {
         this.utente = utente;
     }
 
@@ -338,6 +439,171 @@ public class Controller {
         }
         return true;
     }
+    public void visualizzaVoli(DashBoardUser view) {
+        AmministratoreImplementazionePostgresDAO adao = new AmministratoreImplementazionePostgresDAO();
+        ArrayList<Volo> voli = adao.visualizzaVoli();
+
+        StringBuilder html = new StringBuilder("<html><body style='color:white;font-family:sans-serif;'>");
+        html.append("<table border='1' cellpadding='4' cellspacing='0'>")
+                .append("<tr>")
+                .append("<th>Codice</th>")
+                .append("<th>Compagnia</th>")
+                .append("<th>Data</th>")
+                .append("<th>Orario</th>")
+                .append("<th>Ritardo</th>")
+                .append("<th>Stato</th>")
+                .append("<th>Origine</th>")
+                .append("<th>Destinazione</th>")
+                .append("<th>Gate</th>")
+                .append("</tr>");
+
+        for (Volo v : voli) {
+            html.append("<tr>")
+                    .append("<td>").append(v.getCodiceVolo()).append("</td>")
+                    .append("<td>").append(v.getCompagnia()).append("</td>")
+                    .append("<td>").append(v.getData()).append("</td>")
+                    .append("<td>").append(v.getOrario()).append("</td>")
+                    .append("<td>").append(v.getRitardo()).append("</td>")
+                    .append("<td>").append(v.getStato()).append("</td>")
+                    .append("<td>").append(v.getOrigine()).append("</td>")
+                    .append("<td>").append(v.getDestinazione()).append("</td>")
+                    .append("<td>").append((v instanceof VoloInPartenza) ? ((VoloInPartenza) v).getGate() : "-").append("</td>")
+                    .append("</tr>");
+        }
+
+        html.append("</table></body></html>");
+
+        JLabel output = view.getOutputLabel();
+        output.setText(html.toString());
+        output.setVisible(true);
+    }
+
+
+    public void visualizzaVoli(DashBoardAdmin view) {
+        AmministratoreImplementazionePostgresDAO adao = new AmministratoreImplementazionePostgresDAO();
+        ArrayList<Volo> voli = adao.visualizzaVoli();
+
+        StringBuilder html = new StringBuilder("<html><body style='color:white;font-family:sans-serif;'>");
+        html.append("<table border='1' cellpadding='4' cellspacing='0'>")
+                .append("<tr>")
+                .append("<th>Codice</th>")
+                .append("<th>Compagnia</th>")
+                .append("<th>Data</th>")
+                .append("<th>Orario</th>")
+                .append("<th>Ritardo</th>")
+                .append("<th>Stato</th>")
+                .append("<th>Origine</th>")
+                .append("<th>Destinazione</th>")
+                .append("<th>Gate</th>")
+                .append("</tr>");
+
+        for (Volo v : voli) {
+            html.append("<tr>")
+                    .append("<td>").append(v.getCodiceVolo()).append("</td>")
+                    .append("<td>").append(v.getCompagnia()).append("</td>")
+                    .append("<td>").append(v.getData()).append("</td>")
+                    .append("<td>").append(v.getOrario()).append("</td>")
+                    .append("<td>").append(v.getRitardo()).append("</td>")
+                    .append("<td>").append(v.getStato()).append("</td>")
+                    .append("<td>").append(v.getOrigine()).append("</td>")
+                    .append("<td>").append(v.getDestinazione()).append("</td>")
+                    .append("<td>").append((v instanceof VoloInPartenza) ? ((VoloInPartenza) v).getGate() : "-").append("</td>")
+                    .append("</tr>");
+        }
+
+        html.append("</table></body></html>");
+
+        JLabel output = view.getOutputLabel();
+        output.setText(html.toString());
+        output.setVisible(true);
+    }
+
+
+
+
+    private void mostraPopupModificaVolo(Volo volo) {
+        JDialog dialog = new JDialog();
+        dialog.setTitle("Modifica Volo");
+        dialog.setModal(true);
+
+        JPanel panel = new JPanel(new GridLayout(0, 2, 5, 5));
+        panel.setBackground(new Color(43, 48, 52));
+
+        JTextField codiceField = creaCampo(String.valueOf(volo.getCodiceVolo()));
+        JTextField compagniaField = creaCampo(volo.getCompagnia());
+        JTextField dataField = creaCampo(volo.getData().toString()); // yyyy-mm-dd
+        JTextField orarioField = creaCampo(volo.getOrario().toString()); // HH:mm:ss
+        JTextField ritardoField = creaCampo(String.valueOf(volo.getRitardo()));
+        JTextField statoField = creaCampo(volo.getStato());
+        JTextField origineField = creaCampo(volo.getOrigine());
+        JTextField destinazioneField = creaCampo(volo.getDestinazione());
+        JTextField gateField = null;
+
+        panel.add(new JLabel("Codice Volo:")); panel.add(codiceField);
+        panel.add(new JLabel("Compagnia:")); panel.add(compagniaField);
+        panel.add(new JLabel("Data (YYYY-MM-DD):")); panel.add(dataField);
+        panel.add(new JLabel("Orario (HH:MM:SS):")); panel.add(orarioField);
+        panel.add(new JLabel("Ritardo (minuti):")); panel.add(ritardoField);
+        panel.add(new JLabel("Stato:")); panel.add(statoField);
+        panel.add(new JLabel("Origine:")); panel.add(origineField);
+        panel.add(new JLabel("Destinazione:")); panel.add(destinazioneField);
+
+        if (volo instanceof VoloInPartenza) {
+            VoloInPartenza v = (VoloInPartenza) volo;
+            gateField = creaCampo(String.valueOf(v.getGate()));
+            panel.add(new JLabel("Gate:")); panel.add(gateField);
+        }
+
+        JButton conferma = new JButton("Conferma modifica");
+        conferma.setBackground(new Color(255, 162, 35));
+        conferma.setForeground(Color.BLACK);
+
+        JTextField finalGateField = gateField; // per usarlo nel lambda
+
+        conferma.addActionListener(e -> {
+            try {
+                int nuovoCodice = Integer.parseInt(codiceField.getText());
+                String compagnia = compagniaField.getText();
+                Date data = Date.valueOf(dataField.getText());
+                Time orario = Time.valueOf(orarioField.getText());
+                int ritardo = Integer.parseInt(ritardoField.getText());
+                StatoVolo stato = StatoVolo.valueOf(statoField.getText().toUpperCase());
+                String origine = origineField.getText();
+                String destinazione = destinazioneField.getText();
+
+                if (volo instanceof VoloInPartenza) {
+                    int gate = Integer.parseInt(finalGateField.getText());
+                    VoloInPartenza vPartModificato = new VoloInPartenza(
+                            nuovoCodice, compagnia, data, orario, ritardo,
+                            stato, destinazione, new ArrayList<>(), gate
+                    );
+                    new AmministratoreImplementazionePostgresDAO().aggiornaVolo(vPartModificato);
+                } else {
+                    VoloInArrivo vArrModificato = new VoloInArrivo(
+                            nuovoCodice, compagnia, data, orario, ritardo,
+                            stato, origine, new ArrayList<>()
+                    );
+                    new AmministratoreImplementazionePostgresDAO().aggiornaVolo(vArrModificato);
+                }
+
+                JOptionPane.showMessageDialog(null, "Volo aggiornato con successo!");
+                dialog.dispose();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(null, "Errore: " + ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        panel.add(new JLabel()); // spaziatore
+        panel.add(conferma);
+
+        dialog.setContentPane(panel);
+        dialog.pack();
+        dialog.setLocationRelativeTo(null);
+        dialog.setVisible(true);
+    }
+
+
+
 }
 
     /*
@@ -350,18 +616,18 @@ public class Controller {
         return sistema.getVoliDisponibili();
     }
 
-    public void prenotavolo(Utente_Generico utente, Volo volo, Passeggero passeggero){
+    public void prenotavolo(UtenteGenerico utente, Volo volo, Passeggero passeggero){
         utente.prenota_Volo(volo, passeggero);
     }
 
-    public Prenotazione cercaPrenotazionePerNome(Utente_Generico utente, String nome){
+    public Prenotazione cercaPrenotazionePerNome(UtenteGenerico utente, String nome){
         return utente.cerca_Prenotazione(nome);
     }
 
-    public Prenotazione cercaPrenotazionePerCodice(Utente_Generico utente, int codice){
+    public Prenotazione cercaPrenotazionePerCodice(UtenteGenerico utente, int codice){
         return utente.cerca_Prenotazione(codice);
     }
-    public void segnalaSmarrimento(Utente_Generico utente, Bagaglio bagaglio){
+    public void segnalaSmarrimento(UtenteGenerico utente, Bagaglio bagaglio){
         utente.segnala_Smarrimento(bagaglio);
     }
 
@@ -369,11 +635,11 @@ public class Controller {
         amministratore.aggiorna_Volo(volo);
     }
 
-    public void modificaGate(Amministratore amministratore, Volo_In_Partenza volo){
+    public void modificaGate(Amministratore amministratore, VoloInPartenza volo){
         amministratore.modifica_Gate(volo);
     }
 
-    public void aggiornaBagaglio(Amministratore amministratore, Bagaglio bagaglio, Stato_Bagaglio stato){
+    public void aggiornaBagaglio(Amministratore amministratore, Bagaglio bagaglio, StatoBagaglio stato){
         amministratore.aggiorna_Bag
         }
      */

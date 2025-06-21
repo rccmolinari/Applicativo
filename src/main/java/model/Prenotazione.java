@@ -9,7 +9,7 @@ public class Prenotazione {
     /**
      * The Utente.
      */
-    protected Utente_Generico utente;
+    protected UtenteGenerico utente;
     /**
      * The Volo.
      */
@@ -17,15 +17,15 @@ public class Prenotazione {
     /**
      * The Numero biglietto.
      */
-    protected int numero_Biglietto;
+    protected int numeroBiglietto;
     /**
      * The Numero assegnato.
      */
-    protected int numero_Assegnato;
+    protected int numeroAssegnato;
     /**
      * The Stato prenotazione.
      */
-    protected Stato_Prenotazione stato_Prenotazione;
+    protected StatoPrenotazione statoPrenotazione;
     /**
      * The Passeggero.
      */
@@ -33,7 +33,7 @@ public class Prenotazione {
     /**
      * The Lista bagagli.
      */
-    protected ArrayList<Bagaglio> lista_Bagagli;
+    protected ArrayList<Bagaglio> listaBagagli;
 
     /**
      * Gets volo.
@@ -58,7 +58,7 @@ public class Prenotazione {
      *
      * @return the utente
      */
-    public Utente_Generico getUtente() {
+    public UtenteGenerico getUtente() {
         return utente;
     }
 
@@ -67,7 +67,7 @@ public class Prenotazione {
      *
      * @param utente the utente
      */
-    public void setUtente(Utente_Generico utente) {
+    public void setUtente(UtenteGenerico utente) {
         this.utente = utente;
     }
 
@@ -76,17 +76,17 @@ public class Prenotazione {
      *
      * @return the numero biglietto
      */
-    public int getNumero_Biglietto() {
-        return numero_Biglietto;
+    public int getNumeroBiglietto() {
+        return numeroBiglietto;
     }
 
     /**
      * Sets numero biglietto.
      *
-     * @param numero_Biglietto the numero biglietto
+     * @param numeroBiglietto the numero biglietto
      */
-    public void setNumero_Biglietto(int numero_Biglietto) {
-        this.numero_Biglietto = numero_Biglietto;
+    public void setNumeroBiglietto(int numeroBiglietto) {
+        this.numeroBiglietto = numeroBiglietto;
     }
 
     /**
@@ -94,17 +94,17 @@ public class Prenotazione {
      *
      * @return the numero assegnato
      */
-    public int getNumero_Assegnato() {
-        return numero_Assegnato;
+    public int getNumeroAssegnato() {
+        return numeroAssegnato;
     }
 
     /**
      * Sets numero assegnato.
      *
-     * @param numero_Assegnato the numero assegnato
+     * @param numeroAssegnato the numero assegnato
      */
-    public void setNumero_Assegnato(int numero_Assegnato) {
-        this.numero_Assegnato = numero_Assegnato;
+    public void setNumeroAssegnato(int numeroAssegnato) {
+        this.numeroAssegnato = numeroAssegnato;
     }
 
     /**
@@ -112,17 +112,17 @@ public class Prenotazione {
      *
      * @return the stato prenotazione
      */
-    public Stato_Prenotazione getStato_Prenotazione() {
-        return stato_Prenotazione;
+    public StatoPrenotazione getStatoPrenotazione() {
+        return statoPrenotazione;
     }
 
     /**
      * Sets stato prenotazione.
      *
-     * @param stato_Prenotazione the stato prenotazione
+     * @param statoPrenotazione the stato prenotazione
      */
-    public void setStato_Prenotazione(Stato_Prenotazione stato_Prenotazione) {
-        this.stato_Prenotazione = stato_Prenotazione;
+    public void setStatoPrenotazione(StatoPrenotazione statoPrenotazione) {
+        this.statoPrenotazione = statoPrenotazione;
     }
 
     /**
@@ -148,17 +148,17 @@ public class Prenotazione {
      *
      * @return the lista bagagli
      */
-    public ArrayList<Bagaglio> getLista_Bagagli() {
-        return lista_Bagagli;
+    public ArrayList<Bagaglio> getListaBagagli() {
+        return listaBagagli;
     }
 
     /**
      * Sets lista bagagli.
      *
-     * @param lista_Bagagli the lista bagagli
+     * @param listaBagagli the lista bagagli
      */
-    public void setLista_Bagagli(ArrayList<Bagaglio> lista_Bagagli) {
-        this.lista_Bagagli = lista_Bagagli;
+    public void setListaBagagli(ArrayList<Bagaglio> listaBagagli) {
+        this.listaBagagli = listaBagagli;
     }
 
     /**
@@ -166,20 +166,20 @@ public class Prenotazione {
      *
      * @param utente             the utente
      * @param volo               the volo
-     * @param numero_Assegnato   the numero assegnato
-     * @param numero_Biglietto   the numero biglietto
-     * @param stato_Prenotazione the stato prenotazione
+     * @param numeroAssegnato   the numero assegnato
+     * @param numeroBiglietto   the numero biglietto
+     * @param statoPrenotazione the stato prenotazione
      * @param passeggero         the passeggero
-     * @param lista_Bagagli      the lista bagagli
+     * @param listaBagagli      the lista bagagli
      */
-    public Prenotazione(Utente_Generico utente, Volo volo, int numero_Assegnato, int numero_Biglietto, Stato_Prenotazione stato_Prenotazione, Passeggero passeggero, ArrayList<Bagaglio> lista_Bagagli) {
+    public Prenotazione(UtenteGenerico utente, Volo volo, int numeroAssegnato, int numeroBiglietto, StatoPrenotazione statoPrenotazione, Passeggero passeggero, ArrayList<Bagaglio> listaBagagli) {
         this.utente = utente;
         this.volo = volo;
-        this.numero_Assegnato = numero_Assegnato;
-        this.numero_Biglietto = numero_Biglietto;
-        this.stato_Prenotazione = stato_Prenotazione;
+        this.numeroAssegnato = numeroAssegnato;
+        this.numeroBiglietto = numeroBiglietto;
+        this.statoPrenotazione = statoPrenotazione;
         this.passeggero = passeggero;
-        this.lista_Bagagli = lista_Bagagli;
+        this.listaBagagli = listaBagagli;
     }
 
     /**

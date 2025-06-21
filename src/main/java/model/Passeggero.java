@@ -11,7 +11,7 @@ public class Passeggero {
     /**
      * The Id documento.
      */
-    protected int id_Documento;
+    protected int idDocumento;
     /**
      * The Nome.
      */
@@ -23,28 +23,28 @@ public class Passeggero {
     /**
      * The Data nascita.
      */
-    protected Date data_Nascita;
+    protected Date dataNascita;
     /**
      * The Lista prenotazioni.
      */
-    protected ArrayList<Prenotazione> lista_Prenotazioni;
+    protected ArrayList<Prenotazione> listaPrenotazioni;
 
     /**
      * Gets id documento.
      *
      * @return the id documento
      */
-    public int getId_Documento() {
-        return id_Documento;
+    public int getIdDocumento() {
+        return idDocumento;
     }
 
     /**
      * Sets id documento.
      *
-     * @param id_Documento the id documento
+     * @param idDocumento the id documento
      */
-    public void setId_Documento(int id_Documento) {
-        this.id_Documento = id_Documento;
+    public void setIdDocumento(int idDocumento) {
+        this.idDocumento = idDocumento;
     }
 
     /**
@@ -88,17 +88,17 @@ public class Passeggero {
      *
      * @return the data nascita
      */
-    public Date getData_Nascita() {
-        return data_Nascita;
+    public Date getDataNascita() {
+        return dataNascita;
     }
 
     /**
      * Sets data nascita.
      *
-     * @param data_Nascita the data nascita
+     * @param dataNascita the data nascita
      */
-    public void setData_Nascita(Date data_Nascita) {
-        this.data_Nascita = data_Nascita;
+    public void setDataNascita(Date dataNascita) {
+        this.dataNascita = dataNascita;
     }
 
     /**
@@ -106,34 +106,34 @@ public class Passeggero {
      *
      * @return the lista prenotazioni
      */
-    public ArrayList<Prenotazione> getLista_Prenotazioni() {
-        return lista_Prenotazioni;
+    public ArrayList<Prenotazione> getListaPrenotazioni() {
+        return listaPrenotazioni;
     }
 
     /**
      * Sets lista prenotazioni.
      *
-     * @param lista_Prenotazioni the lista prenotazioni
+     * @param listaPrenotazioni the lista prenotazioni
      */
-    public void setLista_Prenotazioni(ArrayList<Prenotazione> lista_Prenotazioni) {
-        this.lista_Prenotazioni = lista_Prenotazioni;
+    public void setListaPrenotazioni(ArrayList<Prenotazione> listaPrenotazioni) {
+        this.listaPrenotazioni = listaPrenotazioni;
     }
 
     /**
      * Instantiates a new Passeggero.
      *
-     * @param id_Documento       the id documento
+     * @param idDocumento       the id documento
      * @param nome               the nome
      * @param cognome            the cognome
-     * @param data_Nascita       the data nascita
-     * @param lista_Prenotazioni the lista prenotazioni
+     * @param dataNascita       the data nascita
+     * @param listaPrenotazioni the lista prenotazioni
      */
-    public Passeggero(int id_Documento, String nome, String cognome, Date data_Nascita, ArrayList<Prenotazione> lista_Prenotazioni) {
-        this.id_Documento = id_Documento;
+    public Passeggero(int idDocumento, String nome, String cognome, Date dataNascita, ArrayList<Prenotazione> listaPrenotazioni) {
+        this.idDocumento = idDocumento;
         this.nome = nome;
         this.cognome = cognome;
-        this.data_Nascita = data_Nascita;
-        this.lista_Prenotazioni = lista_Prenotazioni;
+        this.dataNascita = dataNascita;
+        this.listaPrenotazioni = listaPrenotazioni;
     }
 
     /**

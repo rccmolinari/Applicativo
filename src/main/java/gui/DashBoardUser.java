@@ -42,7 +42,7 @@ public class DashBoardUser {
     public DashBoardUser(String username, Controller controller) {
         this.controller = controller;
         // Scelte che l’utente può fare nel menu a tendina
-        String [] choices = {"", "Visualizza Voli", "Prenota Volo", "Cerca Prenotazione", "Segnala Smarrimento"};
+        String [] choices = {"", "Prenota Volo", "Cerca Prenotazione", "Segnala Smarrimento"};
 
         // Impostiamo la comboBox con queste opzioni
         comboBox1.setModel(new DefaultComboBoxModel(choices));
@@ -77,6 +77,9 @@ public class DashBoardUser {
                 System.exit(0);
             }
         });
+        // Carica i voli di default alla prima apertura
+        controller.visualizzaVoli(this);
+
     }
 
     // Qui sotto ci sono tutti i getter e setter per i componenti, utili per modificarli o leggerli da fuori
@@ -156,4 +159,6 @@ public class DashBoardUser {
     private void createUIComponents() {
         // Se vuoi aggiungere componenti customizzati mettili qui
     }
+
+
 }

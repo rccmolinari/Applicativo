@@ -1,5 +1,6 @@
 package model;
 
+import java.sql.Time;
 import java.util.Date;
 import java.util.ArrayList;
 
@@ -11,7 +12,7 @@ public class Volo {
     /**
      * Codice del volo.
      */
-    protected int codice_Volo;
+    protected int codiceVolo;
     /**
      * Compagnia aerea.
      */
@@ -23,7 +24,7 @@ public class Volo {
     /**
      * The Orario.
      */
-    protected String orario;
+    protected Time orario;
     /**
      * The Ritardo.
      */
@@ -31,7 +32,7 @@ public class Volo {
     /**
      * The Stato.
      */
-    protected Stato_Volo stato;
+    protected StatoVolo stato;
     /**
      * The Origine.
      */
@@ -43,15 +44,15 @@ public class Volo {
     /**
      * The Lista prenotazioni.
      */
-    protected ArrayList<Prenotazione> lista_Prenotazioni;
+    protected ArrayList<Prenotazione> listaPrenotazioni;
 
     /**
      * Restituisce il codice identificativo del volo.
      *
      * @return the codice volo
      */
-    public int getCodice_Volo() {
-        return codice_Volo;
+    public int getCodiceVolo() {
+        return codiceVolo;
     }
 
     /**
@@ -59,8 +60,8 @@ public class Volo {
      *
      * @param codice_Volo the codice volo
      */
-    public void setCodice_Volo(int codice_Volo) {
-        this.codice_Volo = codice_Volo;
+    public void setCodiceVolo(int codice_Volo) {
+        this.codiceVolo = codice_Volo;
     }
 
     /**
@@ -104,7 +105,7 @@ public class Volo {
      *
      * @return the orario
      */
-    public String getOrario() {
+    public Time getOrario() {
         return orario;
     }
 
@@ -113,7 +114,7 @@ public class Volo {
      *
      * @param orario the orario
      */
-    public void setOrario(String orario) {
+    public void setOrario(Time orario) {
         this.orario = orario;
     }
 
@@ -140,8 +141,8 @@ public class Volo {
      *
      * @return the stato
      */
-    public Stato_Volo getStato() {
-        return stato;
+    public String getStato() {
+        return stato.name();
     }
 
     /**
@@ -149,7 +150,7 @@ public class Volo {
      *
      * @param stato the stato
      */
-    public void setStato(Stato_Volo stato) {
+    public void setStato(StatoVolo stato) {
         this.stato = stato;
     }
 
@@ -194,23 +195,23 @@ public class Volo {
      *
      * @return the lista prenotazioni
      */
-    public ArrayList<Prenotazione> getLista_Prenotazioni() {
-        return lista_Prenotazioni;
+    public ArrayList<Prenotazione> getListaPrenotazioni() {
+        return listaPrenotazioni;
     }
 
     /**
      * Imposta la lista delle prenotazioni.
      *
-     * @param lista_Prenotazioni the lista prenotazioni
+     * @param listaPrenotazioni the lista prenotazioni
      */
-    public void setLista_Prenotazioni(ArrayList<Prenotazione> lista_Prenotazioni) {
-        this.lista_Prenotazioni = lista_Prenotazioni;
+    public void setListaPrenotazioni(ArrayList<Prenotazione> listaPrenotazioni) {
+        this.listaPrenotazioni = listaPrenotazioni;
     }
 
     /**
      * Costruttore completo per inizializzare tutti i campi del volo.
      *
-     * @param codice_Volo        the codice volo
+     * @param codiceVolo        the codice volo
      * @param compagnia          the compagnia
      * @param data               the data
      * @param orario             the orario
@@ -218,10 +219,10 @@ public class Volo {
      * @param stato              the stato
      * @param origine            the origine
      * @param destinazione       the destinazione
-     * @param lista_Prenotazioni the lista prenotazioni
+     * @param listaPrenotazioni the lista prenotazioni
      */
-    public Volo(int codice_Volo, String compagnia, Date data, String orario, int ritardo, Stato_Volo stato, String origine, String destinazione, ArrayList<Prenotazione> lista_Prenotazioni) {
-        this.codice_Volo = codice_Volo;
+    public Volo(int codiceVolo, String compagnia, Date data, Time orario, int ritardo, StatoVolo stato, String origine, String destinazione, ArrayList<Prenotazione> listaPrenotazioni) {
+        this.codiceVolo = codiceVolo;
         this.compagnia = compagnia;
         this.data = data;
         this.orario = orario;
@@ -229,7 +230,7 @@ public class Volo {
         this.stato = stato;
         this.origine = origine;
         this.destinazione = destinazione;
-        this.lista_Prenotazioni = lista_Prenotazioni;
+        this.listaPrenotazioni = listaPrenotazioni;
     }
 
     /**

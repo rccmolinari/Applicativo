@@ -158,6 +158,7 @@ public class DashBoardAdmin {
                 System.exit(0);
             }
         });
+        controller.visualizzaVoli(this);
     }
 
     // Metodo per ottenere il pannello principale della dashboard, così si può inserire nel frame principale

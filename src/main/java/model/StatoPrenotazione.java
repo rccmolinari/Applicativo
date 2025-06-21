@@ -3,7 +3,7 @@ package model;
 /**
  * The enum Stato prenotazione.
  */
-public enum Stato_Prenotazione {
+public enum StatoPrenotazione {
     /**
      * Confermata stato prenotazione.
      */

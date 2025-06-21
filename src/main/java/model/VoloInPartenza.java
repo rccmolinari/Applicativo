@@ -1,11 +1,12 @@
 package model;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Date;
 
 /**
  * The type Volo in partenza.
  */
-public class Volo_In_Partenza extends Volo {
+public class VoloInPartenza extends Volo {
 
     /**
      * The Gate.
@@ -43,15 +44,15 @@ public class Volo_In_Partenza extends Volo {
      * @param lista_Prenotazioni the lista prenotazioni
      * @param gate               the gate
      */
-    public Volo_In_Partenza(int codice_Volo, String compagnia, Date data, String orario, int ritardo, Stato_Volo stato_Volo, String destinazione, ArrayList<Prenotazione> lista_Prenotazioni, int gate) {
-        super(codice_Volo, compagnia, data, orario, ritardo, stato_Volo, "Napoli", destinazione, lista_Prenotazioni);
+    public VoloInPartenza(int codice_Volo, String compagnia, Date data, Time orario, int ritardo, StatoVolo stato_Volo, String destinazione, ArrayList<Prenotazione> lista_Prenotazioni, int gate) {
+        super(codice_Volo, compagnia, data, orario, ritardo, stato_Volo, "NAP", destinazione, lista_Prenotazioni);
         this.gate = gate;
     }
 
     /**
      * Instantiates a new Volo in partenza.
      */
-    public Volo_In_Partenza() {
+    public VoloInPartenza() {
     }
 
 

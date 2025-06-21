@@ -1,5 +1,6 @@
 package model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -58,7 +59,7 @@ public class Utente {
      *
      * @return the string
      */
-    public List<Volo> visualizza_Voli(List<Volo> voli) {
+    public ArrayList<Volo> visualizzaVoli(ArrayList<Volo> voli) {
         return voli;
     }
 

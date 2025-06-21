@@ -1,5 +1,6 @@
 package model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -12,34 +13,34 @@ public class Amministratore extends Utente {
      *
      * @param volo the volo
      */
-    public void inserisci_Volo(Volo volo) {}
+    public void inserisciVolo(Volo volo) {}
 
     /**
      * Con questo metodo l'amministratore può aggiornare un volo esistente.
      *
      * @param volo the volo
      */
-    public void aggiorna_Volo(Volo volo) {}
+    public void aggiornaVolo(Volo volo) {}
 
     /**
      * Modifica il gate del volo.
      *
      * @param volo the volo
      */
-    public void modifica_Gate(Volo_In_Partenza volo) {}
+    public void modificaGate(VoloInPartenza volo) {}
 
     /**
      * Aggiorna lo stato di un bagaglio.
      *
      * @param bagaglio the bagaglio
      */
-    public void aggiorna_Bagaglio(Bagaglio bagaglio, Stato_Bagaglio stato) {}
+    public void aggiornaBagaglio(Bagaglio bagaglio, StatoBagaglio stato) {}
 
     /**
      * Visualizza lo smarrimento di un bagaglio.
      *
      */
-    public List<Bagaglio> visualizza_Smarrimento() {
+    public ArrayList<Bagaglio> visualizzaSmarrimento() {
         return null;
     }
 

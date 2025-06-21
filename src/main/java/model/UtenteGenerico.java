@@ -5,29 +5,29 @@ import java.util.List;
 /**
  * Estende {@link Utente} per rappsentare un utente generico che può eddettuare prenotazioni.
  */
-public class Utente_Generico extends Utente {
+public class UtenteGenerico extends Utente {
 
     /**
      * Lista dei voli prenotati dall'utente.
      */
-    protected ArrayList<Volo> lista_Prenotazioni;
+    protected ArrayList<Volo> listaPrenotazioni;
 
     /**
      * Restituisce la lista delle prenotazioni dell'utente.
      *
      * @return the lista prenotazioni
      */
-    public ArrayList<Volo> getLista_Prenotazioni() {
-        return lista_Prenotazioni;
+    public ArrayList<Volo>getListaPrenotazioni() {
+        return listaPrenotazioni;
     }
 
     /**
      * Imposta la lista delle prenotazioni.
      *
-     * @param lista_Prenotazioni the lista prenotazioni
+     * @param listaPrenotazioni the lista prenotazioni
      */
-    public void setLista_Prenotazioni(ArrayList<Volo> lista_Prenotazioni) {
-        this.lista_Prenotazioni = lista_Prenotazioni;
+    public void setListaPrenotazioni(ArrayList<Volo> listaPrenotazioni) {
+        this.listaPrenotazioni = listaPrenotazioni;
     }
 
     /**
@@ -35,14 +35,14 @@ public class Utente_Generico extends Utente {
      *
      * @param volo the volo
      */
-    public void prenota_Volo(Volo volo, Passeggero p) {}
+    public void prenotaVolo(Volo volo, Passeggero p) {}
 
     /**
      * Cerca una prenotazione tramite il nome del passeggero.
      *
      * @param nome_Passeggero the nome passeggero
      */
-    public Prenotazione cerca_Prenotazione(String nome_Passeggero) {
+    public Prenotazione cercaPrenotazione(String nome_Passeggero) {
         return null;
     }
 
@@ -51,7 +51,7 @@ public class Utente_Generico extends Utente {
      *
      * @param codice_Volo the codice volo
      */
-    public Prenotazione cerca_Prenotazione(int codice_Volo) {
+    public Prenotazione cercaPrenotazione(int codice_Volo) {
         return null;
     }
 
@@ -60,7 +60,7 @@ public class Utente_Generico extends Utente {
      *
      * @param Bagaglio the bagaglio
      */
-    public void segnala_Smarrimento(Bagaglio Bagaglio) {}
+    public void segnalaSmarrimento(Bagaglio Bagaglio) {}
 
 
     /**
@@ -68,22 +68,22 @@ public class Utente_Generico extends Utente {
      *
      * @param login              the login
      * @param password           the password
-     * @param lista_Prenotazioni the lista prenotazioni
+     * @param listaPrenotazioni the lista prenotazioni
      */
-    public Utente_Generico(String login, String password, ArrayList<Volo> lista_Prenotazioni) {
+    public UtenteGenerico(String login, String password, ArrayList<Volo> listaPrenotazioni) {
         super(login, password);
-        this.lista_Prenotazioni = lista_Prenotazioni;
+        this.listaPrenotazioni = listaPrenotazioni;
     }
 
     @Override
-    public List<Volo> visualizza_Voli(List<Volo> voli) {
+    public ArrayList<Volo> visualizzaVoli(ArrayList<Volo> voli) {
         return voli;
     }
 
     /**
      * Costruttore di default.
      */
-    public Utente_Generico() {
+    public UtenteGenerico() {
     }
 
 
