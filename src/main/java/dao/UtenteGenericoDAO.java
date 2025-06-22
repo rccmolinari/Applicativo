@@ -12,9 +12,9 @@ public interface UtenteGenericoDAO {
 
 
 
-    public Prenotazione cercaPrenotazione(String nomePasseggero);
+    public ArrayList<Prenotazione> cercaPrenotazione(UtenteGenerico utente, String nomePasseggero, String cognomePasseggero);
 
-    public Prenotazione cercaPrenotazione(int codiceVolo);
+    public ArrayList<Prenotazione> cercaPrenotazione(UtenteGenerico utente, int codiceVolo);
 
 
     public void segnalaSmarrimento(Bagaglio Bagaglio);

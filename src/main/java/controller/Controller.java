@@ -10,6 +10,8 @@ import java.sql.Date;
 
 import gui.*;
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 public class Controller {
     // Variabili d'istanza per tenere traccia dell'utente connesso.
@@ -48,7 +50,7 @@ public class Controller {
      */
     public void selectedItem(String item, DashBoardUser d) {
         String selected = (String) d.getComboBox1().getSelectedItem();
-
+        if (selected == null || selected.trim().isEmpty()) return;
         JPanel panel = new JPanel();
         panel.setBackground(new Color(43, 48, 52));
         JLabel label = new JLabel(selected + " work in progress king...");
@@ -94,7 +96,8 @@ public class Controller {
 
                 JDialog popup = new JDialog();
                 popup.setTitle("Prenotazioni Effettuate");
-                popup.setModal(true);
+                popup.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
+                popup.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
                 popup.setSize(650, 350);
                 popup.setLocationRelativeTo(null);
 
@@ -108,8 +111,7 @@ public class Controller {
 
                 popup.setContentPane(contenitore);
                 popup.setVisible(true);
-                break;
-
+                return;
 
 
 
@@ -165,18 +167,162 @@ public class Controller {
 
 
             case "Cerca Prenotazione":
-                // Campo per inserire il numero del biglietto e bottone per ricerca
-                panel.setLayout(new GridLayout(2, 1, 5, 5));
-                panel.add(creaCampo("Numero Biglietto"));
-                //panel.add(creaBottoneConAzione("Cerca", "Prenotazione trovata", dialog));
+                panel.setLayout(new GridLayout(5, 1, 5, 5));
+
+                JTextField campoBigliettoUnico = creaCampo("Numero Biglietto (opzionale)");
+                JTextField campoNomePasseggeroUnico = creaCampo("Nome Passeggero (opzionale)");
+                JTextField campoCognomePasseggeroUnico = creaCampo("Cognome Passeggero (opzionale)");
+
+                // Quando scrivo in nome o cognome → svuota campo biglietto
+                campoNomePasseggeroUnico.getDocument().addDocumentListener(new DocumentListener() {
+                    public void insertUpdate(DocumentEvent e) { campoBigliettoUnico.setText(""); }
+                    public void removeUpdate(DocumentEvent e) { campoBigliettoUnico.setText(""); }
+                    public void changedUpdate(DocumentEvent e) { campoBigliettoUnico.setText(""); }
+                });
+                campoCognomePasseggeroUnico.getDocument().addDocumentListener(new DocumentListener() {
+                    public void insertUpdate(DocumentEvent e) { campoBigliettoUnico.setText(""); }
+                    public void removeUpdate(DocumentEvent e) { campoBigliettoUnico.setText(""); }
+                    public void changedUpdate(DocumentEvent e) { campoBigliettoUnico.setText(""); }
+                });
+
+                panel.add(campoBigliettoUnico);
+                panel.add(campoNomePasseggeroUnico);
+                panel.add(campoCognomePasseggeroUnico);
+
+                panel.add(creaBottoneConAzione("Cerca", () -> {
+                    try {
+                        UtenteGenericoImplementazionePostgresDAO daoUtenteGen = new UtenteGenericoImplementazionePostgresDAO();
+                        ArrayList<Prenotazione> risultatiRicerca = new ArrayList<>();
+
+                        boolean ricercaPerBiglietto = !campoBigliettoUnico.getText().trim().isEmpty();
+                        boolean ricercaPerNomeECognome = !campoNomePasseggeroUnico.getText().trim().isEmpty()
+                                && !campoCognomePasseggeroUnico.getText().trim().isEmpty();
+
+                        if (ricercaPerBiglietto && ricercaPerNomeECognome) {
+                            JOptionPane.showMessageDialog(dialog,
+                                    "⚠️ Scegli solo una modalità di ricerca: o per numero biglietto o per nome e cognome.",
+                                    "Errore", JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
+
+                        if (ricercaPerBiglietto) {
+                            int numeroBiglietto = Integer.parseInt(campoBigliettoUnico.getText().trim());
+                            risultatiRicerca = daoUtenteGen.cercaPrenotazione(utente, numeroBiglietto);
+                        } else if (ricercaPerNomeECognome) {
+                            risultatiRicerca = daoUtenteGen.cercaPrenotazione(
+                                    utente,
+                                    campoNomePasseggeroUnico.getText().trim(),
+                                    campoCognomePasseggeroUnico.getText().trim()
+                            );
+                        } else {
+                            JOptionPane.showMessageDialog(dialog,
+                                    "Compila almeno il numero biglietto oppure nome e cognome.",
+                                    "Campi vuoti", JOptionPane.WARNING_MESSAGE);
+                            return;
+                        }
+
+                        if (risultatiRicerca.isEmpty()) {
+                            JOptionPane.showMessageDialog(dialog,
+                                    "Nessuna prenotazione trovata.",
+                                    "Risultato", JOptionPane.INFORMATION_MESSAGE);
+                        } else {
+                            String[] intestazioniColonne = {"Biglietto", "Nome", "Cognome", "Posto", "Stato", "Bagagli"};
+                            String[][] righeTabella = new String[risultatiRicerca.size()][intestazioniColonne.length];
+
+                            for (int i = 0; i < risultatiRicerca.size(); i++) {
+                                Prenotazione prenotazioneTrovata = risultatiRicerca.get(i);
+                                Passeggero passeggeroTrovato = prenotazioneTrovata.getPasseggero();
+                                righeTabella[i] = new String[]{
+                                        String.valueOf(prenotazioneTrovata.getNumeroBiglietto()),
+                                        passeggeroTrovato.getNome(),
+                                        passeggeroTrovato.getCognome(),
+                                        String.valueOf(prenotazioneTrovata.getNumeroAssegnato()),
+                                        prenotazioneTrovata.getStatoPrenotazione().toString(),
+                                        String.valueOf(prenotazioneTrovata.getListaBagagli().size())
+                                };
+                            }
+
+                            JTable tabellaRisultati = new JTable(righeTabella, intestazioniColonne);
+                            tabellaRisultati.setEnabled(false);
+                            tabellaRisultati.setFont(new Font("SansSerif", Font.PLAIN, 14));
+                            tabellaRisultati.setBackground(new Color(107, 112, 119));
+                            tabellaRisultati.setForeground(Color.WHITE);
+                            tabellaRisultati.setGridColor(Color.GRAY);
+
+                            // Colore header arancione
+                            tabellaRisultati.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 14));
+                            tabellaRisultati.getTableHeader().setBackground(new Color(255, 162, 35));
+                            tabellaRisultati.getTableHeader().setForeground(Color.WHITE);
+
+                            JScrollPane scrollPaneRisultati = new JScrollPane(tabellaRisultati);
+                            scrollPaneRisultati.setPreferredSize(new Dimension(600, 300));
+                            scrollPaneRisultati.getViewport().setBackground(new Color(43, 48, 52));
+
+                            JDialog popupRisultati = new JDialog();
+                            popupRisultati.setTitle("Risultati Prenotazioni");
+                            popupRisultati.setModal(true);
+                            popupRisultati.setSize(650, 350);
+                            popupRisultati.setLocationRelativeTo(null);
+
+                            JPanel contenitoreTabella = new JPanel(new GridBagLayout());
+                            contenitoreTabella.setBackground(new Color(43, 48, 52));
+                            GridBagConstraints gbcTabella = new GridBagConstraints();
+                            gbcTabella.fill = GridBagConstraints.BOTH;
+                            gbcTabella.weightx = 1;
+                            gbcTabella.weighty = 1;
+                            contenitoreTabella.add(scrollPaneRisultati, gbcTabella);
+
+                            popupRisultati.setContentPane(contenitoreTabella);
+                            popupRisultati.setVisible(true);
+                        }
+
+                    } catch (NumberFormatException ex) {
+                        JOptionPane.showMessageDialog(dialog, "Numero biglietto non valido.", "Errore", JOptionPane.ERROR_MESSAGE);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        JOptionPane.showMessageDialog(dialog, "Errore: " + ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
+                    }
+                }, dialog));
                 break;
 
+
+
+
+
             case "Segnala Smarrimento":
-                // Permette all'utente di segnalare un bagaglio smarrito.
                 panel.setLayout(new GridLayout(2, 1, 5, 5));
-                panel.add(creaCampo("Codice Bagaglio"));
-                //panel.add(creaBottoneConAzione("Invia segnalazione", "Segnalazione inviata", dialog));
+
+                JTextField codiceBagaglioField = creaCampo("Codice Bagaglio");
+
+                panel.add(codiceBagaglioField);
+
+                panel.add(creaBottoneConAzione("Invia segnalazione", () -> {
+                    try {
+                        String input = codiceBagaglioField.getText().trim();
+
+                        if (input.isEmpty()) {
+                            JOptionPane.showMessageDialog(dialog, "Inserisci il codice del bagaglio.", "Campo vuoto", JOptionPane.WARNING_MESSAGE);
+                            return;
+                        }
+
+                        int codiceBagaglio = Integer.parseInt(input);
+
+                        Bagaglio b = new Bagaglio();
+                        b.setCodiceBagaglio(codiceBagaglio);
+
+                        UtenteGenericoImplementazionePostgresDAO dao = new UtenteGenericoImplementazionePostgresDAO();
+                        dao.segnalaSmarrimento(b);
+
+                        JOptionPane.showMessageDialog(dialog, "Segnalazione inviata correttamente!", "Successo", JOptionPane.INFORMATION_MESSAGE);
+                    } catch (NumberFormatException ex) {
+                        JOptionPane.showMessageDialog(dialog, "Il codice deve essere un numero intero.", "Errore di formato", JOptionPane.ERROR_MESSAGE);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        JOptionPane.showMessageDialog(dialog, "Errore durante la segnalazione: " + ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
+                    }
+                }, dialog));
                 break;
+
 
             default:
                 /*
@@ -202,14 +348,13 @@ public class Controller {
      * Un sistema reale dovrebbe collegare questi input ai modelli e al backend per modifiche persistenti.
      */
     public void selectedItem(String item, DashBoardAdmin d) {
+        if (item == null || item.trim().isEmpty()) return;
+
         AmministratoreImplementazionePostgresDAO a = new AmministratoreImplementazionePostgresDAO();
         String selected = (String) d.getComboBox1().getSelectedItem();
 
         JPanel panel = new JPanel();
         panel.setBackground(new Color(43, 48, 52));
-        JLabel label = new JLabel(selected + " work in progress king...");
-        label.setHorizontalAlignment(SwingConstants.CENTER);
-        label.setForeground(Color.WHITE);
 
         d.setChoiceDialog(new JDialog());
         JDialog dialog = d.getChoiceDialog();
@@ -286,7 +431,7 @@ public class Controller {
                         JOptionPane.showMessageDialog(null, "Errore: " + ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
                     }
                     visualizzaVoli(d);
-                    }, dialog));
+                }, dialog));
                 break;
 
             case "Aggiorna Volo":
@@ -300,7 +445,7 @@ public class Controller {
                     JPanel riga = new JPanel(new FlowLayout(FlowLayout.LEFT));
                     riga.setBackground(new Color(107, 112, 119));
 
-                    label = new JLabel("Volo " + v.getCodiceVolo() + " → " + v.getDestinazione() + " (" + v.getData() + ")");
+                    JLabel label = new JLabel("Volo " + v.getCodiceVolo() + " → " + v.getDestinazione() + " (" + v.getData() + ")");
                     label.setForeground(Color.WHITE);
                     JButton modificaBtn = new JButton("Modifica");
                     modificaBtn.setBackground(new Color(255, 162, 35));
@@ -318,7 +463,6 @@ public class Controller {
                         }
                     });
 
-
                     riga.add(label);
                     riga.add(modificaBtn);
                     listaPanel.add(riga);
@@ -334,11 +478,9 @@ public class Controller {
                 voloDialog.pack();
                 voloDialog.setLocationRelativeTo(null);
                 voloDialog.setVisible(true);
-                break;
-
+                return;
 
             case "Modifica Gate":
-                // Cambia il gate di partenza di un volo
                 panel.setLayout(new GridLayout(3, 1, 5, 5));
                 JTextField codiceFieldGate = creaCampo("Codice Volo");
                 JTextField gateFieldGate = creaCampo("Nuovo Gate");
@@ -353,15 +495,12 @@ public class Controller {
                 break;
 
             case "Aggiorna Bagaglio":
-                // Permette di aggiornare lo stato di un bagaglio smarrito o ritrovato
                 panel.setLayout(new GridLayout(3, 1, 5, 5));
 
                 JTextField codiceBagaglioField = creaCampo("Codice Bagaglio");
-
-// Crea ComboBox con le label dell'enum
                 JComboBox<String> statoComboBox = new JComboBox<>();
                 for (StatoBagaglio s : StatoBagaglio.values()) {
-                    statoComboBox.addItem(s.toString()); // usa il label (es: "registrato", "imbarcato", ecc.)
+                    statoComboBox.addItem(s.toString());
                 }
 
                 panel.add(codiceBagaglioField);
@@ -374,24 +513,20 @@ public class Controller {
                     try {
                         StatoBagaglio stato = StatoBagaglio.fromString(statoSelezionato);
                         b.setStatoBagaglio(stato);
-                        new AmministratoreImplementazionePostgresDAO().aggiornaBagaglio(b,stato);
+                        new AmministratoreImplementazionePostgresDAO().aggiornaBagaglio(b, stato);
                     } catch (IllegalArgumentException ex) {
                         JOptionPane.showMessageDialog(panel,
                                 "Errore durante l'assegnazione dello stato.",
                                 "Errore", JOptionPane.ERROR_MESSAGE);
                     }
                 }, dialog));
-
                 break;
 
             case "Visualizza Smarrimenti":
-                // Recupera la lista dei bagagli smarriti
                 ArrayList<Bagaglio> listaSmarriti = new AmministratoreImplementazionePostgresDAO().visualizzaSmarrimento();
 
-                // Definisci le colonne
                 String[] colonne = { "Codice Bagaglio", "Stato", "Numero Biglietto" };
 
-                // Prepara i dati per la tabella
                 String[][] dati = new String[listaSmarriti.size()][3];
                 for (int i = 0; i < listaSmarriti.size(); i++) {
                     Bagaglio b = listaSmarriti.get(i);
@@ -400,7 +535,6 @@ public class Controller {
                     dati[i][2] = String.valueOf(b.getPrenotazione().getNumeroBiglietto());
                 }
 
-                // Crea la JTable
                 JTable tabella = new JTable(dati, colonne);
                 tabella.setEnabled(false);
                 tabella.setBackground(new Color(107, 112, 119));
@@ -409,23 +543,17 @@ public class Controller {
                 tabella.getTableHeader().setBackground(Color.DARK_GRAY);
                 tabella.getTableHeader().setForeground(Color.WHITE);
 
-                // Crea il popup con JScrollPane
                 JDialog popup = new JDialog();
                 popup.setTitle("Bagagli Smarriti");
                 popup.setModal(true);
                 popup.setSize(500, 300);
-                popup.setLocationRelativeTo(null); // centra la finestra
+                popup.setLocationRelativeTo(null);
 
                 JScrollPane scrollPane2 = new JScrollPane(tabella);
                 popup.add(scrollPane2);
 
                 popup.setVisible(true);
                 break;
-
-
-            default:
-                panel.setLayout(new BorderLayout());
-                panel.add(label, BorderLayout.CENTER);
         }
 
         JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(d.getComboBox1());
