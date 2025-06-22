@@ -144,7 +144,7 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
 
         try {
             ps = connection.prepareStatement(
-                    "UPDATE bagaglio SET stato = ? WHERE id_bagaglio = ?"
+                    "UPDATE bagaglio SET stato_bagaglio = ? WHERE id_bagaglio = ?"
             );
 
             ps.setString(1, stato.toString());
@@ -182,7 +182,7 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
             while (rs.next()) {
                 Bagaglio b = new Bagaglio();
                 b.setCodiceBagaglio(rs.getInt("id_bagaglio"));
-                b.setStatoBagaglio(StatoBagaglio.fromString(rs.getString("stato")));
+                b.setStatoBagaglio(StatoBagaglio.fromString(rs.getString("stato_bagaglio")));
 
                 Prenotazione p = new Prenotazione();
                 p.setNumeroBiglietto(rs.getInt("numero_biglietto"));

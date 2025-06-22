@@ -73,49 +73,47 @@ public class Login {
         INVIOButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+
                 // Prendo i dati inseriti dall'utente nei campi
-                String username = login.getText();
-                // Per la password uso getPassword() perché è più sicuro di getText()
-                // Poi converto l'array di char in stringa
+                String username = login.getText(); // o email
                 String password = new String(passwordField1.getPassword());
 
                 // Chiamo il metodo di login del controller
                 controller.login(username, password);
 
-                // Controllo se il login è andato a buon fine, cioè se c'è un utente o un admin loggato
-                if(controller.getUtente() != null || controller.getAdmin() != null) {
-                    // Prendo il JFrame che contiene il bottone INVIO
-                    JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(INVIOButton);
-                    JPanel content;
+                // Prendo il JFrame contenitore
+                JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(INVIOButton);
+                JPanel content;
 
-                    // Se non c'è utente ma c'è admin, carico la dashboard admin,
-                    // altrimenti carico la home page dell'utente normale
-                    if (controller.getUtente() == null) {
-                        content = new DashBoardAdmin(username, controller).getDashboardAdminPage();
-                    } else {
-                        content = new DashBoardUser(username, controller).getHomePage();
-                    }
-
-                    // Imposto il pannello con la dashboard corretta come contenuto del frame
+                // Controllo chi ha effettuato il login
+                if (controller.getUtente() != null) {
+                    content = new DashBoardUser(username, controller).getHomePage();
                     frame.setContentPane(content);
-                    // Centrare la finestra al centro dello schermo
                     frame.setLocationRelativeTo(null);
-                    // Rendo visibile la finestra aggiornata
                     frame.setVisible(true);
-                    // Imposto la chiusura dell'app alla chiusura della finestra
                     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                    // Adatto la dimensione del frame al nuovo contenuto
                     frame.pack();
+
+                } else if (controller.getAdmin() != null) {
+                    content = new DashBoardAdmin(username, controller).getDashboardAdminPage();
+                    frame.setContentPane(content);
+                    frame.setLocationRelativeTo(null);
+                    frame.setVisible(true);
+                    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                    frame.pack();
+
                 } else {
-                    // Se login fallisce, mostro un messaggio di errore
-                    // e fornisco anche delle credenziali di prova per testing
-                    JOptionPane.showMessageDialog(null, "Login Failed" + "\n" +
-                            " Le uniche credenziali disponibili sono \n" +
-                            " user, user \n" +
-                            " admin, admin");
+                    // Login fallito
+                    JOptionPane.showMessageDialog(null,
+                            "Login fallito! Utente non registrato!",
+                            "Errore di autenticazione",
+                            JOptionPane.ERROR_MESSAGE
+                    );
                 }
             }
         });
+
+
 
         // Se clicchi su "REGISTRATI", chiamo il metodo per aprire l'interfaccia di registrazione
         REGISTRATIButton.addActionListener(new ActionListener() {

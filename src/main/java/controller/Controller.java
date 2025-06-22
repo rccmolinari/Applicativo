@@ -1,6 +1,7 @@
 package controller;
 
 import implementazionePostgresDAO.AmministratoreImplementazionePostgresDAO;
+import implementazionePostgresDAO.LoginImplementazionePostgresDAO;
 import implementazionePostgresDAO.UtenteGenericoImplementazionePostgresDAO;
 import model.*;
 import java.awt.*;
@@ -29,13 +30,7 @@ public class Controller {
      * Questo metodo gestisce la distinzione tra tipi di utenti ma senza autenticazione reale.
      * In un'applicazione reale servirebbe una verifica su database o altro sistema persistente.
      */
-    public void login(String login, String password) {
-        if (login.equals("admin") && password.equals("admin")) {
-            this.admin = new Amministratore(login, password);
-        } else {
-            this.utente = new UtenteGenerico(login, password);
-        }
-    }
+
 
     /**
      * Metodo per gestire l'interazione con il dashboard dell'utente normale.
@@ -111,6 +106,7 @@ public class Controller {
 
                 popup.setContentPane(contenitore);
                 popup.setVisible(true);
+                visualizzaVoli(d);
                 return;
 
 
@@ -162,7 +158,7 @@ public class Controller {
                         JOptionPane.showMessageDialog(dialog, "Errore: " + ex.getMessage());
                     }
                 }, dialog));
-
+                visualizzaVoli(d);
                 break;
 
 
@@ -283,6 +279,7 @@ public class Controller {
                         JOptionPane.showMessageDialog(dialog, "Errore: " + ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
                     }
                 }, dialog));
+                visualizzaVoli(d);
                 break;
 
 
@@ -321,6 +318,7 @@ public class Controller {
                         JOptionPane.showMessageDialog(dialog, "Errore durante la segnalazione: " + ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
                     }
                 }, dialog));
+                visualizzaVoli(d);
                 break;
 
 
@@ -360,6 +358,7 @@ public class Controller {
         JDialog dialog = d.getChoiceDialog();
 
         switch (item) {
+            /*
             case "Visualizza Voli":
                 panel.setLayout(new GridLayout(1, 5, 5, 5));
                 for (int i = 1; i <= 5; i++) {
@@ -367,6 +366,8 @@ public class Controller {
                     //panel.add(button);
                 }
                 break;
+                */
+
 
             case "Inserisci Volo":
                 panel.setLayout(new GridLayout(6, 1, 5, 5));
@@ -430,9 +431,9 @@ public class Controller {
                         ex.printStackTrace();
                         JOptionPane.showMessageDialog(null, "Errore: " + ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
                     }
-                    visualizzaVoli(d);
                 }, dialog));
-                break;
+                visualizzaVoli(d);
+                return;
 
             case "Aggiorna Volo":
                 ArrayList<Volo> voli = new AmministratoreImplementazionePostgresDAO().visualizzaVoli();
@@ -478,6 +479,7 @@ public class Controller {
                 voloDialog.pack();
                 voloDialog.setLocationRelativeTo(null);
                 voloDialog.setVisible(true);
+                visualizzaVoli(d);
                 return;
 
             case "Modifica Gate":
@@ -492,7 +494,8 @@ public class Controller {
                     volo.setGate(Integer.parseInt(gateFieldGate.getText()));
                     new AmministratoreImplementazionePostgresDAO().modificaGate(volo);
                 }, dialog));
-                break;
+                visualizzaVoli(d);
+                return;
 
             case "Aggiorna Bagaglio":
                 panel.setLayout(new GridLayout(3, 1, 5, 5));
@@ -520,14 +523,15 @@ public class Controller {
                                 "Errore", JOptionPane.ERROR_MESSAGE);
                     }
                 }, dialog));
-                break;
+                visualizzaVoli(d);
+                return;
 
-            case "Visualizza Smarrimenti":
+            case "Visualizza Smarrimenti": {
                 ArrayList<Bagaglio> listaSmarriti = new AmministratoreImplementazionePostgresDAO().visualizzaSmarrimento();
 
                 String[] colonne = { "Codice Bagaglio", "Stato", "Numero Biglietto" };
-
                 String[][] dati = new String[listaSmarriti.size()][3];
+
                 for (int i = 0; i < listaSmarriti.size(); i++) {
                     Bagaglio b = listaSmarriti.get(i);
                     dati[i][0] = String.valueOf(b.getCodiceBagaglio());
@@ -539,21 +543,38 @@ public class Controller {
                 tabella.setEnabled(false);
                 tabella.setBackground(new Color(107, 112, 119));
                 tabella.setForeground(Color.WHITE);
+                tabella.setFont(new Font("SansSerif", Font.PLAIN, 14));
                 tabella.setGridColor(Color.GRAY);
-                tabella.getTableHeader().setBackground(Color.DARK_GRAY);
-                tabella.getTableHeader().setForeground(Color.WHITE);
+
+                tabella.getTableHeader().setBackground(new Color(255, 162, 35));
+                tabella.getTableHeader().setForeground(Color.BLACK);
+                tabella.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 14));
+
+                scrollPane = new JScrollPane(tabella);
+                scrollPane.setPreferredSize(new Dimension(600, 300));
+                scrollPane.getViewport().setBackground(new Color(43, 48, 52));
+
+                JPanel contenitore = new JPanel(new GridBagLayout());
+                contenitore.setBackground(new Color(43, 48, 52));
+
+                GridBagConstraints gbc = new GridBagConstraints();
+                gbc.fill = GridBagConstraints.BOTH;
+                gbc.weightx = 1;
+                gbc.weighty = 1;
+                contenitore.add(scrollPane, gbc);
 
                 JDialog popup = new JDialog();
                 popup.setTitle("Bagagli Smarriti");
                 popup.setModal(true);
-                popup.setSize(500, 300);
+                popup.setContentPane(contenitore);
+                popup.pack();
                 popup.setLocationRelativeTo(null);
-
-                JScrollPane scrollPane2 = new JScrollPane(tabella);
-                popup.add(scrollPane2);
-
                 popup.setVisible(true);
-                break;
+
+                visualizzaVoli(d);
+                return;
+            }
+
         }
 
         JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(d.getComboBox1());
@@ -630,63 +651,38 @@ public class Controller {
 
         JPanel panel = new JPanel();
         panel.setBackground(new Color(43, 48, 52));
-        panel.setLayout(new GridLayout(13, 1, 5, 5));
+        panel.setLayout(new GridLayout(5, 1, 5, 5));
 
-        JLabel labelEmail = new JLabel("Email/Username");
+        // Email / Username
+        JLabel labelEmail = new JLabel("Email / Username");
         labelEmail.setForeground(Color.WHITE);
         JTextField emailField = creaCampo(null);
 
+        // Password
         JLabel labelPassword = new JLabel("Password");
         labelPassword.setForeground(Color.WHITE);
         JPasswordField passwordField = new JPasswordField();
         passwordField.setBackground(new Color(107, 112, 119));
         passwordField.setForeground(Color.WHITE);
 
-        JLabel labelIdDoc = new JLabel("ID nul");
-        labelIdDoc.setForeground(Color.WHITE);
-        JTextField idDocField = creaCampo(null);
-
-        JLabel labelNome = new JLabel("Nome");
-        labelNome.setForeground(Color.WHITE);
-        JTextField nomeField = creaCampo(null);
-
-        JLabel labelCognome = new JLabel("Cognome");
-        labelCognome.setForeground(Color.WHITE);
-        JTextField cognomeField = creaCampo(null);
-
-        JLabel labelDataNascita = new JLabel("Data Nascita (aaaa-mm-gg)");
-        labelDataNascita.setForeground(Color.WHITE);
-        JTextField dataNascitaField = creaCampo(null);
-
-        panel.add(labelEmail);
-        panel.add(emailField);
-        panel.add(labelPassword);
-        panel.add(passwordField);
-        panel.add(labelIdDoc);
-        panel.add(idDocField);
-        panel.add(labelNome);
-        panel.add(nomeField);
-        panel.add(labelCognome);
-        panel.add(cognomeField);
-        panel.add(labelDataNascita);
-        panel.add(dataNascitaField);
-
+        // Bottone registrazione
         JButton registrati = new JButton("Registrati");
         registrati.setBackground(new Color(255, 162, 35));
         registrati.setForeground(Color.BLACK);
 
         registrati.addActionListener(e -> {
-            if (emailField.getText().isEmpty() || passwordField.getPassword().length == 0
-                    || idDocField.getText().isEmpty() || nomeField.getText().isEmpty()
-                    || cognomeField.getText().isEmpty() || dataNascitaField.getText().isEmpty()) {
+            if (emailField.getText().isEmpty() || passwordField.getPassword().length == 0) {
                 JOptionPane.showMessageDialog(null, "Compila tutti i campi", "Errore", JOptionPane.ERROR_MESSAGE);
             } else {
                 try {
-                    // Simula la registrazione utente tramite un metodo di Login
-                    registraUtente(emailField.getText(), new String(passwordField.getPassword()), idDocField.getText(),
-                            nomeField.getText(), cognomeField.getText(), dataNascitaField.getText());
-                    JOptionPane.showMessageDialog(null, "Registrazione effettuata con successo!", "Info",
-                            JOptionPane.INFORMATION_MESSAGE);
+                    boolean result = registraUtente(emailField.getText(), new String(passwordField.getPassword()));
+                    if(result) {
+                        JOptionPane.showMessageDialog(null, "Registrazione effettuata con successo!", "Info",
+                                JOptionPane.INFORMATION_MESSAGE);
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Errore registrazione, l'utente già esiste", "Info",
+                                JOptionPane.ERROR_MESSAGE);
+                    }
                     dialog.dispose();
                 } catch (IllegalArgumentException ex) {
                     JOptionPane.showMessageDialog(null, ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
@@ -694,20 +690,24 @@ public class Controller {
             }
         });
 
+        // Aggiunta componenti al pannello
+        panel.add(labelEmail);
+        panel.add(emailField);
+        panel.add(labelPassword);
+        panel.add(passwordField);
         panel.add(registrati);
 
+        // Setup finale dialog
         dialog.setContentPane(panel);
         dialog.pack();
         dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
     }
 
-    // Metodo che simula la registrazione, rifiutando solo email vuote o "admin"
-    public boolean registraUtente(String email, String password, String idDoc, String nome, String cognome, String dataNascita) {
-        if (email == null || email.isEmpty() || "admin".equalsIgnoreCase(email)) {
-            return false;
-        }
-        return true;
+
+    public boolean registraUtente(String email, String password) {
+        LoginImplementazionePostgresDAO tmp =  new LoginImplementazionePostgresDAO();
+        return tmp.registrazione(email, password);
     }
     public void visualizzaVoli(DashBoardUser view) {
         AmministratoreImplementazionePostgresDAO adao = new AmministratoreImplementazionePostgresDAO();
@@ -871,6 +871,21 @@ public class Controller {
         dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
     }
+
+    public void login(String email, String password) {
+        this.utente = null;
+        this.admin = null;
+
+        LoginImplementazionePostgresDAO loginDAO = new LoginImplementazionePostgresDAO();
+        int result = loginDAO.login(email, password);
+
+        if (result == 1) {
+            this.utente = new UtenteGenerico(email, password);
+        } else if (result == 2) {
+            this.admin = new Amministratore(email, password);
+        }
+    }
+
 
 
 
