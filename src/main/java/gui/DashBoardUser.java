@@ -61,8 +61,15 @@ public class DashBoardUser {
         comboBox1.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
-                if(e.getStateChange() == ItemEvent.SELECTED) {
-                    controller.selectedItem((String) e.getItem(), DashBoardUser.this);
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    String itemSelezionato = (String) e.getItem();
+
+                    if (!itemSelezionato.equals("")) { // evita il reset se già su default
+                        controller.selectedItem(itemSelezionato, DashBoardUser.this);
+
+                        // Torna al valore di default
+                        comboBox1.setSelectedIndex(0);
+                    }
                 }
             }
         });

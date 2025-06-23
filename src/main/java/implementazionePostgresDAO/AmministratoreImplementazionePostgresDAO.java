@@ -293,32 +293,31 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
         return lista;
     }
     @Override
-    public ArrayList<Bagaglio> cercaBagaglio(Volo v, Passeggero p) {
+    public ArrayList<Bagaglio> cercaBagaglio(Prenotazione p) {
         ArrayList<Bagaglio> lista = new ArrayList<>();
-        String sql = "SELECT b.*, pr.numero_biglietto FROM bagaglio b " +
+
+        String sql = "SELECT b.*, pr.numero_biglietto " +
+                "FROM bagaglio b " +
                 "JOIN prenotazione pr ON b.numero_prenotazione = pr.numero_biglietto " +
-                "WHERE pr.codice_volo = ? AND pr.documento_passeggero = ?";
+                "WHERE pr.numero_biglietto = ?";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setInt(1, v.getCodiceVolo());
-            ps.setString(2, p.getIdDocumento());
+            ps.setInt(1, p.getNumeroBiglietto());
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Bagaglio bag = new Bagaglio();
                     bag.setCodiceBagaglio(rs.getInt("id_bagaglio"));
                     bag.setStatoBagaglio(StatoBagaglio.fromString(rs.getString("stato_bagaglio")));
-
-                    Prenotazione pren = new Prenotazione();
-                    pren.setNumeroBiglietto(rs.getInt("numero_biglietto"));
-                    bag.setPrenotazione(pren);
-
+                    bag.setPrenotazione(p);
                     lista.add(bag);
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
         return lista;
     }
+
 
 }

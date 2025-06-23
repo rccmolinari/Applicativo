@@ -283,80 +283,59 @@ public class Controller {
 
 
             case "Cerca Bagagli":
-                panel.setLayout(new GridLayout(5, 1, 5, 5));
+                panel.setLayout(new GridLayout(4, 1, 5, 5));
 
                 JTextField campoIdBagaglio = creaCampo("ID Bagaglio (opzionale)");
-                JTextField campoIdVolo = creaCampo("ID Volo (opzionale)");
-                JTextField campoIdDocumento = creaCampo("ID Documento Passeggero (opzionale)");
+                JTextField campoNumeroPrenotazione = creaCampo("Numero Prenotazione (opzionale)");
 
-                // Gestione svuotamento campi incrociati (come prima)
-                DocumentListener svuotaIdBagaglio = new DocumentListener() {
+                // Se scrivi in ID Bagaglio → svuota Numero Prenotazione
+                campoIdBagaglio.getDocument().addDocumentListener(new DocumentListener() {
+                    public void insertUpdate(DocumentEvent e) { campoNumeroPrenotazione.setText(""); }
+                    public void removeUpdate(DocumentEvent e) { campoNumeroPrenotazione.setText(""); }
+                    public void changedUpdate(DocumentEvent e) { campoNumeroPrenotazione.setText(""); }
+                });
+
+                // Se scrivi in Numero Prenotazione → svuota ID Bagaglio
+                campoNumeroPrenotazione.getDocument().addDocumentListener(new DocumentListener() {
                     public void insertUpdate(DocumentEvent e) { campoIdBagaglio.setText(""); }
                     public void removeUpdate(DocumentEvent e) { campoIdBagaglio.setText(""); }
                     public void changedUpdate(DocumentEvent e) { campoIdBagaglio.setText(""); }
-                };
-                campoIdDocumento.getDocument().addDocumentListener(svuotaIdBagaglio);
-
-                DocumentListener svuotaAltriCampi = new DocumentListener() {
-                    public void insertUpdate(DocumentEvent e) {
-                        campoIdVolo.setText("");
-                        campoIdDocumento.setText("");
-                    }
-                    public void removeUpdate(DocumentEvent e) {
-                        campoIdVolo.setText("");
-                        campoIdDocumento.setText("");
-                    }
-                    public void changedUpdate(DocumentEvent e) {
-                        campoIdVolo.setText("");
-                        campoIdDocumento.setText("");
-                    }
-                };
-                campoIdBagaglio.getDocument().addDocumentListener(svuotaAltriCampi);
+                });
 
                 panel.add(campoIdBagaglio);
-                panel.add(campoIdVolo);
-                panel.add(campoIdDocumento);
+                panel.add(campoNumeroPrenotazione);
 
                 panel.add(creaBottoneConAzione("Cerca", () -> {
                     try {
-                        UtenteGenericoImplementazionePostgresDAO daoUtenteGen = new UtenteGenericoImplementazionePostgresDAO();
+                        UtenteGenericoImplementazionePostgresDAO dao = new UtenteGenericoImplementazionePostgresDAO();
                         ArrayList<Bagaglio> risultatiRicerca = new ArrayList<>();
 
-                        boolean ricercaPerIdBagaglio = !campoIdBagaglio.getText().trim().isEmpty();
-                        boolean ricercaPerVoloEIdDocumento = !campoIdVolo.getText().trim().isEmpty()
-                                && !campoIdDocumento.getText().trim().isEmpty();
+                        boolean cercaPerId = !campoIdBagaglio.getText().trim().isEmpty();
+                        boolean cercaPerPrenotazione = !campoNumeroPrenotazione.getText().trim().isEmpty();
 
-                        if (ricercaPerIdBagaglio && ricercaPerVoloEIdDocumento) {
-                            JOptionPane.showMessageDialog(dialog,
-                                    "⚠️ Scegli solo una modalità di ricerca: o per ID bagaglio oppure per Volo e Passeggero.",
-                                    "Errore", JOptionPane.ERROR_MESSAGE);
+                        if (cercaPerId && cercaPerPrenotazione) {
+                            JOptionPane.showMessageDialog(dialog, "⚠️ Inserisci solo uno dei due campi.", "Errore", JOptionPane.ERROR_MESSAGE);
                             return;
                         }
 
-                        if (ricercaPerIdBagaglio) {
+                        if (cercaPerId) {
                             Bagaglio b = new Bagaglio();
                             b.setCodiceBagaglio(Integer.parseInt(campoIdBagaglio.getText().trim()));
-                            risultatiRicerca = daoUtenteGen.cercaBagaglio(b);
-                        } else if (ricercaPerVoloEIdDocumento) {
-                            Volo v = new Volo();
-                            v.setCodiceVolo(Integer.parseInt(campoIdVolo.getText().trim()));
-                            Passeggero p = new Passeggero();
-                            p.setIdDocumento(campoIdDocumento.getText().trim());
-                            risultatiRicerca = daoUtenteGen.cercaBagaglio(v, p);
+                            risultatiRicerca = dao.cercaBagaglio(b);
+                        } else if (cercaPerPrenotazione) {
+                            Prenotazione p = new Prenotazione();
+                            p.setNumeroBiglietto(Integer.parseInt(campoNumeroPrenotazione.getText().trim()));
+                            risultatiRicerca = dao.cercaBagaglio(p);
                         } else {
-                            JOptionPane.showMessageDialog(dialog,
-                                    "Compila almeno l'ID bagaglio oppure ID volo e documento passeggero.",
-                                    "Campi vuoti", JOptionPane.WARNING_MESSAGE);
+                            JOptionPane.showMessageDialog(dialog, "Inserisci almeno uno dei due campi.", "Campi vuoti", JOptionPane.WARNING_MESSAGE);
                             return;
                         }
 
                         if (risultatiRicerca.isEmpty()) {
-                            JOptionPane.showMessageDialog(dialog,
-                                    "Nessun bagaglio trovato.",
-                                    "Risultato", JOptionPane.INFORMATION_MESSAGE);
+                            JOptionPane.showMessageDialog(dialog, "Nessun bagaglio trovato.", "Risultato", JOptionPane.INFORMATION_MESSAGE);
                         } else {
-                            JPanel listaPanel = new JPanel(new GridLayout(risultatiRicerca.size(), 1, 5, 5));
-                            listaPanel.setBackground(new Color(43, 48, 52));
+                            JPanel listaPanel1 = new JPanel(new GridLayout(risultatiRicerca.size(), 1, 5, 5));
+                            listaPanel1.setBackground(new Color(43, 48, 52));
 
                             for (Bagaglio b : risultatiRicerca) {
                                 String testo = String.format(
@@ -372,13 +351,11 @@ public class Controller {
 
                                 JLabel label4 = new JLabel(testo);
                                 label4.setForeground(Color.WHITE);
-
                                 riga.add(label4, BorderLayout.CENTER);
-
-                                listaPanel.add(riga);
+                                listaPanel1.add(riga);
                             }
 
-                            JScrollPane scrollPane4 = new JScrollPane(listaPanel);
+                            JScrollPane scrollPane4 = new JScrollPane(listaPanel1);
                             scrollPane4.setPreferredSize(new Dimension(650, 300));
                             scrollPane4.getViewport().setBackground(new Color(43, 48, 52));
 
@@ -392,7 +369,7 @@ public class Controller {
                         }
 
                     } catch (NumberFormatException ex) {
-                        JOptionPane.showMessageDialog(dialog, "ID inserito non valido.", "Errore", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(dialog, "Valore numerico non valido.", "Errore", JOptionPane.ERROR_MESSAGE);
                     } catch (Exception ex) {
                         ex.printStackTrace();
                         JOptionPane.showMessageDialog(dialog, "Errore: " + ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
@@ -613,77 +590,56 @@ public class Controller {
                 visualizzaVoli(d);
                 return;
             case "Cerca Bagagli":
-                panel.setLayout(new GridLayout(5, 1, 5, 5));
+                panel.setLayout(new GridLayout(4, 1, 5, 5));
 
                 JTextField campoIdBagaglio = creaCampo("ID Bagaglio (opzionale)");
-                JTextField campoIdVolo = creaCampo("ID Volo (opzionale)");
-                JTextField campoIdDocumento = creaCampo("ID Documento Passeggero (opzionale)");
+                JTextField campoNumeroPrenotazione = creaCampo("Numero Prenotazione (opzionale)");
 
-                // Gestione svuotamento campi incrociati (come prima)
-                DocumentListener svuotaIdBagaglio = new DocumentListener() {
+                // Se scrivi in ID Bagaglio → svuota Numero Prenotazione
+                campoIdBagaglio.getDocument().addDocumentListener(new DocumentListener() {
+                    public void insertUpdate(DocumentEvent e) { campoNumeroPrenotazione.setText(""); }
+                    public void removeUpdate(DocumentEvent e) { campoNumeroPrenotazione.setText(""); }
+                    public void changedUpdate(DocumentEvent e) { campoNumeroPrenotazione.setText(""); }
+                });
+
+                // Se scrivi in Numero Prenotazione → svuota ID Bagaglio
+                campoNumeroPrenotazione.getDocument().addDocumentListener(new DocumentListener() {
                     public void insertUpdate(DocumentEvent e) { campoIdBagaglio.setText(""); }
                     public void removeUpdate(DocumentEvent e) { campoIdBagaglio.setText(""); }
                     public void changedUpdate(DocumentEvent e) { campoIdBagaglio.setText(""); }
-                };
-                campoIdDocumento.getDocument().addDocumentListener(svuotaIdBagaglio);
-
-                DocumentListener svuotaAltriCampi = new DocumentListener() {
-                    public void insertUpdate(DocumentEvent e) {
-                        campoIdVolo.setText("");
-                        campoIdDocumento.setText("");
-                    }
-                    public void removeUpdate(DocumentEvent e) {
-                        campoIdVolo.setText("");
-                        campoIdDocumento.setText("");
-                    }
-                    public void changedUpdate(DocumentEvent e) {
-                        campoIdVolo.setText("");
-                        campoIdDocumento.setText("");
-                    }
-                };
-                campoIdBagaglio.getDocument().addDocumentListener(svuotaAltriCampi);
+                });
 
                 panel.add(campoIdBagaglio);
-                panel.add(campoIdVolo);
-                panel.add(campoIdDocumento);
+                panel.add(campoNumeroPrenotazione);
 
                 panel.add(creaBottoneConAzione("Cerca", () -> {
                     try {
-                        UtenteGenericoImplementazionePostgresDAO daoUtenteGen = new UtenteGenericoImplementazionePostgresDAO();
+                        UtenteGenericoImplementazionePostgresDAO dao = new UtenteGenericoImplementazionePostgresDAO();
                         ArrayList<Bagaglio> risultatiRicerca = new ArrayList<>();
 
-                        boolean ricercaPerIdBagaglio = !campoIdBagaglio.getText().trim().isEmpty();
-                        boolean ricercaPerVoloEIdDocumento = !campoIdVolo.getText().trim().isEmpty()
-                                && !campoIdDocumento.getText().trim().isEmpty();
+                        boolean cercaPerId = !campoIdBagaglio.getText().trim().isEmpty();
+                        boolean cercaPerPrenotazione = !campoNumeroPrenotazione.getText().trim().isEmpty();
 
-                        if (ricercaPerIdBagaglio && ricercaPerVoloEIdDocumento) {
-                            JOptionPane.showMessageDialog(dialog,
-                                    "⚠️ Scegli solo una modalità di ricerca: o per ID bagaglio oppure per Volo e Passeggero.",
-                                    "Errore", JOptionPane.ERROR_MESSAGE);
+                        if (cercaPerId && cercaPerPrenotazione) {
+                            JOptionPane.showMessageDialog(dialog, "⚠️ Inserisci solo uno dei due campi.", "Errore", JOptionPane.ERROR_MESSAGE);
                             return;
                         }
 
-                        if (ricercaPerIdBagaglio) {
+                        if (cercaPerId) {
                             Bagaglio b = new Bagaglio();
                             b.setCodiceBagaglio(Integer.parseInt(campoIdBagaglio.getText().trim()));
-                            risultatiRicerca = daoUtenteGen.cercaBagaglio(b);
-                        } else if (ricercaPerVoloEIdDocumento) {
-                            Volo v = new Volo();
-                            v.setCodiceVolo(Integer.parseInt(campoIdVolo.getText().trim()));
-                            Passeggero p = new Passeggero();
-                            p.setIdDocumento(campoIdDocumento.getText().trim());
-                            risultatiRicerca = daoUtenteGen.cercaBagaglio(v, p);
+                            risultatiRicerca = dao.cercaBagaglio(b);
+                        } else if (cercaPerPrenotazione) {
+                            Prenotazione p = new Prenotazione();
+                            p.setNumeroBiglietto(Integer.parseInt(campoNumeroPrenotazione.getText().trim()));
+                            risultatiRicerca = dao.cercaBagaglio(p);
                         } else {
-                            JOptionPane.showMessageDialog(dialog,
-                                    "Compila almeno l'ID bagaglio oppure ID volo e documento passeggero.",
-                                    "Campi vuoti", JOptionPane.WARNING_MESSAGE);
+                            JOptionPane.showMessageDialog(dialog, "Inserisci almeno uno dei due campi.", "Campi vuoti", JOptionPane.WARNING_MESSAGE);
                             return;
                         }
 
                         if (risultatiRicerca.isEmpty()) {
-                            JOptionPane.showMessageDialog(dialog,
-                                    "Nessun bagaglio trovato.",
-                                    "Risultato", JOptionPane.INFORMATION_MESSAGE);
+                            JOptionPane.showMessageDialog(dialog, "Nessun bagaglio trovato.", "Risultato", JOptionPane.INFORMATION_MESSAGE);
                         } else {
                             JPanel listaPanel1 = new JPanel(new GridLayout(risultatiRicerca.size(), 1, 5, 5));
                             listaPanel1.setBackground(new Color(43, 48, 52));
@@ -702,9 +658,7 @@ public class Controller {
 
                                 JLabel label4 = new JLabel(testo);
                                 label4.setForeground(Color.WHITE);
-
                                 riga.add(label4, BorderLayout.CENTER);
-
                                 listaPanel1.add(riga);
                             }
 
@@ -722,7 +676,7 @@ public class Controller {
                         }
 
                     } catch (NumberFormatException ex) {
-                        JOptionPane.showMessageDialog(dialog, "ID inserito non valido.", "Errore", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(dialog, "Valore numerico non valido.", "Errore", JOptionPane.ERROR_MESSAGE);
                     } catch (Exception ex) {
                         ex.printStackTrace();
                         JOptionPane.showMessageDialog(dialog, "Errore: " + ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
@@ -730,6 +684,7 @@ public class Controller {
                 }, dialog));
 
                 break;
+
             case "Aggiorna Bagaglio":
                 panel.setLayout(new GridLayout(3, 1, 5, 5));
 

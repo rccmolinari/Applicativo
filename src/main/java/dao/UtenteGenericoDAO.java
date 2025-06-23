@@ -11,9 +11,6 @@ public interface UtenteGenericoDAO extends UtenteDAO {
 
     public void prenotaVolo(UtenteGenerico ug, Volo volo, Passeggero p, ArrayList<Bagaglio> ab);
 
-    public ArrayList<Bagaglio> cercaBagaglio(Volo v, Passeggero p);
-
-    public ArrayList<Bagaglio> cercaBagaglio(Bagaglio b);
 
 
     public void modificaPrenotazione(Prenotazione prenotazione, ArrayList<Bagaglio> ab);

@@ -143,7 +143,14 @@ public class DashBoardAdmin {
             @Override
             public void itemStateChanged(ItemEvent e) {
                 if (e.getStateChange() == ItemEvent.SELECTED) {
-                    controller.selectedItem((String) e.getItem(), DashBoardAdmin.this);
+                    String itemSelezionato = (String) e.getItem();
+
+                    if (!itemSelezionato.equals("")) { // evita il reset se già su default
+                        controller.selectedItem(itemSelezionato, DashBoardAdmin.this);
+
+                        // Torna al valore di default
+                        comboBox1.setSelectedIndex(0);
+                    }
                 }
             }
         });
