@@ -5,17 +5,18 @@ import model.Volo;
 
 import java.util.ArrayList;
 
-public interface UtenteGenericoDAO {
-    public ArrayList<Prenotazione> ListaPrenotazioni(UtenteGenerico utente);
+public interface UtenteGenericoDAO extends UtenteDAO {
+
+    public ArrayList<Prenotazione> listaPrenotazioni(UtenteGenerico utente);
 
     public void prenotaVolo(UtenteGenerico ug, Volo volo, Passeggero p, ArrayList<Bagaglio> ab);
 
+    public ArrayList<Bagaglio> cercaBagaglio(Volo v, Passeggero p);
+
+    public ArrayList<Bagaglio> cercaBagaglio(Bagaglio b);
 
 
-    public ArrayList<Prenotazione> cercaPrenotazione(UtenteGenerico utente, String nomePasseggero, String cognomePasseggero);
-
-    public ArrayList<Prenotazione> cercaPrenotazione(UtenteGenerico utente, int codiceVolo);
-
+    public void modificaPrenotazione(Prenotazione prenotazione, ArrayList<Bagaglio> ab);
 
     public void segnalaSmarrimento(Bagaglio Bagaglio);
 

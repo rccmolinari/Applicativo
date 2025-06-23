@@ -3,7 +3,12 @@ package implementazionePostgresDAO;
 import dao.UtenteGenericoDAO;
 import database.ConnessioneDatabase;
 import model.*;
-
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Date;
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -18,7 +23,64 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
         }
     }
 
-    public ArrayList<Prenotazione> ListaPrenotazioni(UtenteGenerico utente) {
+    @Override
+    public ArrayList<Volo> visualizzaVoli() {
+        ArrayList<Volo> lista = new ArrayList<>();
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+            ps = connection.prepareStatement("SELECT * FROM volo WHERE stato_volo <> 'CANCELLATO' ORDER BY data_volo, orario_previsto");
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                String tipo = rs.getString("tipo_volo");
+
+                if ("inPartenza".equalsIgnoreCase(tipo)) {
+                    VoloInPartenza v = new VoloInPartenza();
+                    v.setCodiceVolo(rs.getInt("codice_volo"));
+                    v.setCompagnia(rs.getString("compagnia"));
+                    v.setData(rs.getDate("data_volo"));
+                    v.setOrario(rs.getTime("orario_previsto"));
+                    v.setRitardo(rs.getInt("ritardo"));
+                    v.setStato(StatoVolo.fromString(rs.getString("stato_volo").toLowerCase()));
+                    v.setDestinazione(rs.getString("aeroporto_destinazione"));
+                    v.setOrigine(rs.getString("aeroporto_origine"));
+                    v.setGate(rs.getInt("gate"));
+
+                    lista.add(v);
+
+                } else if ("inArrivo".equalsIgnoreCase(tipo)) {
+                    VoloInArrivo v = new VoloInArrivo();
+                    v.setCodiceVolo(rs.getInt("codice_volo"));
+                    v.setCompagnia(rs.getString("compagnia"));
+                    v.setData(rs.getDate("data_volo"));
+                    v.setOrario(rs.getTime("orario_previsto"));
+                    v.setRitardo(rs.getInt("ritardo"));
+                    v.setStato(StatoVolo.fromString(rs.getString("stato_volo").toLowerCase()));
+                    v.setDestinazione(rs.getString("aeroporto_destinazione"));
+                    v.setOrigine(rs.getString("aeroporto_origine"));
+
+                    lista.add(v);
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (ps != null) ps.close();
+                if (connection != null) connection.close();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        return lista;
+    }
+
+    public ArrayList<Prenotazione> listaPrenotazioni(UtenteGenerico utente) {
         ArrayList<Prenotazione> lista = new ArrayList<>();
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -152,12 +214,19 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
         ResultSet rs = null;
 
         try {
-            ps = connection.prepareStatement(
-                    "SELECT * FROM prenotazione pr " +
-                            "JOIN passeggero pa ON pr.documento_passeggero = pa.id_documento " +
-                            "LEFT JOIN bagaglio b ON b.numero_prenotazione = pr.numero_biglietto " +
-                            "WHERE pr.numero_biglietto = ?"
-            );
+            String sql = "SELECT pr.*, " +
+                    "       pa.nome, " +
+                    "       pa.cognome, " +
+                    "       pa.data_nascita, " +
+                    "       b.id_bagaglio, " +
+                    "       b.stato_bagaglio, " +
+                    "       pa.id_documento " +
+                    "FROM prenotazione pr " +
+                    "JOIN passeggero pa ON pr.documento_passeggero = pa.id_documento " +
+                    "LEFT JOIN bagaglio b ON b.numero_prenotazione = pr.numero_biglietto " +
+                    "WHERE pr.numero_biglietto = ?";
+
+            ps = connection.prepareStatement(sql);
             ps.setInt(1, numeroBiglietto);
 
             rs = ps.executeQuery();
@@ -172,12 +241,22 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
                     Passeggero pa = new Passeggero();
                     pa.setNome(rs.getString("nome"));
                     pa.setCognome(rs.getString("cognome"));
+                    pa.setIdDocumento(rs.getString("id_documento"));
+
+                    // Lettura e conversione data di nascita
+                    java.sql.Date sqlDate = rs.getDate("data_nascita");
+                    Date dataNascita = null;
+                    if (sqlDate != null) {
+                        dataNascita = new Date(sqlDate.getTime());
+                    }
+                    pa.setDataNascita(dataNascita);
 
                     p = new Prenotazione();
                     p.setNumeroBiglietto(numero);
                     p.setNumeroAssegnato(rs.getInt("posto_assegnato"));
                     p.setStatoPrenotazione(StatoPrenotazione.fromString(rs.getString("stato_prenotazione")));
                     p.setPasseggero(pa);
+                    p.setListaBagagli(new ArrayList<>());
 
                     lista.add(p);
                     ultimoBiglietto = numero;
@@ -189,7 +268,7 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
                     b.setStatoBagaglio(StatoBagaglio.fromString(rs.getString("stato_bagaglio")));
                     b.setPrenotazione(p);
                     if (p != null) {
-                        p.listaBagagli.add(b);
+                        p.getListaBagagli().add(b);
                     }
                 }
             }
@@ -214,14 +293,27 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
         ResultSet rs = null;
 
         try {
-            ps = connection.prepareStatement(
-                    "SELECT * FROM prenotazione pr " +
-                            "JOIN passeggero pa ON pr.documento_passeggero = pa.id_documento " +
-                            "LEFT JOIN bagaglio b ON b.numero_prenotazione = pr.numero_biglietto " +
-                            "JOIN utente_generico ug ON ug.username = pr.username AND ug.password = pr.password " +
-                            "WHERE pa.nome = ? AND pa.cognome = ? AND ug.username = ? AND ug.password = ? " +
-                            "ORDER BY pr.numero_biglietto"
-            );
+            String sql =   "SELECT pr.numero_biglietto, " +
+                    "       pr.posto_assegnato, " +
+                    "       pr.stato_prenotazione, " +
+                    "       pr.documento_passeggero, " +
+                    "       pa.nome AS nome_passeggero, " +
+                    "       pa.cognome AS cognome_passeggero, " +
+                    "       pa.id_documento, " +
+                    "       pa.data_nascita AS aa, " +
+                    "       b.id_bagaglio, " +
+                    "       b.stato_bagaglio " +
+                    "FROM prenotazione pr " +
+                    "JOIN passeggero pa ON pr.documento_passeggero = pa.id_documento " +
+                    "LEFT JOIN bagaglio b ON b.numero_prenotazione = pr.numero_biglietto " +
+                    "JOIN utente_generico ug ON ug.username = pr.username AND ug.password = pr.password " +
+                    "WHERE pa.nome = ? " +
+                    "AND pa.cognome = ? " +
+                    "AND ug.username = ? " +
+                    "AND ug.password = ? " +
+                    "ORDER BY pr.numero_biglietto";
+
+            ps = connection.prepareStatement(sql);
             ps.setString(1, nome);
             ps.setString(2, cognome);
             ps.setString(3, utente.getLogin());
@@ -229,37 +321,52 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
 
             rs = ps.executeQuery();
 
+            Prenotazione prenotazioneCorrente = null;
             int ultimoBiglietto = -1;
-            Prenotazione p = null;
 
             while (rs.next()) {
+                if (ultimoBiglietto == -1) {
+                    ResultSetMetaData meta = rs.getMetaData();
+                    int colonne = meta.getColumnCount();
+                    for (int i = 1; i <= colonne; i++) {
+                        System.out.println("Colonna #" + i + ": " + meta.getColumnName(i));
+                    }
+                }
+
                 int numeroBiglietto = rs.getInt("numero_biglietto");
+                System.out.println("Numero biglietto: " + numeroBiglietto);
 
                 if (numeroBiglietto != ultimoBiglietto) {
                     Passeggero pa = new Passeggero();
-                    pa.setNome(rs.getString("nome"));
-                    pa.setCognome(rs.getString("cognome"));
-                    pa.setIdDocumento(rs.getString("documento_passeggero"));
-                    pa.setDataNascita(rs.getDate("data_nascita"));
+                    pa.setNome(rs.getString("nome_passeggero"));
+                    pa.setCognome(rs.getString("cognome_passeggero"));
+                    pa.setIdDocumento(rs.getString("id_documento"));
 
-                    p = new Prenotazione();
-                    p.setNumeroBiglietto(numeroBiglietto);
-                    p.setNumeroAssegnato(rs.getInt("posto_assegnato"));
-                    p.setStatoPrenotazione(StatoPrenotazione.fromString(rs.getString("stato_prenotazione")));
-                    p.setPasseggero(pa);
+                    java.sql.Date sqlDate = rs.getDate("aa");
+                    Date dataNascita = null;
+                    if (sqlDate != null) {
+                        dataNascita = new Date(sqlDate.getTime());
+                    }
+                    System.out.println("Data di nascita letta: " + dataNascita);
+                    pa.setDataNascita(dataNascita);
 
-                    lista.add(p);
+                    prenotazioneCorrente = new Prenotazione();
+                    prenotazioneCorrente.setNumeroBiglietto(numeroBiglietto);
+                    prenotazioneCorrente.setNumeroAssegnato(rs.getInt("posto_assegnato"));
+                    prenotazioneCorrente.setStatoPrenotazione(StatoPrenotazione.fromString(rs.getString("stato_prenotazione")));
+                    prenotazioneCorrente.setPasseggero(pa);
+                    prenotazioneCorrente.setListaBagagli(new ArrayList<>());
+
+                    lista.add(prenotazioneCorrente);
                     ultimoBiglietto = numeroBiglietto;
                 }
 
-                if (rs.getObject("id_bagaglio") != null) {
+                if (rs.getObject("id_bagaglio") != null && prenotazioneCorrente != null) {
                     Bagaglio b = new Bagaglio();
                     b.setCodiceBagaglio(rs.getInt("id_bagaglio"));
                     b.setStatoBagaglio(StatoBagaglio.fromString(rs.getString("stato_bagaglio")));
-                    b.setPrenotazione(p);
-                    if (p != null) {
-                        p.listaBagagli.add(b);
-                    }
+                    b.setPrenotazione(prenotazioneCorrente);
+                    prenotazioneCorrente.getListaBagagli().add(b);
                 }
             }
 
@@ -288,6 +395,103 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
             e.printStackTrace();
         }
     }
+
+    public void modificaPrenotazione(Prenotazione prenotazione, ArrayList<Bagaglio> nuoviBagagli) {
+        try {
+            connection.setAutoCommit(false);
+
+            // 1. Elimina tutti i bagagli precedenti della prenotazione
+            try (PreparedStatement ps = connection.prepareStatement(
+                    "DELETE FROM bagaglio WHERE numero_prenotazione = ?")) {
+                ps.setInt(1, prenotazione.getNumeroBiglietto());
+                ps.executeUpdate();
+            }
+
+            // 2. Inserisce i nuovi bagagli
+            try (PreparedStatement ps = connection.prepareStatement(
+                    "INSERT INTO bagaglio (stato_bagaglio, numero_prenotazione) VALUES (?, ?)")) {
+                for (Bagaglio b : nuoviBagagli) {
+                    ps.setString(1, b.getStatoBagaglio().toString());
+                    ps.setInt(2, prenotazione.getNumeroBiglietto());
+                    ps.addBatch();
+                }
+                ps.executeBatch();
+            }
+
+            connection.commit();
+
+        } catch (SQLException e) {
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+            e.printStackTrace();
+        } finally {
+            try {
+                connection.setAutoCommit(true);
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
+@Override
+    public ArrayList<Bagaglio> cercaBagaglio(Bagaglio b) {
+        ArrayList<Bagaglio> lista = new ArrayList<>();
+        String sql = "SELECT b.*, pr.numero_biglietto FROM bagaglio b " +
+                "LEFT JOIN prenotazione pr ON b.numero_prenotazione = pr.numero_biglietto " +
+                "WHERE b.id_bagaglio = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, b.getCodiceBagaglio());
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Bagaglio bag = new Bagaglio();
+                    bag.setCodiceBagaglio(rs.getInt("id_bagaglio"));
+                    bag.setStatoBagaglio(StatoBagaglio.fromString(rs.getString("stato_bagaglio")));
+
+                    Prenotazione pren = new Prenotazione();
+                    pren.setNumeroBiglietto(rs.getInt("numero_biglietto"));
+                    bag.setPrenotazione(pren);
+
+                    lista.add(bag);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return lista;
+    }
+@Override
+    public ArrayList<Bagaglio> cercaBagaglio(Volo v, Passeggero p) {
+        ArrayList<Bagaglio> lista = new ArrayList<>();
+        String sql = "SELECT b.*, pr.numero_biglietto FROM bagaglio b " +
+                "JOIN prenotazione pr ON b.numero_prenotazione = pr.numero_biglietto " +
+                "WHERE pr.codice_volo = ? AND pr.documento_passeggero = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, v.getCodiceVolo());
+            ps.setString(2, p.getIdDocumento());
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Bagaglio bag = new Bagaglio();
+                    bag.setCodiceBagaglio(rs.getInt("id_bagaglio"));
+                    bag.setStatoBagaglio(StatoBagaglio.fromString(rs.getString("stato_bagaglio")));
+
+                    Prenotazione pren = new Prenotazione();
+                    pren.setNumeroBiglietto(rs.getInt("numero_biglietto"));
+                    bag.setPrenotazione(pren);
+
+                    lista.add(bag);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return lista;
+    }
+
 
     private int generaPostoRandom() {
         return (int) (Math.random() * 100 + 1);

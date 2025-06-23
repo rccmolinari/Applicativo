@@ -41,7 +41,7 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
             ps.setDate(3, new java.sql.Date(v.getData().getTime()));
             ps.setTime(4, v.getOrario());
             ps.setInt(5, v.getRitardo());
-            ps.setString(6, v.getStato());
+            ps.setString(6, v.getStato().name());
             ps.setString(7, tipo);
             ps.setString(8, v.getDestinazione());
             ps.setString(9, v.getOrigine());
@@ -67,13 +67,7 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
     }
 
     public void aggiornaVolo(Volo v) {
-        String tipo = "";
-
-        if (v instanceof VoloInPartenza) {
-            tipo = "inPartenza";
-        } else if (v instanceof VoloInArrivo) {
-            tipo = "inArrivo";
-        }
+        String tipo = (v instanceof VoloInPartenza) ? "inPartenza" : "inArrivo";
 
         PreparedStatement ps = null;
 
@@ -87,27 +81,37 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
             ps.setDate(2, new java.sql.Date(v.getData().getTime()));
             ps.setTime(3, v.getOrario());
             ps.setInt(4, v.getRitardo());
-            ps.setString(5, v.getStato());
+            ps.setString(5, v.getStato().name());
             ps.setString(6, tipo);
-            ps.setString(7, v.getDestinazione());
-            ps.setString(8, v.getOrigine());
 
+            // Gestione destinazione/origine e gate
             if (v instanceof VoloInPartenza) {
+                ps.setString(7, v.getDestinazione());
+                ps.setString(8, v.getOrigine());
                 ps.setInt(9, ((VoloInPartenza) v).getGate());
+            } else if (v instanceof VoloInArrivo) {
+                ps.setString(7, v.getDestinazione());
+                ps.setString(8, v.getOrigine());
+                ps.setInt(9, -1); // gate null
             } else {
+                ps.setNull(7, java.sql.Types.VARCHAR);
+                ps.setNull(8, java.sql.Types.VARCHAR);
                 ps.setNull(9, java.sql.Types.INTEGER);
             }
 
             ps.setInt(10, v.getCodiceVolo());
 
-            ps.executeUpdate();
+            int updated = ps.executeUpdate();
+            if (updated == 0) {
+                System.err.println("⚠️ Nessuna riga aggiornata. Codice volo inesistente?");
+            }
 
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
             try {
                 if (ps != null) ps.close();
-                if (connection != null) connection.close();
+                if (connection != null) connection.close();  // chiusura solo se non gestita altrove
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }
@@ -212,7 +216,7 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
         ResultSet rs = null;
 
         try {
-            ps = connection.prepareStatement("SELECT * FROM volo ORDER BY data_volo, orario_previsto");
+            ps = connection.prepareStatement("SELECT * FROM volo WHERE stato_volo <> 'CANCELLATO' ORDER BY data_volo, orario_previsto");
             rs = ps.executeQuery();
 
             while (rs.next()) {
@@ -225,7 +229,7 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
                     v.setData(rs.getDate("data_volo"));
                     v.setOrario(rs.getTime("orario_previsto"));
                     v.setRitardo(rs.getInt("ritardo"));
-                    v.setStato(StatoVolo.fromString(rs.getString("stato_volo")));
+                    v.setStato(StatoVolo.fromString(rs.getString("stato_volo").toLowerCase()));
                     v.setDestinazione(rs.getString("aeroporto_destinazione"));
                     v.setOrigine(rs.getString("aeroporto_origine"));
                     v.setGate(rs.getInt("gate"));
@@ -239,7 +243,7 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
                     v.setData(rs.getDate("data_volo"));
                     v.setOrario(rs.getTime("orario_previsto"));
                     v.setRitardo(rs.getInt("ritardo"));
-                    v.setStato(StatoVolo.fromString(rs.getString("stato_volo")));
+                    v.setStato(StatoVolo.fromString(rs.getString("stato_volo").toLowerCase()));
                     v.setDestinazione(rs.getString("aeroporto_destinazione"));
                     v.setOrigine(rs.getString("aeroporto_origine"));
 
@@ -261,4 +265,60 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
 
         return lista;
     }
+
+    public ArrayList<Bagaglio> cercaBagaglio(Bagaglio b) {
+        ArrayList<Bagaglio> lista = new ArrayList<>();
+        String sql = "SELECT b.*, pr.numero_biglietto FROM bagaglio b " +
+                "LEFT JOIN prenotazione pr ON b.numero_prenotazione = pr.numero_biglietto " +
+                "WHERE b.id_bagaglio = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, b.getCodiceBagaglio());
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Bagaglio bag = new Bagaglio();
+                    bag.setCodiceBagaglio(rs.getInt("id_bagaglio"));
+                    bag.setStatoBagaglio(StatoBagaglio.fromString(rs.getString("stato_bagaglio")));
+
+                    Prenotazione pren = new Prenotazione();
+                    pren.setNumeroBiglietto(rs.getInt("numero_biglietto"));
+                    bag.setPrenotazione(pren);
+
+                    lista.add(bag);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return lista;
+    }
+    @Override
+    public ArrayList<Bagaglio> cercaBagaglio(Volo v, Passeggero p) {
+        ArrayList<Bagaglio> lista = new ArrayList<>();
+        String sql = "SELECT b.*, pr.numero_biglietto FROM bagaglio b " +
+                "JOIN prenotazione pr ON b.numero_prenotazione = pr.numero_biglietto " +
+                "WHERE pr.codice_volo = ? AND pr.documento_passeggero = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, v.getCodiceVolo());
+            ps.setString(2, p.getIdDocumento());
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Bagaglio bag = new Bagaglio();
+                    bag.setCodiceBagaglio(rs.getInt("id_bagaglio"));
+                    bag.setStatoBagaglio(StatoBagaglio.fromString(rs.getString("stato_bagaglio")));
+
+                    Prenotazione pren = new Prenotazione();
+                    pren.setNumeroBiglietto(rs.getInt("numero_biglietto"));
+                    bag.setPrenotazione(pren);
+
+                    lista.add(bag);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return lista;
+    }
+
 }

@@ -1,10 +1,10 @@
 package model;
 
 public enum StatoVolo {
-    PROGRAMMATO("programmato"),
-    DECOLLATO("decollato"),
-    RITARDO("ritardo"),
-    CANCELLATO("cancellato"); // ho corretto 'cacellato'
+    PROGRAMMATO("PROGRAMMATO"),
+    DECOLLATO("DECOLLATO"),
+    RITARDO("RITARDO"),
+    CANCELLATO("CANCELLATO");
 
     private final String label;
 

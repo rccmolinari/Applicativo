@@ -57,7 +57,7 @@ public class Controller {
 
         switch (item) {
             case "Visualizza Prenotazioni":
-                ArrayList<Prenotazione> prenotazioni = new UtenteGenericoImplementazionePostgresDAO().ListaPrenotazioni(utente);
+                ArrayList<Prenotazione> prenotazioni = new UtenteGenericoImplementazionePostgresDAO().listaPrenotazioni(utente);
 
                 String[] colonne = {"Biglietto", "Nome", "Cognome", "Posto", "Stato", "Bagagli"};
                 String[][] dati = new String[prenotazioni.size()][colonne.length];
@@ -155,7 +155,7 @@ public class Controller {
                         JOptionPane.showMessageDialog(dialog, "Prenotazione effettuata con " + numeroBagagli + " bagagli.");
                     } catch (Exception ex) {
                         ex.printStackTrace();
-                        JOptionPane.showMessageDialog(dialog, "Errore: " + ex.getMessage());
+                        JOptionPane.showMessageDialog(dialog, "Errore: volo non esistente");
                     }
                 }, dialog));
                 visualizzaVoli(d);
@@ -222,55 +222,54 @@ public class Controller {
                                     "Nessuna prenotazione trovata.",
                                     "Risultato", JOptionPane.INFORMATION_MESSAGE);
                         } else {
-                            String[] intestazioniColonne = {"Biglietto", "Nome", "Cognome", "Posto", "Stato", "Bagagli"};
-                            String[][] righeTabella = new String[risultatiRicerca.size()][intestazioniColonne.length];
+                            JPanel listaPanel = new JPanel(new GridLayout(risultatiRicerca.size(), 1, 5, 5));
+                            listaPanel.setBackground(new Color(43, 48, 52));
 
-                            for (int i = 0; i < risultatiRicerca.size(); i++) {
-                                Prenotazione prenotazioneTrovata = risultatiRicerca.get(i);
-                                Passeggero passeggeroTrovato = prenotazioneTrovata.getPasseggero();
-                                righeTabella[i] = new String[]{
-                                        String.valueOf(prenotazioneTrovata.getNumeroBiglietto()),
-                                        passeggeroTrovato.getNome(),
-                                        passeggeroTrovato.getCognome(),
-                                        String.valueOf(prenotazioneTrovata.getNumeroAssegnato()),
-                                        prenotazioneTrovata.getStatoPrenotazione().toString(),
-                                        String.valueOf(prenotazioneTrovata.getListaBagagli().size())
-                                };
+                            for (Prenotazione p : risultatiRicerca) {
+                                Passeggero passeggero = p.getPasseggero();
+
+                                String testo = String.format(
+                                        "Biglietto: %d → %s %s (%s) - Stato: %s - Bagagli: %d",
+                                        p.getNumeroBiglietto(),
+                                        passeggero.getNome(),
+                                        passeggero.getCognome(),
+                                        passeggero.getDataNascita(),
+                                        p.getStatoPrenotazione(),
+                                        p.getListaBagagli().size()
+                                );
+                                //System.out.println(passeggero.getDataNascita());
+
+                                JPanel riga = new JPanel(new BorderLayout());
+                                riga.setBackground(new Color(60, 63, 65));
+                                riga.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+
+                                JLabel label3 = new JLabel(testo);
+                                label3.setForeground(Color.WHITE);
+
+                                JButton modificaBtn = new JButton("Modifica");
+                                modificaBtn.setBackground(new Color(255, 162, 35));
+                                modificaBtn.setForeground(Color.BLACK);
+                                modificaBtn.addActionListener(e2 -> mostraPopupModificaPrenotazione(p));
+
+                                riga.add(label3, BorderLayout.CENTER);
+                                riga.add(modificaBtn, BorderLayout.EAST);
+
+                                listaPanel.add(riga);
                             }
 
-                            JTable tabellaRisultati = new JTable(righeTabella, intestazioniColonne);
-                            tabellaRisultati.setEnabled(false);
-                            tabellaRisultati.setFont(new Font("SansSerif", Font.PLAIN, 14));
-                            tabellaRisultati.setBackground(new Color(107, 112, 119));
-                            tabellaRisultati.setForeground(Color.WHITE);
-                            tabellaRisultati.setGridColor(Color.GRAY);
-
-                            // Colore header arancione
-                            tabellaRisultati.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 14));
-                            tabellaRisultati.getTableHeader().setBackground(new Color(255, 162, 35));
-                            tabellaRisultati.getTableHeader().setForeground(Color.WHITE);
-
-                            JScrollPane scrollPaneRisultati = new JScrollPane(tabellaRisultati);
-                            scrollPaneRisultati.setPreferredSize(new Dimension(600, 300));
-                            scrollPaneRisultati.getViewport().setBackground(new Color(43, 48, 52));
+                            JScrollPane scrollPane1 = new JScrollPane(listaPanel);
+                            scrollPane1.setPreferredSize(new Dimension(650, 300));
+                            scrollPane1.getViewport().setBackground(new Color(43, 48, 52));
 
                             JDialog popupRisultati = new JDialog();
                             popupRisultati.setTitle("Risultati Prenotazioni");
                             popupRisultati.setModal(true);
-                            popupRisultati.setSize(650, 350);
+                            popupRisultati.setContentPane(scrollPane1);
+                            popupRisultati.pack();
                             popupRisultati.setLocationRelativeTo(null);
-
-                            JPanel contenitoreTabella = new JPanel(new GridBagLayout());
-                            contenitoreTabella.setBackground(new Color(43, 48, 52));
-                            GridBagConstraints gbcTabella = new GridBagConstraints();
-                            gbcTabella.fill = GridBagConstraints.BOTH;
-                            gbcTabella.weightx = 1;
-                            gbcTabella.weighty = 1;
-                            contenitoreTabella.add(scrollPaneRisultati, gbcTabella);
-
-                            popupRisultati.setContentPane(contenitoreTabella);
                             popupRisultati.setVisible(true);
                         }
+
 
                     } catch (NumberFormatException ex) {
                         JOptionPane.showMessageDialog(dialog, "Numero biglietto non valido.", "Errore", JOptionPane.ERROR_MESSAGE);
@@ -283,7 +282,124 @@ public class Controller {
                 break;
 
 
+            case "Cerca Bagagli":
+                panel.setLayout(new GridLayout(5, 1, 5, 5));
 
+                JTextField campoIdBagaglio = creaCampo("ID Bagaglio (opzionale)");
+                JTextField campoIdVolo = creaCampo("ID Volo (opzionale)");
+                JTextField campoIdDocumento = creaCampo("ID Documento Passeggero (opzionale)");
+
+                // Gestione svuotamento campi incrociati (come prima)
+                DocumentListener svuotaIdBagaglio = new DocumentListener() {
+                    public void insertUpdate(DocumentEvent e) { campoIdBagaglio.setText(""); }
+                    public void removeUpdate(DocumentEvent e) { campoIdBagaglio.setText(""); }
+                    public void changedUpdate(DocumentEvent e) { campoIdBagaglio.setText(""); }
+                };
+                campoIdDocumento.getDocument().addDocumentListener(svuotaIdBagaglio);
+
+                DocumentListener svuotaAltriCampi = new DocumentListener() {
+                    public void insertUpdate(DocumentEvent e) {
+                        campoIdVolo.setText("");
+                        campoIdDocumento.setText("");
+                    }
+                    public void removeUpdate(DocumentEvent e) {
+                        campoIdVolo.setText("");
+                        campoIdDocumento.setText("");
+                    }
+                    public void changedUpdate(DocumentEvent e) {
+                        campoIdVolo.setText("");
+                        campoIdDocumento.setText("");
+                    }
+                };
+                campoIdBagaglio.getDocument().addDocumentListener(svuotaAltriCampi);
+
+                panel.add(campoIdBagaglio);
+                panel.add(campoIdVolo);
+                panel.add(campoIdDocumento);
+
+                panel.add(creaBottoneConAzione("Cerca", () -> {
+                    try {
+                        UtenteGenericoImplementazionePostgresDAO daoUtenteGen = new UtenteGenericoImplementazionePostgresDAO();
+                        ArrayList<Bagaglio> risultatiRicerca = new ArrayList<>();
+
+                        boolean ricercaPerIdBagaglio = !campoIdBagaglio.getText().trim().isEmpty();
+                        boolean ricercaPerVoloEIdDocumento = !campoIdVolo.getText().trim().isEmpty()
+                                && !campoIdDocumento.getText().trim().isEmpty();
+
+                        if (ricercaPerIdBagaglio && ricercaPerVoloEIdDocumento) {
+                            JOptionPane.showMessageDialog(dialog,
+                                    "⚠️ Scegli solo una modalità di ricerca: o per ID bagaglio oppure per Volo e Passeggero.",
+                                    "Errore", JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
+
+                        if (ricercaPerIdBagaglio) {
+                            Bagaglio b = new Bagaglio();
+                            b.setCodiceBagaglio(Integer.parseInt(campoIdBagaglio.getText().trim()));
+                            risultatiRicerca = daoUtenteGen.cercaBagaglio(b);
+                        } else if (ricercaPerVoloEIdDocumento) {
+                            Volo v = new Volo();
+                            v.setCodiceVolo(Integer.parseInt(campoIdVolo.getText().trim()));
+                            Passeggero p = new Passeggero();
+                            p.setIdDocumento(campoIdDocumento.getText().trim());
+                            risultatiRicerca = daoUtenteGen.cercaBagaglio(v, p);
+                        } else {
+                            JOptionPane.showMessageDialog(dialog,
+                                    "Compila almeno l'ID bagaglio oppure ID volo e documento passeggero.",
+                                    "Campi vuoti", JOptionPane.WARNING_MESSAGE);
+                            return;
+                        }
+
+                        if (risultatiRicerca.isEmpty()) {
+                            JOptionPane.showMessageDialog(dialog,
+                                    "Nessun bagaglio trovato.",
+                                    "Risultato", JOptionPane.INFORMATION_MESSAGE);
+                        } else {
+                            JPanel listaPanel = new JPanel(new GridLayout(risultatiRicerca.size(), 1, 5, 5));
+                            listaPanel.setBackground(new Color(43, 48, 52));
+
+                            for (Bagaglio b : risultatiRicerca) {
+                                String testo = String.format(
+                                        "ID Bagaglio: %d - Stato: %s - Prenotazione: %d",
+                                        b.getCodiceBagaglio(),
+                                        b.getStatoBagaglio(),
+                                        b.getPrenotazione() != null ? b.getPrenotazione().getNumeroBiglietto() : null
+                                );
+
+                                JPanel riga = new JPanel(new BorderLayout());
+                                riga.setBackground(new Color(60, 63, 65));
+                                riga.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+
+                                JLabel label4 = new JLabel(testo);
+                                label4.setForeground(Color.WHITE);
+
+                                riga.add(label4, BorderLayout.CENTER);
+
+                                listaPanel.add(riga);
+                            }
+
+                            JScrollPane scrollPane4 = new JScrollPane(listaPanel);
+                            scrollPane4.setPreferredSize(new Dimension(650, 300));
+                            scrollPane4.getViewport().setBackground(new Color(43, 48, 52));
+
+                            JDialog popupRisultati = new JDialog();
+                            popupRisultati.setTitle("Risultati Ricerca Bagagli");
+                            popupRisultati.setModal(true);
+                            popupRisultati.setContentPane(scrollPane4);
+                            popupRisultati.pack();
+                            popupRisultati.setLocationRelativeTo(null);
+                            popupRisultati.setVisible(true);
+                        }
+
+                    } catch (NumberFormatException ex) {
+                        JOptionPane.showMessageDialog(dialog, "ID inserito non valido.", "Errore", JOptionPane.ERROR_MESSAGE);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        JOptionPane.showMessageDialog(dialog, "Errore: " + ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
+                    }
+                }, dialog));
+
+                break;
 
 
             case "Segnala Smarrimento":
@@ -496,7 +612,124 @@ public class Controller {
                 }, dialog));
                 visualizzaVoli(d);
                 return;
+            case "Cerca Bagagli":
+                panel.setLayout(new GridLayout(5, 1, 5, 5));
 
+                JTextField campoIdBagaglio = creaCampo("ID Bagaglio (opzionale)");
+                JTextField campoIdVolo = creaCampo("ID Volo (opzionale)");
+                JTextField campoIdDocumento = creaCampo("ID Documento Passeggero (opzionale)");
+
+                // Gestione svuotamento campi incrociati (come prima)
+                DocumentListener svuotaIdBagaglio = new DocumentListener() {
+                    public void insertUpdate(DocumentEvent e) { campoIdBagaglio.setText(""); }
+                    public void removeUpdate(DocumentEvent e) { campoIdBagaglio.setText(""); }
+                    public void changedUpdate(DocumentEvent e) { campoIdBagaglio.setText(""); }
+                };
+                campoIdDocumento.getDocument().addDocumentListener(svuotaIdBagaglio);
+
+                DocumentListener svuotaAltriCampi = new DocumentListener() {
+                    public void insertUpdate(DocumentEvent e) {
+                        campoIdVolo.setText("");
+                        campoIdDocumento.setText("");
+                    }
+                    public void removeUpdate(DocumentEvent e) {
+                        campoIdVolo.setText("");
+                        campoIdDocumento.setText("");
+                    }
+                    public void changedUpdate(DocumentEvent e) {
+                        campoIdVolo.setText("");
+                        campoIdDocumento.setText("");
+                    }
+                };
+                campoIdBagaglio.getDocument().addDocumentListener(svuotaAltriCampi);
+
+                panel.add(campoIdBagaglio);
+                panel.add(campoIdVolo);
+                panel.add(campoIdDocumento);
+
+                panel.add(creaBottoneConAzione("Cerca", () -> {
+                    try {
+                        UtenteGenericoImplementazionePostgresDAO daoUtenteGen = new UtenteGenericoImplementazionePostgresDAO();
+                        ArrayList<Bagaglio> risultatiRicerca = new ArrayList<>();
+
+                        boolean ricercaPerIdBagaglio = !campoIdBagaglio.getText().trim().isEmpty();
+                        boolean ricercaPerVoloEIdDocumento = !campoIdVolo.getText().trim().isEmpty()
+                                && !campoIdDocumento.getText().trim().isEmpty();
+
+                        if (ricercaPerIdBagaglio && ricercaPerVoloEIdDocumento) {
+                            JOptionPane.showMessageDialog(dialog,
+                                    "⚠️ Scegli solo una modalità di ricerca: o per ID bagaglio oppure per Volo e Passeggero.",
+                                    "Errore", JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
+
+                        if (ricercaPerIdBagaglio) {
+                            Bagaglio b = new Bagaglio();
+                            b.setCodiceBagaglio(Integer.parseInt(campoIdBagaglio.getText().trim()));
+                            risultatiRicerca = daoUtenteGen.cercaBagaglio(b);
+                        } else if (ricercaPerVoloEIdDocumento) {
+                            Volo v = new Volo();
+                            v.setCodiceVolo(Integer.parseInt(campoIdVolo.getText().trim()));
+                            Passeggero p = new Passeggero();
+                            p.setIdDocumento(campoIdDocumento.getText().trim());
+                            risultatiRicerca = daoUtenteGen.cercaBagaglio(v, p);
+                        } else {
+                            JOptionPane.showMessageDialog(dialog,
+                                    "Compila almeno l'ID bagaglio oppure ID volo e documento passeggero.",
+                                    "Campi vuoti", JOptionPane.WARNING_MESSAGE);
+                            return;
+                        }
+
+                        if (risultatiRicerca.isEmpty()) {
+                            JOptionPane.showMessageDialog(dialog,
+                                    "Nessun bagaglio trovato.",
+                                    "Risultato", JOptionPane.INFORMATION_MESSAGE);
+                        } else {
+                            JPanel listaPanel1 = new JPanel(new GridLayout(risultatiRicerca.size(), 1, 5, 5));
+                            listaPanel1.setBackground(new Color(43, 48, 52));
+
+                            for (Bagaglio b : risultatiRicerca) {
+                                String testo = String.format(
+                                        "ID Bagaglio: %d - Stato: %s - Prenotazione: %d",
+                                        b.getCodiceBagaglio(),
+                                        b.getStatoBagaglio(),
+                                        b.getPrenotazione() != null ? b.getPrenotazione().getNumeroBiglietto() : null
+                                );
+
+                                JPanel riga = new JPanel(new BorderLayout());
+                                riga.setBackground(new Color(60, 63, 65));
+                                riga.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+
+                                JLabel label4 = new JLabel(testo);
+                                label4.setForeground(Color.WHITE);
+
+                                riga.add(label4, BorderLayout.CENTER);
+
+                                listaPanel1.add(riga);
+                            }
+
+                            JScrollPane scrollPane4 = new JScrollPane(listaPanel1);
+                            scrollPane4.setPreferredSize(new Dimension(650, 300));
+                            scrollPane4.getViewport().setBackground(new Color(43, 48, 52));
+
+                            JDialog popupRisultati = new JDialog();
+                            popupRisultati.setTitle("Risultati Ricerca Bagagli");
+                            popupRisultati.setModal(true);
+                            popupRisultati.setContentPane(scrollPane4);
+                            popupRisultati.pack();
+                            popupRisultati.setLocationRelativeTo(null);
+                            popupRisultati.setVisible(true);
+                        }
+
+                    } catch (NumberFormatException ex) {
+                        JOptionPane.showMessageDialog(dialog, "ID inserito non valido.", "Errore", JOptionPane.ERROR_MESSAGE);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        JOptionPane.showMessageDialog(dialog, "Errore: " + ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
+                    }
+                }, dialog));
+
+                break;
             case "Aggiorna Bagaglio":
                 panel.setLayout(new GridLayout(3, 1, 5, 5));
 
@@ -804,7 +1037,7 @@ public class Controller {
         JTextField dataField = creaCampo(volo.getData().toString()); // yyyy-mm-dd
         JTextField orarioField = creaCampo(volo.getOrario().toString()); // HH:mm:ss
         JTextField ritardoField = creaCampo(String.valueOf(volo.getRitardo()));
-        JTextField statoField = creaCampo(volo.getStato());
+        JTextField statoField = creaCampo(volo.getStato().name());
         JTextField origineField = creaCampo(volo.getOrigine());
         JTextField destinazioneField = creaCampo(volo.getDestinazione());
         JTextField gateField = null;
@@ -885,6 +1118,102 @@ public class Controller {
             this.admin = new Amministratore(email, password);
         }
     }
+
+    private void mostraPopupModificaPrenotazione(Prenotazione p) {
+        JDialog dialog = new JDialog();
+        dialog.setTitle("Modifica Prenotazione");
+        dialog.setModal(true);
+        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBackground(new Color(43, 48, 52));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+
+        JLabel docLabel = new JLabel("ID Documento:");
+        docLabel.setForeground(Color.WHITE);
+        panel.add(docLabel, gbc);
+        gbc.gridx = 1;
+        JTextField documentoField = new JTextField(p.getPasseggero().getIdDocumento());
+        documentoField.setEditable(false);  // Solo lettura
+        panel.add(documentoField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy++;
+        JLabel nomeLabel = new JLabel("Nome:");
+        nomeLabel.setForeground(Color.WHITE);
+        panel.add(nomeLabel, gbc);
+        gbc.gridx = 1;
+        JTextField nomeField = new JTextField(p.getPasseggero().getNome());
+        nomeField.setEditable(false);  // Solo lettura
+        panel.add(nomeField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy++;
+        JLabel cognomeLabel = new JLabel("Cognome:");
+        cognomeLabel.setForeground(Color.WHITE);
+        panel.add(cognomeLabel, gbc);
+        gbc.gridx = 1;
+        JTextField cognomeField = new JTextField(p.getPasseggero().getCognome());
+        cognomeField.setEditable(false);  // Solo lettura
+        panel.add(cognomeField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy++;
+        JLabel bagagliLabel = new JLabel("Numero Bagagli:");
+        bagagliLabel.setForeground(Color.WHITE);
+        panel.add(bagagliLabel, gbc);
+        gbc.gridx = 1;
+        JTextField bagagliField = new JTextField(String.valueOf(p.getListaBagagli().size()));
+        panel.add(bagagliField, gbc);
+
+        // Bottone conferma
+        gbc.gridx = 0;
+        gbc.gridy++;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+        JButton conferma = new JButton("Conferma");
+        conferma.setBackground(new Color(255, 162, 35));
+        conferma.setForeground(Color.BLACK);
+        panel.add(conferma, gbc);
+
+        conferma.addActionListener(e -> {
+            try {
+                // Non modificare passeggero, solo bagagli
+                int nBagagli = Integer.parseInt(bagagliField.getText());
+                if (nBagagli < 0) throw new NumberFormatException("Numero bagagli negativo");
+
+                ArrayList<Bagaglio> nuoviBagagli = new ArrayList<>();
+                for (int i = 0; i < nBagagli; i++) {
+                    Bagaglio b = new Bagaglio();
+                    b.setStatoBagaglio(StatoBagaglio.REGISTRATO);
+                    nuoviBagagli.add(b);
+                }
+
+                // Modifica solo i bagagli
+                new UtenteGenericoImplementazionePostgresDAO().modificaPrenotazione(
+                        p, nuoviBagagli
+                );
+
+                JOptionPane.showMessageDialog(null, "Numero bagagli aggiornato con successo!");
+                dialog.dispose();
+            } catch (NumberFormatException nfe) {
+                JOptionPane.showMessageDialog(null, "Inserisci un numero valido di bagagli.", "Errore", JOptionPane.ERROR_MESSAGE);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(null, "Errore durante l'aggiornamento.", "Errore", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        dialog.setContentPane(panel);
+        dialog.pack();
+        dialog.setLocationRelativeTo(null);
+        dialog.setVisible(true);
+    }
+
 
 
 

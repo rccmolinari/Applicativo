@@ -42,7 +42,7 @@ public class DashBoardUser {
     public DashBoardUser(String username, Controller controller) {
         this.controller = controller;
         // Scelte che l’utente può fare nel menu a tendina
-        String [] choices = {"", "Visualizza Prenotazioni", "Prenota Volo", "Cerca Prenotazione", "Segnala Smarrimento"};
+        String [] choices = {"", "Visualizza Prenotazioni", "Prenota Volo", "Cerca Prenotazione", "Cerca Bagagli", "Segnala Smarrimento"};
 
         // Impostiamo la comboBox con queste opzioni
         comboBox1.setModel(new DefaultComboBoxModel(choices));

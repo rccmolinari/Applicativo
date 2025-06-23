@@ -141,8 +141,8 @@ public class Volo {
      *
      * @return the stato
      */
-    public String getStato() {
-        return stato.name();
+    public StatoVolo getStato() {
+        return stato;
     }
 
     /**
