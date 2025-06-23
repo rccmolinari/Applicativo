@@ -131,7 +131,7 @@ public class DashBoardAdmin {
         this.username = username;
 
         // Le azioni che l’admin può scegliere dalla comboBox
-        String [] choices = {"", "Inserisci Volo", "Aggiorna Volo", "Modifica Gate", "Cerca Bagagli", "Aggiorna Bagaglio", "Modifica Gate", "Visualizza Smarrimenti"};
+        String [] choices = {"", "Inserisci Volo", "Aggiorna Volo", "Modifica Gate", "Cerca Bagagli", "Aggiorna Bagaglio", "Visualizza Smarrimenti"};
 
         // Abilito la comboBox, la riempio con le scelte e nascondo la label output che non serve subito
         comboBox1.setEnabled(true);
@@ -149,8 +149,9 @@ public class DashBoardAdmin {
                         controller.selectedItem(itemSelezionato, DashBoardAdmin.this);
 
                         // Torna al valore di default
-                        comboBox1.setSelectedIndex(0);
                     }
+                    comboBox1.setSelectedIndex(0);
+                    controller.visualizzaVoli(DashBoardAdmin.this);
                 }
             }
         });

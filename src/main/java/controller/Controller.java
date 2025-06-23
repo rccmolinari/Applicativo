@@ -288,18 +288,39 @@ public class Controller {
                 JTextField campoIdBagaglio = creaCampo("ID Bagaglio (opzionale)");
                 JTextField campoNumeroPrenotazione = creaCampo("Numero Prenotazione (opzionale)");
 
+                // Flag per evitare trigger incrociati
+                final boolean[] bloccoModifica = {false};
+
                 // Se scrivi in ID Bagaglio → svuota Numero Prenotazione
                 campoIdBagaglio.getDocument().addDocumentListener(new DocumentListener() {
-                    public void insertUpdate(DocumentEvent e) { campoNumeroPrenotazione.setText(""); }
-                    public void removeUpdate(DocumentEvent e) { campoNumeroPrenotazione.setText(""); }
-                    public void changedUpdate(DocumentEvent e) { campoNumeroPrenotazione.setText(""); }
+                    public void insertUpdate(DocumentEvent e) { aggiorna(campoIdBagaglio, campoNumeroPrenotazione); }
+                    public void removeUpdate(DocumentEvent e) { aggiorna(campoIdBagaglio, campoNumeroPrenotazione); }
+                    public void changedUpdate(DocumentEvent e) { aggiorna(campoIdBagaglio, campoNumeroPrenotazione); }
+
+                    private void aggiorna(JTextField attivo, JTextField daSvuotare) {
+                        if (bloccoModifica[0]) return;
+                        if (!attivo.getText().trim().isEmpty()) {
+                            bloccoModifica[0] = true;
+                            daSvuotare.setText("");
+                            bloccoModifica[0] = false;
+                        }
+                    }
                 });
 
                 // Se scrivi in Numero Prenotazione → svuota ID Bagaglio
                 campoNumeroPrenotazione.getDocument().addDocumentListener(new DocumentListener() {
-                    public void insertUpdate(DocumentEvent e) { campoIdBagaglio.setText(""); }
-                    public void removeUpdate(DocumentEvent e) { campoIdBagaglio.setText(""); }
-                    public void changedUpdate(DocumentEvent e) { campoIdBagaglio.setText(""); }
+                    public void insertUpdate(DocumentEvent e) { aggiorna(campoNumeroPrenotazione, campoIdBagaglio); }
+                    public void removeUpdate(DocumentEvent e) { aggiorna(campoNumeroPrenotazione, campoIdBagaglio); }
+                    public void changedUpdate(DocumentEvent e) { aggiorna(campoNumeroPrenotazione, campoIdBagaglio); }
+
+                    private void aggiorna(JTextField attivo, JTextField daSvuotare) {
+                        if (bloccoModifica[0]) return;
+                        if (!attivo.getText().trim().isEmpty()) {
+                            bloccoModifica[0] = true;
+                            daSvuotare.setText("");
+                            bloccoModifica[0] = false;
+                        }
+                    }
                 });
 
                 panel.add(campoIdBagaglio);
@@ -377,6 +398,7 @@ public class Controller {
                 }, dialog));
 
                 break;
+
 
 
             case "Segnala Smarrimento":
@@ -464,7 +486,6 @@ public class Controller {
 
             case "Inserisci Volo":
                 panel.setLayout(new GridLayout(6, 1, 5, 5));
-
                 JTextField codiceField = creaCampo("Codice Volo");
                 JTextField compagniaField = creaCampo("Compagnia");
                 JTextField dataField = creaCampo("Data Partenza (yyyy-mm-dd)");
@@ -524,9 +545,9 @@ public class Controller {
                         ex.printStackTrace();
                         JOptionPane.showMessageDialog(null, "Errore: " + ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
                     }
+                    visualizzaVoli(d);
                 }, dialog));
-                visualizzaVoli(d);
-                return;
+                break;
 
             case "Aggiorna Volo":
                 ArrayList<Volo> voli = new AmministratoreImplementazionePostgresDAO().visualizzaVoli();
@@ -586,29 +607,14 @@ public class Controller {
                     volo.setCodiceVolo(Integer.parseInt(codiceFieldGate.getText()));
                     volo.setGate(Integer.parseInt(gateFieldGate.getText()));
                     new AmministratoreImplementazionePostgresDAO().modificaGate(volo);
+                    visualizzaVoli(d);
                 }, dialog));
-                visualizzaVoli(d);
-                return;
+                break;
             case "Cerca Bagagli":
                 panel.setLayout(new GridLayout(4, 1, 5, 5));
 
                 JTextField campoIdBagaglio = creaCampo("ID Bagaglio (opzionale)");
                 JTextField campoNumeroPrenotazione = creaCampo("Numero Prenotazione (opzionale)");
-
-                // Se scrivi in ID Bagaglio → svuota Numero Prenotazione
-                campoIdBagaglio.getDocument().addDocumentListener(new DocumentListener() {
-                    public void insertUpdate(DocumentEvent e) { campoNumeroPrenotazione.setText(""); }
-                    public void removeUpdate(DocumentEvent e) { campoNumeroPrenotazione.setText(""); }
-                    public void changedUpdate(DocumentEvent e) { campoNumeroPrenotazione.setText(""); }
-                });
-
-                // Se scrivi in Numero Prenotazione → svuota ID Bagaglio
-                campoNumeroPrenotazione.getDocument().addDocumentListener(new DocumentListener() {
-                    public void insertUpdate(DocumentEvent e) { campoIdBagaglio.setText(""); }
-                    public void removeUpdate(DocumentEvent e) { campoIdBagaglio.setText(""); }
-                    public void changedUpdate(DocumentEvent e) { campoIdBagaglio.setText(""); }
-                });
-
                 panel.add(campoIdBagaglio);
                 panel.add(campoNumeroPrenotazione);
 
@@ -682,7 +688,7 @@ public class Controller {
                         JOptionPane.showMessageDialog(dialog, "Errore: " + ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
                     }
                 }, dialog));
-
+                visualizzaVoli(d);
                 break;
 
             case "Aggiorna Bagaglio":
@@ -712,7 +718,7 @@ public class Controller {
                     }
                 }, dialog));
                 visualizzaVoli(d);
-                return;
+                break;
 
             case "Visualizza Smarrimenti": {
                 ArrayList<Bagaglio> listaSmarriti = new AmministratoreImplementazionePostgresDAO().visualizzaSmarrimento();
@@ -771,6 +777,7 @@ public class Controller {
         dialog.pack();
         dialog.setLocationRelativeTo(frame);
         dialog.setVisible(true);
+        visualizzaVoli(d);
     }
 
     /**
@@ -984,39 +991,43 @@ public class Controller {
         dialog.setTitle("Modifica Volo");
         dialog.setModal(true);
 
-        JPanel panel = new JPanel(new GridLayout(0, 2, 5, 5));
+        JPanel panel = new JPanel(new GridLayout(0, 2, 10, 10));
         panel.setBackground(new Color(43, 48, 52));
+        panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
+        // Campi
         JTextField codiceField = creaCampo(String.valueOf(volo.getCodiceVolo()));
+        codiceField.setEditable(false);
         JTextField compagniaField = creaCampo(volo.getCompagnia());
-        JTextField dataField = creaCampo(volo.getData().toString()); // yyyy-mm-dd
-        JTextField orarioField = creaCampo(volo.getOrario().toString()); // HH:mm:ss
+        JTextField dataField = creaCampo(volo.getData().toString());
+        JTextField orarioField = creaCampo(volo.getOrario().toString());
         JTextField ritardoField = creaCampo(String.valueOf(volo.getRitardo()));
         JTextField statoField = creaCampo(volo.getStato().name());
         JTextField origineField = creaCampo(volo.getOrigine());
         JTextField destinazioneField = creaCampo(volo.getDestinazione());
         JTextField gateField = null;
 
-        panel.add(new JLabel("Codice Volo:")); panel.add(codiceField);
-        panel.add(new JLabel("Compagnia:")); panel.add(compagniaField);
-        panel.add(new JLabel("Data (YYYY-MM-DD):")); panel.add(dataField);
-        panel.add(new JLabel("Orario (HH:MM:SS):")); panel.add(orarioField);
-        panel.add(new JLabel("Ritardo (minuti):")); panel.add(ritardoField);
-        panel.add(new JLabel("Stato:")); panel.add(statoField);
-        panel.add(new JLabel("Origine:")); panel.add(origineField);
-        panel.add(new JLabel("Destinazione:")); panel.add(destinazioneField);
+        // Etichette bianche
+        panel.add(creaEtichetta("Codice Volo:")); panel.add(codiceField);
+        panel.add(creaEtichetta("Compagnia:")); panel.add(compagniaField);
+        panel.add(creaEtichetta("Data (YYYY-MM-DD):")); panel.add(dataField);
+        panel.add(creaEtichetta("Orario (HH:MM:SS):")); panel.add(orarioField);
+        panel.add(creaEtichetta("Ritardo (minuti):")); panel.add(ritardoField);
+        panel.add(creaEtichetta("Stato:")); panel.add(statoField);
+        panel.add(creaEtichetta("Origine:")); panel.add(origineField);
+        panel.add(creaEtichetta("Destinazione:")); panel.add(destinazioneField);
 
         if (volo instanceof VoloInPartenza) {
             VoloInPartenza v = (VoloInPartenza) volo;
             gateField = creaCampo(String.valueOf(v.getGate()));
-            panel.add(new JLabel("Gate:")); panel.add(gateField);
+            panel.add(creaEtichetta("Gate:")); panel.add(gateField);
         }
 
         JButton conferma = new JButton("Conferma modifica");
         conferma.setBackground(new Color(255, 162, 35));
         conferma.setForeground(Color.BLACK);
 
-        JTextField finalGateField = gateField; // per usarlo nel lambda
+        JTextField finalGateField = gateField;
 
         conferma.addActionListener(e -> {
             try {
@@ -1051,7 +1062,7 @@ public class Controller {
             }
         });
 
-        panel.add(new JLabel()); // spaziatore
+        panel.add(new JLabel()); // spazio vuoto
         panel.add(conferma);
 
         dialog.setContentPane(panel);
@@ -1059,6 +1070,14 @@ public class Controller {
         dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
     }
+
+    // Etichetta bianca personalizzata
+    private JLabel creaEtichetta(String testo) {
+        JLabel label = new JLabel(testo);
+        label.setForeground(Color.WHITE);
+        return label;
+    }
+
 
     public void login(String email, String password) {
         this.utente = null;

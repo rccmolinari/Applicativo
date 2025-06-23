@@ -151,21 +151,24 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
         ResultSet generatedKeys = null;
 
         try {
+            connection.setAutoCommit(false);
+
             psPasseggero = connection.prepareStatement(
                     "INSERT INTO passeggero (id_documento, nome, cognome, data_nascita) " +
-                            "VALUES (?, ?, ?, ?) ON CONFLICT (id_documento) DO NOTHING"
-            );
+                            "VALUES (?, ?, ?, ?) ON CONFLICT (id_documento) DO NOTHING");
             psPasseggero.setString(1, passeggero.getIdDocumento());
             psPasseggero.setString(2, passeggero.getNome());
             psPasseggero.setString(3, passeggero.getCognome());
             psPasseggero.setDate(4, new java.sql.Date(passeggero.getDataNascita().getTime()));
-            psPasseggero.executeUpdate();
+            int passeggeroInserito = psPasseggero.executeUpdate();
+
+            boolean passeggeroNuovo = passeggeroInserito > 0;
+            System.out.println("Passeggero " + (passeggeroNuovo ? "nuovo" : "già presente"));
 
             psPrenotazione = connection.prepareStatement(
                     "INSERT INTO prenotazione (username, password, documento_passeggero, stato_prenotazione, posto_assegnato, codice_volo) " +
                             "VALUES (?, ?, ?, ?, ?, ?)",
-                    new String[] { "numero_biglietto" }
-            );
+                    new String[]{"numero_biglietto"});
             psPrenotazione.setString(1, utente.getLogin());
             psPrenotazione.setString(2, utente.getPassword());
             psPrenotazione.setString(3, passeggero.getIdDocumento());
@@ -173,10 +176,13 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
             psPrenotazione.setInt(5, generaPostoRandom());
             psPrenotazione.setInt(6, volo.getCodiceVolo());
 
-            psPrenotazione.executeUpdate();
+            int righeInserite = psPrenotazione.executeUpdate();
+            if (righeInserite == 0) {
+                throw new SQLException("Prenotazione non inserita: controlla volo o documento passeggero.");
+            }
 
-            int numeroBiglietto;
             generatedKeys = psPrenotazione.getGeneratedKeys();
+            int numeroBiglietto;
             if (generatedKeys.next()) {
                 numeroBiglietto = generatedKeys.getInt(1);
             } else {
@@ -184,8 +190,7 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
             }
 
             psBagaglio = connection.prepareStatement(
-                    "INSERT INTO bagaglio (stato_bagaglio, numero_prenotazione) VALUES (?, ?)"
-            );
+                    "INSERT INTO bagaglio (stato_bagaglio, numero_prenotazione) VALUES (?, ?)");
             for (Bagaglio b : bagagli) {
                 psBagaglio.setString(1, b.getStatoBagaglio().toString());
                 psBagaglio.setInt(2, numeroBiglietto);
@@ -193,8 +198,14 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
             }
             psBagaglio.executeBatch();
 
+            connection.commit();
+
         } catch (SQLException e) {
-            e.printStackTrace();
+            try {
+                connection.rollback();
+            } catch (SQLException rollbackEx) {
+                rollbackEx.printStackTrace();
+            }
             throw new RuntimeException("Errore durante la prenotazione: " + e.getMessage());
         } finally {
             try {
@@ -202,11 +213,14 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
                 if (psPasseggero != null) psPasseggero.close();
                 if (psPrenotazione != null) psPrenotazione.close();
                 if (psBagaglio != null) psBagaglio.close();
+                connection.setAutoCommit(true);
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }
         }
     }
+
+
 
     public ArrayList<Prenotazione> cercaPrenotazione(UtenteGenerico utente, int numeroBiglietto) {
         ArrayList<Prenotazione> lista = new ArrayList<>();
@@ -397,38 +411,39 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
     }
 
     public void modificaPrenotazione(Prenotazione prenotazione, ArrayList<Bagaglio> nuoviBagagli) {
+        PreparedStatement psDelete = null;
+        PreparedStatement psInsert = null;
+
         try {
             connection.setAutoCommit(false);
 
-            // 1. Elimina tutti i bagagli precedenti della prenotazione
-            try (PreparedStatement ps = connection.prepareStatement(
-                    "DELETE FROM bagaglio WHERE numero_prenotazione = ?")) {
-                ps.setInt(1, prenotazione.getNumeroBiglietto());
-                ps.executeUpdate();
-            }
+            psDelete = connection.prepareStatement(
+                    "DELETE FROM bagaglio WHERE numero_prenotazione = ?");
+            psDelete.setInt(1, prenotazione.getNumeroBiglietto());
+            psDelete.executeUpdate();
 
-            // 2. Inserisce i nuovi bagagli
-            try (PreparedStatement ps = connection.prepareStatement(
-                    "INSERT INTO bagaglio (stato_bagaglio, numero_prenotazione) VALUES (?, ?)")) {
-                for (Bagaglio b : nuoviBagagli) {
-                    ps.setString(1, b.getStatoBagaglio().toString());
-                    ps.setInt(2, prenotazione.getNumeroBiglietto());
-                    ps.addBatch();
-                }
-                ps.executeBatch();
+            psInsert = connection.prepareStatement(
+                    "INSERT INTO bagaglio (stato_bagaglio, numero_prenotazione) VALUES (?, ?)");
+            for (Bagaglio b : nuoviBagagli) {
+                psInsert.setString(1, b.getStatoBagaglio().toString());
+                psInsert.setInt(2, prenotazione.getNumeroBiglietto());
+                psInsert.addBatch();
             }
+            psInsert.executeBatch();
 
             connection.commit();
 
         } catch (SQLException e) {
             try {
                 connection.rollback();
-            } catch (SQLException ex) {
-                ex.printStackTrace();
+            } catch (SQLException rollbackEx) {
+                rollbackEx.printStackTrace();
             }
-            e.printStackTrace();
+            throw new RuntimeException("Errore durante modifica prenotazione: " + e.getMessage());
         } finally {
             try {
+                if (psDelete != null) psDelete.close();
+                if (psInsert != null) psInsert.close();
                 connection.setAutoCommit(true);
             } catch (SQLException ex) {
                 ex.printStackTrace();
@@ -436,7 +451,8 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
         }
     }
 
-@Override
+
+    @Override
     public ArrayList<Bagaglio> cercaBagaglio(Bagaglio b) {
         ArrayList<Bagaglio> lista = new ArrayList<>();
         String sql = "SELECT b.*, pr.numero_biglietto FROM bagaglio b " +
