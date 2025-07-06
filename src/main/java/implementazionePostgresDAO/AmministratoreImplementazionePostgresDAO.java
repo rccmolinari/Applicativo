@@ -266,7 +266,7 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
         return lista;
     }
 
-    public ArrayList<Bagaglio> cercaBagaglio(Bagaglio b) {
+    public ArrayList<Bagaglio> cercaBagaglio(Bagaglio b, UtenteGenerico u) {
         ArrayList<Bagaglio> lista = new ArrayList<>();
         String sql = "SELECT b.*, pr.numero_biglietto FROM bagaglio b " +
                 "LEFT JOIN prenotazione pr ON b.numero_prenotazione = pr.numero_biglietto " +
@@ -293,7 +293,7 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
         return lista;
     }
     @Override
-    public ArrayList<Bagaglio> cercaBagaglio(Prenotazione p) {
+    public ArrayList<Bagaglio> cercaBagaglio(Prenotazione p, UtenteGenerico u) {
         ArrayList<Bagaglio> lista = new ArrayList<>();
 
         String sql = "SELECT b.*, pr.numero_biglietto " +

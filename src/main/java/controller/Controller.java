@@ -110,9 +110,12 @@ public class Controller {
                 return;
 
 
-
             case "Prenota Volo":
-                panel.setLayout(new GridLayout(0, 1, 5, 5));
+                panel.setLayout(new GridLayout(1, 1));
+
+                JPanel formPanel = new JPanel(new GridLayout(7, 1, 10, 10));
+                formPanel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
+                formPanel.setBackground(new Color(43, 48, 52));
 
                 JTextField idDocumentoField = creaCampo("Id_Documento");
                 JTextField dataNascitaField = creaCampo("Data_Nascita (yyyy-mm-dd)");
@@ -121,25 +124,25 @@ public class Controller {
                 JTextField codiceVoloField = creaCampo("Codice Volo");
                 JTextField numeroBagagliField = creaCampo("Numero Bagagli");
 
-                panel.add(idDocumentoField);
-                panel.add(dataNascitaField);
-                panel.add(nomeField);
-                panel.add(cognomeField);
-                panel.add(codiceVoloField);
-                panel.add(numeroBagagliField);
+                formPanel.add(idDocumentoField);
+                formPanel.add(dataNascitaField);
+                formPanel.add(nomeField);
+                formPanel.add(cognomeField);
+                formPanel.add(codiceVoloField);
+                formPanel.add(numeroBagagliField);
 
-                panel.add(creaBottoneConAzione("Prenota", () -> {
+                JButton prenotaButton = creaBottoneConAzione("Prenota", () -> {
                     try {
                         Passeggero passeggero = new Passeggero();
-                        passeggero.setIdDocumento(idDocumentoField.getText());
-                        passeggero.setNome(nomeField.getText());
-                        passeggero.setCognome(cognomeField.getText());
-                        passeggero.setDataNascita(java.sql.Date.valueOf(dataNascitaField.getText()));
+                        passeggero.setIdDocumento(idDocumentoField.getText().trim());
+                        passeggero.setNome(nomeField.getText().trim());
+                        passeggero.setCognome(cognomeField.getText().trim());
+                        passeggero.setDataNascita(java.sql.Date.valueOf(dataNascitaField.getText().trim()));
 
                         Volo volo = new Volo();
-                        volo.setCodiceVolo(Integer.parseInt(codiceVoloField.getText()));
+                        volo.setCodiceVolo(Integer.parseInt(codiceVoloField.getText().trim()));
 
-                        int numeroBagagli = Integer.parseInt(numeroBagagliField.getText());
+                        int numeroBagagli = Integer.parseInt(numeroBagagliField.getText().trim());
                         if (numeroBagagli < 0) throw new IllegalArgumentException("Il numero di bagagli deve essere >= 0");
 
                         ArrayList<Bagaglio> bagagli = new ArrayList<>();
@@ -155,21 +158,29 @@ public class Controller {
                         JOptionPane.showMessageDialog(dialog, "Prenotazione effettuata con " + numeroBagagli + " bagagli.");
                     } catch (Exception ex) {
                         ex.printStackTrace();
-                        JOptionPane.showMessageDialog(dialog, "Errore: volo non esistente");
+                        JOptionPane.showMessageDialog(dialog, "Errore: " + ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
                     }
-                }, dialog));
+                }, dialog);
+
+                formPanel.add(prenotaButton);
+                panel.add(formPanel);
+
                 visualizzaVoli(d);
                 break;
 
 
+
             case "Cerca Prenotazione":
-                panel.setLayout(new GridLayout(5, 1, 5, 5));
+                panel.setLayout(new GridLayout(1, 1));
+                JPanel formPanel1 = new JPanel(new GridLayout(5, 1, 10, 10));
+                formPanel1.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
+                formPanel1.setBackground(new Color(43, 48, 52));
 
                 JTextField campoBigliettoUnico = creaCampo("Numero Biglietto (opzionale)");
                 JTextField campoNomePasseggeroUnico = creaCampo("Nome Passeggero (opzionale)");
                 JTextField campoCognomePasseggeroUnico = creaCampo("Cognome Passeggero (opzionale)");
 
-                // Quando scrivo in nome o cognome → svuota campo biglietto
+                // Svuota campo biglietto se si scrive in nome o cognome
                 campoNomePasseggeroUnico.getDocument().addDocumentListener(new DocumentListener() {
                     public void insertUpdate(DocumentEvent e) { campoBigliettoUnico.setText(""); }
                     public void removeUpdate(DocumentEvent e) { campoBigliettoUnico.setText(""); }
@@ -181,11 +192,11 @@ public class Controller {
                     public void changedUpdate(DocumentEvent e) { campoBigliettoUnico.setText(""); }
                 });
 
-                panel.add(campoBigliettoUnico);
-                panel.add(campoNomePasseggeroUnico);
-                panel.add(campoCognomePasseggeroUnico);
+                formPanel1.add(campoBigliettoUnico);
+                formPanel1.add(campoNomePasseggeroUnico);
+                formPanel1.add(campoCognomePasseggeroUnico);
 
-                panel.add(creaBottoneConAzione("Cerca", () -> {
+                JButton cercaButton = creaBottoneConAzione("Cerca", () -> {
                     try {
                         UtenteGenericoImplementazionePostgresDAO daoUtenteGen = new UtenteGenericoImplementazionePostgresDAO();
                         ArrayList<Prenotazione> risultatiRicerca = new ArrayList<>();
@@ -196,7 +207,7 @@ public class Controller {
 
                         if (ricercaPerBiglietto && ricercaPerNomeECognome) {
                             JOptionPane.showMessageDialog(dialog,
-                                    "⚠️ Scegli solo una modalità di ricerca: o per numero biglietto o per nome e cognome.",
+                                    "Scegli solo una modalità di ricerca: o per numero biglietto o per nome e cognome.",
                                     "Errore", JOptionPane.ERROR_MESSAGE);
                             return;
                         }
@@ -222,14 +233,16 @@ public class Controller {
                                     "Nessuna prenotazione trovata.",
                                     "Risultato", JOptionPane.INFORMATION_MESSAGE);
                         } else {
-                            JPanel listaPanel = new JPanel(new GridLayout(risultatiRicerca.size(), 1, 5, 5));
+                            JPanel listaPanel = new JPanel();
+                            listaPanel.setLayout(new BoxLayout(listaPanel, BoxLayout.Y_AXIS));
                             listaPanel.setBackground(new Color(43, 48, 52));
 
                             for (Prenotazione p : risultatiRicerca) {
                                 Passeggero passeggero = p.getPasseggero();
 
                                 String testo = String.format(
-                                        "Biglietto: %d → %s %s (%s) - Stato: %s - Bagagli: %d",
+                                        "Codice Volo: %d - Biglietto: %d - %s %s (%s) - Stato: %s - Bagagli: %d",
+                                        p.getVolo().getCodiceVolo(),
                                         p.getNumeroBiglietto(),
                                         passeggero.getNome(),
                                         passeggero.getCognome(),
@@ -237,29 +250,37 @@ public class Controller {
                                         p.getStatoPrenotazione(),
                                         p.getListaBagagli().size()
                                 );
-                                //System.out.println(passeggero.getDataNascita());
 
                                 JPanel riga = new JPanel(new BorderLayout());
                                 riga.setBackground(new Color(60, 63, 65));
-                                riga.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+                                riga.setBorder(BorderFactory.createCompoundBorder(
+                                        BorderFactory.createLineBorder(new Color(80, 80, 80)),
+                                        BorderFactory.createEmptyBorder(6, 12, 6, 12)
+                                ));
+                                riga.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40)); // Impedisce altezza esagerata
 
-                                JLabel label3 = new JLabel(testo);
-                                label3.setForeground(Color.WHITE);
+                                label.setText(testo);
+                                label.setForeground(Color.WHITE);
 
                                 JButton modificaBtn = new JButton("Modifica");
+                                modificaBtn.setFocusPainted(false);
                                 modificaBtn.setBackground(new Color(255, 162, 35));
                                 modificaBtn.setForeground(Color.BLACK);
                                 modificaBtn.addActionListener(e2 -> mostraPopupModificaPrenotazione(p));
+                                // Non impostare dimensioni fisse, lascia adattare
 
-                                riga.add(label3, BorderLayout.CENTER);
+                                riga.add(label, BorderLayout.CENTER);
                                 riga.add(modificaBtn, BorderLayout.EAST);
 
                                 listaPanel.add(riga);
+                                listaPanel.add(Box.createVerticalStrut(8)); // Spazio tra righe
                             }
 
                             JScrollPane scrollPane1 = new JScrollPane(listaPanel);
-                            scrollPane1.setPreferredSize(new Dimension(650, 300));
+                            scrollPane1.setPreferredSize(new Dimension(700, 350));
                             scrollPane1.getViewport().setBackground(new Color(43, 48, 52));
+                            scrollPane1.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+
 
                             JDialog popupRisultati = new JDialog();
                             popupRisultati.setTitle("Risultati Prenotazioni");
@@ -270,20 +291,27 @@ public class Controller {
                             popupRisultati.setVisible(true);
                         }
 
-
                     } catch (NumberFormatException ex) {
                         JOptionPane.showMessageDialog(dialog, "Numero biglietto non valido.", "Errore", JOptionPane.ERROR_MESSAGE);
                     } catch (Exception ex) {
                         ex.printStackTrace();
                         JOptionPane.showMessageDialog(dialog, "Errore: " + ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
                     }
-                }, dialog));
+                }, dialog);
+
+                formPanel1.add(cercaButton);
+                panel.add(formPanel1);
+
                 visualizzaVoli(d);
                 break;
 
 
             case "Cerca Bagagli":
-                panel.setLayout(new GridLayout(4, 1, 5, 5));
+                panel.setLayout(new GridLayout(1, 1));
+
+                JPanel formPanelCB = new JPanel(new GridLayout(3, 1, 10, 10));
+                formPanelCB.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
+                formPanelCB.setBackground(new Color(43, 48, 52));
 
                 JTextField campoIdBagaglio = creaCampo("ID Bagaglio (opzionale)");
                 JTextField campoNumeroPrenotazione = creaCampo("Numero Prenotazione (opzionale)");
@@ -291,42 +319,31 @@ public class Controller {
                 // Flag per evitare trigger incrociati
                 final boolean[] bloccoModifica = {false};
 
-                // Se scrivi in ID Bagaglio → svuota Numero Prenotazione
-                campoIdBagaglio.getDocument().addDocumentListener(new DocumentListener() {
-                    public void insertUpdate(DocumentEvent e) { aggiorna(campoIdBagaglio, campoNumeroPrenotazione); }
-                    public void removeUpdate(DocumentEvent e) { aggiorna(campoIdBagaglio, campoNumeroPrenotazione); }
-                    public void changedUpdate(DocumentEvent e) { aggiorna(campoIdBagaglio, campoNumeroPrenotazione); }
+                // Sincronizzazione dei campi
+                DocumentListener listener = new DocumentListener() {
+                    public void insertUpdate(DocumentEvent e) { aggiorna(); }
+                    public void removeUpdate(DocumentEvent e) { aggiorna(); }
+                    public void changedUpdate(DocumentEvent e) { aggiorna(); }
 
-                    private void aggiorna(JTextField attivo, JTextField daSvuotare) {
+                    private void aggiorna() {
                         if (bloccoModifica[0]) return;
-                        if (!attivo.getText().trim().isEmpty()) {
-                            bloccoModifica[0] = true;
-                            daSvuotare.setText("");
-                            bloccoModifica[0] = false;
+                        bloccoModifica[0] = true;
+                        if (!campoIdBagaglio.getText().trim().isEmpty()) {
+                            campoNumeroPrenotazione.setText("");
+                        } else if (!campoNumeroPrenotazione.getText().trim().isEmpty()) {
+                            campoIdBagaglio.setText("");
                         }
+                        bloccoModifica[0] = false;
                     }
-                });
+                };
 
-                // Se scrivi in Numero Prenotazione → svuota ID Bagaglio
-                campoNumeroPrenotazione.getDocument().addDocumentListener(new DocumentListener() {
-                    public void insertUpdate(DocumentEvent e) { aggiorna(campoNumeroPrenotazione, campoIdBagaglio); }
-                    public void removeUpdate(DocumentEvent e) { aggiorna(campoNumeroPrenotazione, campoIdBagaglio); }
-                    public void changedUpdate(DocumentEvent e) { aggiorna(campoNumeroPrenotazione, campoIdBagaglio); }
+                campoIdBagaglio.getDocument().addDocumentListener(listener);
+                campoNumeroPrenotazione.getDocument().addDocumentListener(listener);
 
-                    private void aggiorna(JTextField attivo, JTextField daSvuotare) {
-                        if (bloccoModifica[0]) return;
-                        if (!attivo.getText().trim().isEmpty()) {
-                            bloccoModifica[0] = true;
-                            daSvuotare.setText("");
-                            bloccoModifica[0] = false;
-                        }
-                    }
-                });
+                formPanelCB.add(campoIdBagaglio);
+                formPanelCB.add(campoNumeroPrenotazione);
 
-                panel.add(campoIdBagaglio);
-                panel.add(campoNumeroPrenotazione);
-
-                panel.add(creaBottoneConAzione("Cerca", () -> {
+                JButton cercaBagagliButton = creaBottoneConAzione("Cerca", () -> {
                     try {
                         UtenteGenericoImplementazionePostgresDAO dao = new UtenteGenericoImplementazionePostgresDAO();
                         ArrayList<Bagaglio> risultatiRicerca = new ArrayList<>();
@@ -335,18 +352,18 @@ public class Controller {
                         boolean cercaPerPrenotazione = !campoNumeroPrenotazione.getText().trim().isEmpty();
 
                         if (cercaPerId && cercaPerPrenotazione) {
-                            JOptionPane.showMessageDialog(dialog, "⚠️ Inserisci solo uno dei due campi.", "Errore", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(dialog, "Inserisci solo uno dei due campi.", "Errore", JOptionPane.ERROR_MESSAGE);
                             return;
                         }
 
                         if (cercaPerId) {
                             Bagaglio b = new Bagaglio();
                             b.setCodiceBagaglio(Integer.parseInt(campoIdBagaglio.getText().trim()));
-                            risultatiRicerca = dao.cercaBagaglio(b);
+                            risultatiRicerca = dao.cercaBagaglio(b, utente);
                         } else if (cercaPerPrenotazione) {
                             Prenotazione p = new Prenotazione();
                             p.setNumeroBiglietto(Integer.parseInt(campoNumeroPrenotazione.getText().trim()));
-                            risultatiRicerca = dao.cercaBagaglio(p);
+                            risultatiRicerca = dao.cercaBagaglio(p, utente);
                         } else {
                             JOptionPane.showMessageDialog(dialog, "Inserisci almeno uno dei due campi.", "Campi vuoti", JOptionPane.WARNING_MESSAGE);
                             return;
@@ -355,8 +372,9 @@ public class Controller {
                         if (risultatiRicerca.isEmpty()) {
                             JOptionPane.showMessageDialog(dialog, "Nessun bagaglio trovato.", "Risultato", JOptionPane.INFORMATION_MESSAGE);
                         } else {
-                            JPanel listaPanel1 = new JPanel(new GridLayout(risultatiRicerca.size(), 1, 5, 5));
-                            listaPanel1.setBackground(new Color(43, 48, 52));
+                            JPanel listaPanel = new JPanel();
+                            listaPanel.setLayout(new BoxLayout(listaPanel, BoxLayout.Y_AXIS));
+                            listaPanel.setBackground(new Color(43, 48, 52));
 
                             for (Bagaglio b : risultatiRicerca) {
                                 String testo = String.format(
@@ -368,22 +386,30 @@ public class Controller {
 
                                 JPanel riga = new JPanel(new BorderLayout());
                                 riga.setBackground(new Color(60, 63, 65));
-                                riga.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+                                riga.setBorder(BorderFactory.createCompoundBorder(
+                                        BorderFactory.createLineBorder(new Color(80, 80, 80)),
+                                        BorderFactory.createEmptyBorder(6, 12, 6, 12)
+                                ));
+                                riga.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
 
-                                JLabel label4 = new JLabel(testo);
-                                label4.setForeground(Color.WHITE);
-                                riga.add(label4, BorderLayout.CENTER);
-                                listaPanel1.add(riga);
+                                JLabel label5 = new JLabel(testo);
+                                label5.setForeground(Color.WHITE);
+                                riga.add(label5, BorderLayout.CENTER);
+
+                                listaPanel.add(riga);
+                                listaPanel.add(Box.createVerticalStrut(8));
                             }
 
-                            JScrollPane scrollPane4 = new JScrollPane(listaPanel1);
-                            scrollPane4.setPreferredSize(new Dimension(650, 300));
-                            scrollPane4.getViewport().setBackground(new Color(43, 48, 52));
+
+                            JScrollPane scrollPane2 = new JScrollPane(listaPanel);
+                            scrollPane2.setPreferredSize(new Dimension(700, 300));
+                            scrollPane2.getViewport().setBackground(new Color(43, 48, 52));
+                            scrollPane2.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
                             JDialog popupRisultati = new JDialog();
                             popupRisultati.setTitle("Risultati Ricerca Bagagli");
                             popupRisultati.setModal(true);
-                            popupRisultati.setContentPane(scrollPane4);
+                            popupRisultati.setContentPane(scrollPane2);
                             popupRisultati.pack();
                             popupRisultati.setLocationRelativeTo(null);
                             popupRisultati.setVisible(true);
@@ -395,20 +421,22 @@ public class Controller {
                         ex.printStackTrace();
                         JOptionPane.showMessageDialog(dialog, "Errore: " + ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
                     }
-                }, dialog));
+                }, dialog);
 
+                formPanelCB.add(cercaBagagliButton);
+                panel.add(formPanelCB);
                 break;
 
-
-
             case "Segnala Smarrimento":
-                panel.setLayout(new GridLayout(2, 1, 5, 5));
+                panel.setLayout(new GridLayout(1, 1));
+
+                JPanel formPanelSS = new JPanel(new GridLayout(2, 1, 10, 10));
+                formPanelSS.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
+                formPanelSS.setBackground(new Color(43, 48, 52));
 
                 JTextField codiceBagaglioField = creaCampo("Codice Bagaglio");
 
-                panel.add(codiceBagaglioField);
-
-                panel.add(creaBottoneConAzione("Invia segnalazione", () -> {
+                JButton segnalaBtn = creaBottoneConAzione("Invia segnalazione", () -> {
                     try {
                         String input = codiceBagaglioField.getText().trim();
 
@@ -423,7 +451,7 @@ public class Controller {
                         b.setCodiceBagaglio(codiceBagaglio);
 
                         UtenteGenericoImplementazionePostgresDAO dao = new UtenteGenericoImplementazionePostgresDAO();
-                        dao.segnalaSmarrimento(b);
+                        dao.segnalaSmarrimento(b, utente);
 
                         JOptionPane.showMessageDialog(dialog, "Segnalazione inviata correttamente!", "Successo", JOptionPane.INFORMATION_MESSAGE);
                     } catch (NumberFormatException ex) {
@@ -432,9 +460,15 @@ public class Controller {
                         ex.printStackTrace();
                         JOptionPane.showMessageDialog(dialog, "Errore durante la segnalazione: " + ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
                     }
-                }, dialog));
+                }, dialog);
+
+                formPanelSS.add(codiceBagaglioField);
+                formPanelSS.add(segnalaBtn);
+                panel.add(formPanelSS);
+
                 visualizzaVoli(d);
                 break;
+
 
 
             default:
@@ -482,72 +516,112 @@ public class Controller {
                 }
                 break;
                 */
-
-
             case "Inserisci Volo":
-                panel.setLayout(new GridLayout(6, 1, 5, 5));
+                panel.setLayout(new GridLayout(1, 1));
+
+                JPanel formPanelIV = new JPanel(new GridLayout(8, 1, 10, 10));
+                formPanelIV.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
+                formPanelIV.setBackground(new Color(43, 48, 52));
+
+                // Campi input
                 JTextField codiceField = creaCampo("Codice Volo");
                 JTextField compagniaField = creaCampo("Compagnia");
                 JTextField dataField = creaCampo("Data Partenza (yyyy-mm-dd)");
                 JTextField orarioField = creaCampo("Orario Partenza (hh:mm:ss)");
-                JTextField origineField = creaCampo("Origine");
-                JTextField destinazioneField = creaCampo("Destinazione");
-                JTextField gateField = creaCampo("Numero Gate (-1 se non ancora scelto)");
+                JCheckBox inArrivoCheck = new JCheckBox("In arrivo");
 
-                panel.add(codiceField);
-                panel.add(compagniaField);
-                panel.add(dataField);
-                panel.add(orarioField);
-                panel.add(origineField);
-                panel.add(destinazioneField);
-                panel.add(gateField);
+                JTextField localitaField = creaCampo("Destinazione"); // Cambierà in base a checkbox
+                JTextField gateField = creaCampo("Numero Gate:");
 
-                panel.add(creaBottoneConAzione("Inserisci", () -> {
+                // Colori e cursori coerenti
+                JTextField[] campi = {codiceField, compagniaField, dataField, orarioField, localitaField, gateField};
+                for (JTextField campo : campi) {
+                    campo.setForeground(Color.WHITE);
+                    campo.setBackground(new Color(60, 63, 65));
+                    campo.setCaretColor(Color.WHITE);
+                }
+
+                // Checkbox
+                inArrivoCheck.setForeground(Color.WHITE);
+                inArrivoCheck.setBackground(new Color(43, 48, 52));
+
+                // Azione checkbox "In arrivo"
+                inArrivoCheck.addActionListener(e -> {
+                    boolean inArrivo = inArrivoCheck.isSelected();
+                    localitaField.setText(inArrivo ? "Origine" : "Destinazione");
+                    gateField.setEnabled(!inArrivo);
+                    gateField.setText(inArrivo ? "-1" : "Numero Gate:");
+                });
+
+                // Bottone
+                JButton inserisciBtn = creaBottoneConAzione("Inserisci", () -> {
                     try {
                         int codice = Integer.parseInt(codiceField.getText());
                         String compagnia = compagniaField.getText();
                         Date data = Date.valueOf(dataField.getText());
                         Time orario = Time.valueOf(orarioField.getText());
-                        int gate = Integer.parseInt(gateField.getText());
-                        String destinazione = destinazioneField.getText();
-                        String origine = origineField.getText();
-                        if(destinazione.equals("NAP")) {
+                        boolean inArrivo = inArrivoCheck.isSelected();
+                        String localita = localitaField.getText();
+                        int gate = -1;
+
+                        if (!inArrivo) {
+                            if (gateField.getText().isBlank()) {
+                                JOptionPane.showMessageDialog(dialog, "Errore: gate non valido", "Errore", JOptionPane.ERROR_MESSAGE);
+                                gateField.setText("Numero Gate:");
+                                gateField.requestFocusInWindow();
+                                return;
+                            }
+                            gate = Integer.parseInt(gateField.getText());
+                            if (gate <= 0) {
+                                JOptionPane.showMessageDialog(dialog, "Errore: il numero di gate deve essere maggiore di 0", "Errore", JOptionPane.ERROR_MESSAGE);
+                                gateField.setText("Numero Gate:");
+                                gateField.requestFocusInWindow();
+                                return;
+                            }
+                        }
+
+                        if (inArrivo) {
                             VoloInArrivo volo = new VoloInArrivo(
-                                    codice,
-                                    compagnia,
-                                    data,
-                                    orario,
-                                    0,
-                                    StatoVolo.PROGRAMMATO,
-                                    origine, // destinazione
-                                    new ArrayList<>()
+                                    codice, compagnia, data, orario, 0,
+                                    StatoVolo.PROGRAMMATO, localita, new ArrayList<>()
                             );
                             new AmministratoreImplementazionePostgresDAO().inserisciVolo(volo);
                         } else {
                             VoloInPartenza volo = new VoloInPartenza(
-                                    codice,
-                                    compagnia,
-                                    data,
-                                    orario,
-                                    0,
-                                    StatoVolo.PROGRAMMATO,
-                                    destinazione, // destinazione
-                                    new ArrayList<>(),
-                                    gate
+                                    codice, compagnia, data, orario, 0,
+                                    StatoVolo.PROGRAMMATO, localita, new ArrayList<>(), gate
                             );
                             new AmministratoreImplementazionePostgresDAO().inserisciVolo(volo);
                         }
 
-
-                        JOptionPane.showMessageDialog(null, "Volo inserito correttamente!");
+                        JOptionPane.showMessageDialog(dialog, "Volo inserito correttamente!");
                         dialog.dispose();
+
                     } catch (Exception ex) {
                         ex.printStackTrace();
-                        JOptionPane.showMessageDialog(null, "Errore: " + ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(dialog, "Errore: " + ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
                     }
+
                     visualizzaVoli(d);
-                }, dialog));
+                }, dialog);
+
+                // Aggiunta componenti al formPanel
+                formPanelIV.add(codiceField);
+                formPanelIV.add(compagniaField);
+                formPanelIV.add(dataField);
+                formPanelIV.add(orarioField);
+                formPanelIV.add(inArrivoCheck);
+                formPanelIV.add(localitaField);
+                formPanelIV.add(gateField);
+                formPanelIV.add(inserisciBtn);
+
+                panel.add(formPanelIV);
+
+                // Focus su checkbox inizialmente
+                SwingUtilities.invokeLater(() -> inArrivoCheck.requestFocusInWindow());
+
                 break;
+
 
             case "Aggiorna Volo":
                 ArrayList<Volo> voli = new AmministratoreImplementazionePostgresDAO().visualizzaVoli();
@@ -597,48 +671,127 @@ public class Controller {
                 return;
 
             case "Modifica Gate":
-                panel.setLayout(new GridLayout(3, 1, 5, 5));
+                panel.setLayout(new GridLayout(1, 1));
+
+                JPanel formPanelMG = new JPanel(new GridLayout(3, 1, 10, 10));
+                formPanelMG.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
+                formPanelMG.setBackground(new Color(43, 48, 52));
+
                 JTextField codiceFieldGate = creaCampo("Codice Volo");
                 JTextField gateFieldGate = creaCampo("Nuovo Gate");
-                panel.add(codiceFieldGate);
-                panel.add(gateFieldGate);
-                panel.add(creaBottoneConAzione("Inserisci", () -> {
-                    VoloInPartenza volo = new VoloInPartenza();
-                    volo.setCodiceVolo(Integer.parseInt(codiceFieldGate.getText()));
-                    volo.setGate(Integer.parseInt(gateFieldGate.getText()));
-                    new AmministratoreImplementazionePostgresDAO().modificaGate(volo);
-                    visualizzaVoli(d);
-                }, dialog));
+
+                // Colori coerenti
+                JTextField[] campiMG = {codiceFieldGate, gateFieldGate};
+                for (JTextField campo : campiMG) {
+                    campo.setForeground(Color.WHITE);
+                    campo.setBackground(new Color(60, 63, 65));
+                    campo.setCaretColor(Color.WHITE);
+                }
+
+                JButton modificaBtn = creaBottoneConAzione("Inserisci", () -> {
+                    try {
+                        int codice = Integer.parseInt(codiceFieldGate.getText().trim());
+                        int nuovoGate = Integer.parseInt(gateFieldGate.getText().trim());
+
+                        if (nuovoGate <= 0) {
+                            JOptionPane.showMessageDialog(dialog, "Il numero di gate deve essere maggiore di 0.", "Errore", JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
+
+                        VoloInPartenza volo = new VoloInPartenza();
+                        volo.setCodiceVolo(codice);
+                        volo.setGate(nuovoGate);
+
+                        new AmministratoreImplementazionePostgresDAO().modificaGate(volo);
+                        JOptionPane.showMessageDialog(dialog, "Gate aggiornato correttamente.", "Successo", JOptionPane.INFORMATION_MESSAGE);
+
+                        visualizzaVoli(d);
+                        dialog.dispose();
+                    } catch (NumberFormatException ex) {
+                        JOptionPane.showMessageDialog(dialog, "Inserisci valori numerici validi.", "Errore", JOptionPane.ERROR_MESSAGE);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        JOptionPane.showMessageDialog(dialog, "Errore: " + ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
+                    }
+                }, dialog);
+
+                formPanelMG.add(codiceFieldGate);
+                formPanelMG.add(gateFieldGate);
+                formPanelMG.add(modificaBtn);
+
+                panel.add(formPanelMG);
                 break;
+
             case "Cerca Bagagli":
-                panel.setLayout(new GridLayout(4, 1, 5, 5));
+                panel.setLayout(new GridLayout(1, 1));
+
+                JPanel formPanelCB = new JPanel(new GridLayout(3, 1, 10, 10));
+                formPanelCB.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
+                formPanelCB.setBackground(new Color(43, 48, 52));
 
                 JTextField campoIdBagaglio = creaCampo("ID Bagaglio (opzionale)");
                 JTextField campoNumeroPrenotazione = creaCampo("Numero Prenotazione (opzionale)");
-                panel.add(campoIdBagaglio);
-                panel.add(campoNumeroPrenotazione);
 
-                panel.add(creaBottoneConAzione("Cerca", () -> {
+                // Colori coerenti
+                JTextField[] campiCB = {campoIdBagaglio, campoNumeroPrenotazione};
+                for (JTextField campo : campiCB) {
+                    campo.setForeground(Color.WHITE);
+                    campo.setBackground(new Color(60, 63, 65));
+                    campo.setCaretColor(Color.WHITE);
+                }
+
+                // Evita trigger incrociati tra i due campi
+                final boolean[] bloccoModifica = {false};
+
+                campoIdBagaglio.getDocument().addDocumentListener(new DocumentListener() {
+                    public void insertUpdate(DocumentEvent e) { aggiorna(campoIdBagaglio, campoNumeroPrenotazione); }
+                    public void removeUpdate(DocumentEvent e) { aggiorna(campoIdBagaglio, campoNumeroPrenotazione); }
+                    public void changedUpdate(DocumentEvent e) { aggiorna(campoIdBagaglio, campoNumeroPrenotazione); }
+                    private void aggiorna(JTextField attivo, JTextField daSvuotare) {
+                        if (bloccoModifica[0]) return;
+                        if (!attivo.getText().trim().isEmpty()) {
+                            bloccoModifica[0] = true;
+                            daSvuotare.setText("");
+                            bloccoModifica[0] = false;
+                        }
+                    }
+                });
+
+                campoNumeroPrenotazione.getDocument().addDocumentListener(new DocumentListener() {
+                    public void insertUpdate(DocumentEvent e) { aggiorna(campoNumeroPrenotazione, campoIdBagaglio); }
+                    public void removeUpdate(DocumentEvent e) { aggiorna(campoNumeroPrenotazione, campoIdBagaglio); }
+                    public void changedUpdate(DocumentEvent e) { aggiorna(campoNumeroPrenotazione, campoIdBagaglio); }
+                    private void aggiorna(JTextField attivo, JTextField daSvuotare) {
+                        if (bloccoModifica[0]) return;
+                        if (!attivo.getText().trim().isEmpty()) {
+                            bloccoModifica[0] = true;
+                            daSvuotare.setText("");
+                            bloccoModifica[0] = false;
+                        }
+                    }
+                });
+
+                JButton cercaBtn = creaBottoneConAzione("Cerca", () -> {
                     try {
-                        UtenteGenericoImplementazionePostgresDAO dao = new UtenteGenericoImplementazionePostgresDAO();
+                        AmministratoreImplementazionePostgresDAO dao = new AmministratoreImplementazionePostgresDAO();
                         ArrayList<Bagaglio> risultatiRicerca = new ArrayList<>();
 
                         boolean cercaPerId = !campoIdBagaglio.getText().trim().isEmpty();
                         boolean cercaPerPrenotazione = !campoNumeroPrenotazione.getText().trim().isEmpty();
 
                         if (cercaPerId && cercaPerPrenotazione) {
-                            JOptionPane.showMessageDialog(dialog, "⚠️ Inserisci solo uno dei due campi.", "Errore", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(dialog, "Inserisci solo uno dei due campi.", "Errore", JOptionPane.ERROR_MESSAGE);
                             return;
                         }
 
                         if (cercaPerId) {
                             Bagaglio b = new Bagaglio();
                             b.setCodiceBagaglio(Integer.parseInt(campoIdBagaglio.getText().trim()));
-                            risultatiRicerca = dao.cercaBagaglio(b);
+                            risultatiRicerca = dao.cercaBagaglio(b, null);
                         } else if (cercaPerPrenotazione) {
                             Prenotazione p = new Prenotazione();
                             p.setNumeroBiglietto(Integer.parseInt(campoNumeroPrenotazione.getText().trim()));
-                            risultatiRicerca = dao.cercaBagaglio(p);
+                            risultatiRicerca = dao.cercaBagaglio(p, null);
                         } else {
                             JOptionPane.showMessageDialog(dialog, "Inserisci almeno uno dei due campi.", "Campi vuoti", JOptionPane.WARNING_MESSAGE);
                             return;
@@ -647,8 +800,9 @@ public class Controller {
                         if (risultatiRicerca.isEmpty()) {
                             JOptionPane.showMessageDialog(dialog, "Nessun bagaglio trovato.", "Risultato", JOptionPane.INFORMATION_MESSAGE);
                         } else {
-                            JPanel listaPanel1 = new JPanel(new GridLayout(risultatiRicerca.size(), 1, 5, 5));
-                            listaPanel1.setBackground(new Color(43, 48, 52));
+                            JPanel listaPanel2 = new JPanel();
+                            listaPanel2.setLayout(new BoxLayout(listaPanel2, BoxLayout.Y_AXIS));
+                            listaPanel2.setBackground(new Color(43, 48, 52));
 
                             for (Bagaglio b : risultatiRicerca) {
                                 String testo = String.format(
@@ -660,17 +814,24 @@ public class Controller {
 
                                 JPanel riga = new JPanel(new BorderLayout());
                                 riga.setBackground(new Color(60, 63, 65));
-                                riga.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+                                riga.setBorder(BorderFactory.createCompoundBorder(
+                                        BorderFactory.createLineBorder(new Color(80, 80, 80)),
+                                        BorderFactory.createEmptyBorder(6, 12, 6, 12)
+                                ));
+                                riga.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
 
-                                JLabel label4 = new JLabel(testo);
-                                label4.setForeground(Color.WHITE);
-                                riga.add(label4, BorderLayout.CENTER);
-                                listaPanel1.add(riga);
+                                JLabel label = new JLabel(testo);
+                                label.setForeground(Color.WHITE);
+                                riga.add(label, BorderLayout.CENTER);
+
+                                listaPanel2.add(riga);
+                                listaPanel2.add(Box.createVerticalStrut(8));
                             }
 
-                            JScrollPane scrollPane4 = new JScrollPane(listaPanel1);
-                            scrollPane4.setPreferredSize(new Dimension(650, 300));
+                            JScrollPane scrollPane4 = new JScrollPane(listaPanel2);
+                            scrollPane4.setPreferredSize(new Dimension(700, 350));
                             scrollPane4.getViewport().setBackground(new Color(43, 48, 52));
+                            scrollPane4.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
                             JDialog popupRisultati = new JDialog();
                             popupRisultati.setTitle("Risultati Ricerca Bagagli");
@@ -687,36 +848,63 @@ public class Controller {
                         ex.printStackTrace();
                         JOptionPane.showMessageDialog(dialog, "Errore: " + ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
                     }
-                }, dialog));
+                }, dialog);
+
+                formPanelCB.add(campoIdBagaglio);
+                formPanelCB.add(campoNumeroPrenotazione);
+                formPanelCB.add(cercaBtn);
+                panel.add(formPanelCB);
+
                 visualizzaVoli(d);
                 break;
 
+
             case "Aggiorna Bagaglio":
-                panel.setLayout(new GridLayout(3, 1, 5, 5));
+                panel.setLayout(new GridLayout(1, 1));
+
+                JPanel formPanelAB = new JPanel(new GridLayout(3, 1, 10, 10));
+                formPanelAB.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
+                formPanelAB.setBackground(new Color(43, 48, 52));
 
                 JTextField codiceBagaglioField = creaCampo("Codice Bagaglio");
+                codiceBagaglioField.setForeground(Color.WHITE);
+                codiceBagaglioField.setBackground(new Color(60, 63, 65));
+                codiceBagaglioField.setCaretColor(Color.WHITE);
+
                 JComboBox<String> statoComboBox = new JComboBox<>();
                 for (StatoBagaglio s : StatoBagaglio.values()) {
                     statoComboBox.addItem(s.toString());
                 }
+                statoComboBox.setBackground(new Color(60, 63, 65));
+                statoComboBox.setForeground(Color.WHITE);
 
-                panel.add(codiceBagaglioField);
-                panel.add(statoComboBox);
-
-                panel.add(creaBottoneConAzione("Modifica", () -> {
-                    Bagaglio b = new Bagaglio();
-                    b.setCodiceBagaglio(Integer.parseInt(codiceBagaglioField.getText()));
-                    String statoSelezionato = (String) statoComboBox.getSelectedItem();
+                JButton modificaBtn2 = creaBottoneConAzione("Modifica", () -> {
                     try {
+                        int codice = Integer.parseInt(codiceBagaglioField.getText().trim());
+                        String statoSelezionato = (String) statoComboBox.getSelectedItem();
                         StatoBagaglio stato = StatoBagaglio.fromString(statoSelezionato);
+
+                        Bagaglio b = new Bagaglio();
+                        b.setCodiceBagaglio(codice);
                         b.setStatoBagaglio(stato);
+
                         new AmministratoreImplementazionePostgresDAO().aggiornaBagaglio(b, stato);
+                        JOptionPane.showMessageDialog(dialog, "Stato del bagaglio aggiornato correttamente.");
+                    } catch (NumberFormatException e1) {
+                        JOptionPane.showMessageDialog(dialog, "Codice bagaglio non valido.", "Errore", JOptionPane.ERROR_MESSAGE);
                     } catch (IllegalArgumentException ex) {
-                        JOptionPane.showMessageDialog(panel,
-                                "Errore durante l'assegnazione dello stato.",
-                                "Errore", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(dialog, "Errore durante l'assegnazione dello stato.", "Errore", JOptionPane.ERROR_MESSAGE);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        JOptionPane.showMessageDialog(dialog, "Errore: " + ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
                     }
-                }, dialog));
+                }, dialog);
+
+                formPanelAB.add(codiceBagaglioField);
+                formPanelAB.add(statoComboBox);
+                formPanelAB.add(modificaBtn2);
+                panel.add(formPanelAB);
+
                 visualizzaVoli(d);
                 break;
 
@@ -844,57 +1032,65 @@ public class Controller {
         dialog.setTitle("Registrazione Utente");
         dialog.setModal(true);
 
-        JPanel panel = new JPanel();
+        JPanel panel = new JPanel(new GridLayout(1, 1));
         panel.setBackground(new Color(43, 48, 52));
-        panel.setLayout(new GridLayout(5, 1, 5, 5));
+
+        JPanel formPanel = new JPanel(new GridLayout(5, 1, 10, 10));
+        formPanel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
+        formPanel.setBackground(new Color(43, 48, 52));
 
         // Email / Username
         JLabel labelEmail = new JLabel("Email / Username");
         labelEmail.setForeground(Color.WHITE);
         JTextField emailField = creaCampo(null);
+        emailField.setForeground(Color.WHITE);
+        emailField.setBackground(new Color(60, 63, 65));
+        emailField.setCaretColor(Color.WHITE);
 
         // Password
         JLabel labelPassword = new JLabel("Password");
         labelPassword.setForeground(Color.WHITE);
         JPasswordField passwordField = new JPasswordField();
-        passwordField.setBackground(new Color(107, 112, 119));
+        passwordField.setBackground(new Color(60, 63, 65));
         passwordField.setForeground(Color.WHITE);
+        passwordField.setCaretColor(Color.WHITE);
 
         // Bottone registrazione
         JButton registrati = new JButton("Registrati");
         registrati.setBackground(new Color(255, 162, 35));
         registrati.setForeground(Color.BLACK);
+        registrati.setFocusPainted(false);
 
         registrati.addActionListener(e -> {
-            if (emailField.getText().isEmpty() || passwordField.getPassword().length == 0) {
-                JOptionPane.showMessageDialog(null, "Compila tutti i campi", "Errore", JOptionPane.ERROR_MESSAGE);
+            if (emailField.getText().trim().isEmpty() || passwordField.getPassword().length == 0) {
+                JOptionPane.showMessageDialog(dialog, "Compila tutti i campi", "Errore", JOptionPane.ERROR_MESSAGE);
             } else {
                 try {
-                    boolean result = registraUtente(emailField.getText(), new String(passwordField.getPassword()));
-                    if(result) {
-                        JOptionPane.showMessageDialog(null, "Registrazione effettuata con successo!", "Info",
-                                JOptionPane.INFORMATION_MESSAGE);
+                    boolean result = registraUtente(emailField.getText().trim(), new String(passwordField.getPassword()));
+                    if (result) {
+                        JOptionPane.showMessageDialog(dialog, "Registrazione effettuata con successo!", "Info", JOptionPane.INFORMATION_MESSAGE);
+                        dialog.dispose();
                     } else {
-                        JOptionPane.showMessageDialog(null, "Errore registrazione, l'utente già esiste", "Info",
-                                JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(dialog, "Errore registrazione, l'utente già esiste", "Errore", JOptionPane.ERROR_MESSAGE);
                     }
-                    dialog.dispose();
                 } catch (IllegalArgumentException ex) {
-                    JOptionPane.showMessageDialog(null, ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(dialog, ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
 
-        // Aggiunta componenti al pannello
-        panel.add(labelEmail);
-        panel.add(emailField);
-        panel.add(labelPassword);
-        panel.add(passwordField);
-        panel.add(registrati);
+        // Aggiunta componenti
+        formPanel.add(labelEmail);
+        formPanel.add(emailField);
+        formPanel.add(labelPassword);
+        formPanel.add(passwordField);
+        formPanel.add(registrati);
 
-        // Setup finale dialog
+        panel.add(formPanel);
+
         dialog.setContentPane(panel);
         dialog.pack();
+        dialog.setResizable(false);
         dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
     }

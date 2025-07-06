@@ -221,7 +221,7 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
     }
 
 
-
+@Override
     public ArrayList<Prenotazione> cercaPrenotazione(UtenteGenerico utente, int numeroBiglietto) {
         ArrayList<Prenotazione> lista = new ArrayList<>();
         PreparedStatement ps = null;
@@ -234,15 +234,19 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
                     "       pa.data_nascita, " +
                     "       b.id_bagaglio, " +
                     "       b.stato_bagaglio, " +
+                    "       pr.codice_volo," +
                     "       pa.id_documento " +
                     "FROM prenotazione pr " +
                     "JOIN passeggero pa ON pr.documento_passeggero = pa.id_documento " +
                     "LEFT JOIN bagaglio b ON b.numero_prenotazione = pr.numero_biglietto " +
-                    "WHERE pr.numero_biglietto = ?";
-
+                    "JOIN utente_generico ug ON ug.username = pr.username AND ug.password = pr.password " +
+                    "WHERE pr.numero_biglietto = ? "+
+                    "AND ug.username = ? " +
+                    "AND ug.password = ? ";
             ps = connection.prepareStatement(sql);
             ps.setInt(1, numeroBiglietto);
-
+            ps.setString(2, utente.getLogin());
+            ps.setString(3, utente.getPassword());
             rs = ps.executeQuery();
 
             int ultimoBiglietto = -1;
@@ -270,6 +274,9 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
                     p.setNumeroAssegnato(rs.getInt("posto_assegnato"));
                     p.setStatoPrenotazione(StatoPrenotazione.fromString(rs.getString("stato_prenotazione")));
                     p.setPasseggero(pa);
+                    Volo v = new Volo();
+                    v.setCodiceVolo(rs.getInt("codice_volo"));
+                    p.setVolo(v);
                     p.setListaBagagli(new ArrayList<>());
 
                     lista.add(p);
@@ -300,7 +307,7 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
 
         return lista;
     }
-
+@Override
     public ArrayList<Prenotazione> cercaPrenotazione(UtenteGenerico utente, String nome, String cognome) {
         ArrayList<Prenotazione> lista = new ArrayList<>();
         PreparedStatement ps = null;
@@ -316,7 +323,8 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
                     "       pa.id_documento, " +
                     "       pa.data_nascita AS aa, " +
                     "       b.id_bagaglio, " +
-                    "       b.stato_bagaglio " +
+                    "       b.stato_bagaglio, " +
+                    "       pr.codice_volo" +
                     "FROM prenotazione pr " +
                     "JOIN passeggero pa ON pr.documento_passeggero = pa.id_documento " +
                     "LEFT JOIN bagaglio b ON b.numero_prenotazione = pr.numero_biglietto " +
@@ -370,7 +378,9 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
                     prenotazioneCorrente.setStatoPrenotazione(StatoPrenotazione.fromString(rs.getString("stato_prenotazione")));
                     prenotazioneCorrente.setPasseggero(pa);
                     prenotazioneCorrente.setListaBagagli(new ArrayList<>());
-
+                    Volo v = new Volo();
+                    v.setCodiceVolo(rs.getInt("codice_volo"));
+                    prenotazioneCorrente.setVolo(v);
                     lista.add(prenotazioneCorrente);
                     ultimoBiglietto = numeroBiglietto;
                 }
@@ -382,6 +392,7 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
                     b.setPrenotazione(prenotazioneCorrente);
                     prenotazioneCorrente.getListaBagagli().add(b);
                 }
+
             }
 
         } catch (SQLException e) {
@@ -398,17 +409,31 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
         return lista;
     }
 
+    public void segnalaSmarrimento(Bagaglio bagaglio, UtenteGenerico utente) throws SQLException {
+        String sql =
+                "UPDATE bagaglio b " +
+                        "SET stato_bagaglio = ? " +
+                        "FROM prenotazione pr " +
+                        "JOIN utente_generico ug ON ug.username = pr.username AND ug.password = pr.password " +
+                        "WHERE b.numero_prenotazione = pr.numero_biglietto " +
+                        "AND ug.username = ? AND ug.password = ? " +
+                        "AND b.id_bagaglio = ?";
 
-    public void segnalaSmarrimento(Bagaglio bagaglio) {
-        try (PreparedStatement ps = connection.prepareStatement(
-                "UPDATE bagaglio SET stato_bagaglio = ? WHERE id_bagaglio = ?")) {
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, StatoBagaglio.SMARRITO.toString());
-            ps.setInt(2, bagaglio.getCodiceBagaglio());
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
+            ps.setString(2, utente.getLogin());
+            ps.setString(3, utente.getPassword());
+            ps.setInt(4, bagaglio.getCodiceBagaglio());
+
+            int affectedRows = ps.executeUpdate();
+
+            if (affectedRows == 0) {
+                throw new SQLException("Bagaglio non trovato o non appartenente all’utente.");
+            }
+
         }
     }
+
 
     public void modificaPrenotazione(Prenotazione prenotazione, ArrayList<Bagaglio> nuoviBagagli) {
         PreparedStatement psDelete = null;
@@ -453,14 +478,17 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
 
 
     @Override
-    public ArrayList<Bagaglio> cercaBagaglio(Bagaglio b) {
+    public ArrayList<Bagaglio> cercaBagaglio(Bagaglio b, UtenteGenerico u) {
         ArrayList<Bagaglio> lista = new ArrayList<>();
         String sql = "SELECT b.*, pr.numero_biglietto FROM bagaglio b " +
                 "LEFT JOIN prenotazione pr ON b.numero_prenotazione = pr.numero_biglietto " +
-                "WHERE b.id_bagaglio = ?";
+                "JOIN utente_generico ug ON ug.username = pr.username AND ug.password = pr.password " +
+                "WHERE b.id_bagaglio = ? " + "AND ug.username = ?"+" AND ug.password = ?";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, b.getCodiceBagaglio());
+            ps.setString(2, u.getLogin());
+            ps.setString(3, u.getPassword());
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Bagaglio bag = new Bagaglio();
@@ -480,16 +508,22 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
         return lista;
     }
     @Override
-    public ArrayList<Bagaglio> cercaBagaglio(Prenotazione p) {
+    public ArrayList<Bagaglio> cercaBagaglio(Prenotazione p, UtenteGenerico u) {
         ArrayList<Bagaglio> lista = new ArrayList<>();
 
         String sql = "SELECT b.*, pr.numero_biglietto " +
                 "FROM bagaglio b " +
                 "JOIN prenotazione pr ON b.numero_prenotazione = pr.numero_biglietto " +
-                "WHERE pr.numero_biglietto = ?";
+                "JOIN utente_generico ug ON ug.username = pr.username AND ug.password = pr.password " +
+                "WHERE pr.numero_biglietto = ? " +
+                "AND ug.username = ? " +
+                "AND ug.password = ?";
+
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, p.getNumeroBiglietto());
+            ps.setString(2, u.getLogin());
+            ps.setString(3, u.getPassword());
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Bagaglio bag = new Bagaglio();
