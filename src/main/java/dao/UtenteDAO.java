@@ -8,8 +8,8 @@ import java.util.List;
 
 public interface UtenteDAO {
 
-    public ArrayList<Volo> visualizzaVoli();
-    public ArrayList<Bagaglio> cercaBagaglio(Prenotazione p, UtenteGenerico u);
-    public ArrayList<Bagaglio> cercaBagaglio(Bagaglio b, UtenteGenerico u);
+    ArrayList<Volo> visualizzaVoli();
+    ArrayList<Bagaglio> cercaBagaglio(Prenotazione p, UtenteGenerico u);
+    ArrayList<Bagaglio> cercaBagaglio(Bagaglio b, UtenteGenerico u);
 
 }

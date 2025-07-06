@@ -64,7 +64,7 @@ public class DashBoardUser {
                 if (e.getStateChange() == ItemEvent.SELECTED) {
                     String itemSelezionato = (String) e.getItem();
 
-                    if (!itemSelezionato.equals("")) { // evita il reset se già su default
+                    if (!itemSelezionato.isEmpty()) { // evita il reset se già su default
                         controller.selectedItem(itemSelezionato, DashBoardUser.this);
 
                         // Torna al valore di default

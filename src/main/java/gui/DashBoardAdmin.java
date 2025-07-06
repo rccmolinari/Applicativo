@@ -3,7 +3,6 @@ package gui;
 import controller.Controller;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -145,7 +144,7 @@ public class DashBoardAdmin {
                 if (e.getStateChange() == ItemEvent.SELECTED) {
                     String itemSelezionato = (String) e.getItem();
 
-                    if (!itemSelezionato.equals("")) { // evita il reset se già su default
+                    if (!itemSelezionato.isEmpty()) { // evita il reset se già su default
                         controller.selectedItem(itemSelezionato, DashBoardAdmin.this);
 
                         // Torna al valore di default

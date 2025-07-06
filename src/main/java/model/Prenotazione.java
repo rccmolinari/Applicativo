@@ -1,5 +1,6 @@
 package model;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The type Prenotazione.
@@ -33,7 +34,7 @@ public class Prenotazione {
     /**
      * The Lista bagagli.
      */
-    public ArrayList<Bagaglio> listaBagagli = new ArrayList<>();
+    public List<Bagaglio> listaBagagli = new ArrayList<>();
 
     /**
      * Gets volo.
@@ -148,7 +149,7 @@ public class Prenotazione {
      *
      * @return the lista bagagli
      */
-    public ArrayList<Bagaglio> getListaBagagli() {
+    public List<Bagaglio> getListaBagagli() {
         return listaBagagli;
     }
 
@@ -157,7 +158,7 @@ public class Prenotazione {
      *
      * @param listaBagagli the lista bagagli
      */
-    public void setListaBagagli(ArrayList<Bagaglio> listaBagagli) {
+    public void setListaBagagli(List<Bagaglio> listaBagagli) {
         this.listaBagagli = listaBagagli;
     }
 
@@ -172,7 +173,7 @@ public class Prenotazione {
      * @param passeggero         the passeggero
      * @param listaBagagli      the lista bagagli
      */
-    public Prenotazione(UtenteGenerico utente, Volo volo, int numeroAssegnato, int numeroBiglietto, StatoPrenotazione statoPrenotazione, Passeggero passeggero, ArrayList<Bagaglio> listaBagagli) {
+    public Prenotazione(UtenteGenerico utente, Volo volo, int numeroAssegnato, int numeroBiglietto, StatoPrenotazione statoPrenotazione, Passeggero passeggero, List<Bagaglio> listaBagagli) {
         this.utente = utente;
         this.volo = volo;
         this.numeroAssegnato = numeroAssegnato;

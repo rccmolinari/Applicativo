@@ -59,7 +59,7 @@ public class Utente {
      *
      * @return the string
      */
-    public ArrayList<Volo> visualizzaVoli(ArrayList<Volo> voli) {
+    public List<Volo> visualizzaVoli(List<Volo> voli) {
         return voli;
     }
 

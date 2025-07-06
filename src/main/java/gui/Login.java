@@ -120,7 +120,7 @@ public class Login {
             @Override
             public void actionPerformed(ActionEvent e) {
                 // Passo questa istanza di Login al controller per gestire la transizione
-                controller.interfacciaRegistrazione(Login.this);
+                controller.interfacciaRegistrazione();
             }
         });
     }

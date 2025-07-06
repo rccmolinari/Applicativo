@@ -6,19 +6,18 @@ import model.Volo;
 import model.VoloInPartenza;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public interface AmministratoreDAO extends UtenteDAO {
-    public void inserisciVolo(Volo volo);
-    public void aggiornaVolo(Volo volo);
+    void inserisciVolo(Volo volo);
+    void aggiornaVolo(Volo volo);
 
     /**
      * Modifica il gate del volo.
      *
      * @param volo the volo
      */
-    public void modificaGate(VoloInPartenza volo);
-    public void aggiornaBagaglio(Bagaglio bagaglio, StatoBagaglio stato);
-    public ArrayList<Bagaglio> visualizzaSmarrimento();
+    void modificaGate(VoloInPartenza volo);
+    void aggiornaBagaglio(Bagaglio bagaglio, StatoBagaglio stato);
+    ArrayList<Bagaglio> visualizzaSmarrimento();
 
 }

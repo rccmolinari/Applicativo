@@ -1,7 +1,7 @@
 package model;
 
 import java.util.Date;
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The type Passeggero.
@@ -27,7 +27,7 @@ public class Passeggero {
     /**
      * The Lista prenotazioni.
      */
-    protected ArrayList<Prenotazione> listaPrenotazioni;
+    protected List<Prenotazione> listaPrenotazioni;
 
     /**
      * Gets id documento.
@@ -106,7 +106,7 @@ public class Passeggero {
      *
      * @return the lista prenotazioni
      */
-    public ArrayList<Prenotazione> getListaPrenotazioni() {
+    public List<Prenotazione> getListaPrenotazioni() {
         return listaPrenotazioni;
     }
 
@@ -115,7 +115,7 @@ public class Passeggero {
      *
      * @param listaPrenotazioni the lista prenotazioni
      */
-    public void setListaPrenotazioni(ArrayList<Prenotazione> listaPrenotazioni) {
+    public void setListaPrenotazioni(List<Prenotazione> listaPrenotazioni) {
         this.listaPrenotazioni = listaPrenotazioni;
     }
 
@@ -128,7 +128,7 @@ public class Passeggero {
      * @param dataNascita       the data nascita
      * @param listaPrenotazioni the lista prenotazioni
      */
-    public Passeggero(String idDocumento, String nome, String cognome, Date dataNascita, ArrayList<Prenotazione> listaPrenotazioni) {
+    public Passeggero(String idDocumento, String nome, String cognome, Date dataNascita, List<Prenotazione> listaPrenotazioni) {
         this.idDocumento = idDocumento;
         this.nome = nome;
         this.cognome = cognome;

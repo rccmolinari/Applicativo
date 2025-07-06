@@ -10,7 +10,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.sql.*;
-import java.util.ArrayList;
 
 public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoDAO {
     private Connection connection;
@@ -314,17 +313,17 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
         ResultSet rs = null;
 
         try {
-            String sql =   "SELECT pr.numero_biglietto, " +
-                    "       pr.posto_assegnato, " +
-                    "       pr.stato_prenotazione, " +
-                    "       pr.documento_passeggero, " +
-                    "       pa.nome AS nome_passeggero, " +
-                    "       pa.cognome AS cognome_passeggero, " +
-                    "       pa.id_documento, " +
-                    "       pa.data_nascita AS aa, " +
-                    "       b.id_bagaglio, " +
-                    "       b.stato_bagaglio, " +
-                    "       pr.codice_volo" +
+            String sql = "SELECT pr.numero_biglietto, " +
+                    "pr.posto_assegnato, " +
+                    "pr.stato_prenotazione, " +
+                    "pr.documento_passeggero, " +
+                    "pa.nome AS nome_passeggero, " +
+                    "pa.cognome AS cognome_passeggero, " +
+                    "pa.id_documento, " +
+                    "pa.data_nascita AS aa, " +
+                    "b.id_bagaglio, " +
+                    "b.stato_bagaglio, " +
+                    "pr.codice_volo " +                     // ← aggiunto spazio dopo ultima colonna
                     "FROM prenotazione pr " +
                     "JOIN passeggero pa ON pr.documento_passeggero = pa.id_documento " +
                     "LEFT JOIN bagaglio b ON b.numero_prenotazione = pr.numero_biglietto " +
@@ -334,6 +333,7 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
                     "AND ug.username = ? " +
                     "AND ug.password = ? " +
                     "ORDER BY pr.numero_biglietto";
+
 
             ps = connection.prepareStatement(sql);
             ps.setString(1, nome);

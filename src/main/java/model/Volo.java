@@ -3,6 +3,7 @@ package model;
 import java.sql.Time;
 import java.util.Date;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Rappresenta un volo disponibile per la prenotazione.
@@ -44,7 +45,7 @@ public class Volo {
     /**
      * The Lista prenotazioni.
      */
-    protected ArrayList<Prenotazione> listaPrenotazioni;
+    protected List<Prenotazione> listaPrenotazioni;
 
     /**
      * Restituisce il codice identificativo del volo.
@@ -58,10 +59,10 @@ public class Volo {
     /**
      * Imposta il codice identificativo del volo.
      *
-     * @param codice_Volo the codice volo
+     * @param codiceVolo the codice volo
      */
-    public void setCodiceVolo(int codice_Volo) {
-        this.codiceVolo = codice_Volo;
+    public void setCodiceVolo(int codiceVolo) {
+        this.codiceVolo = codiceVolo;
     }
 
     /**
@@ -195,7 +196,7 @@ public class Volo {
      *
      * @return the lista prenotazioni
      */
-    public ArrayList<Prenotazione> getListaPrenotazioni() {
+    public List<Prenotazione> getListaPrenotazioni() {
         return listaPrenotazioni;
     }
 
@@ -204,7 +205,7 @@ public class Volo {
      *
      * @param listaPrenotazioni the lista prenotazioni
      */
-    public void setListaPrenotazioni(ArrayList<Prenotazione> listaPrenotazioni) {
+    public void setListaPrenotazioni(List<Prenotazione> listaPrenotazioni) {
         this.listaPrenotazioni = listaPrenotazioni;
     }
 
@@ -221,7 +222,7 @@ public class Volo {
      * @param destinazione       the destinazione
      * @param listaPrenotazioni the lista prenotazioni
      */
-    public Volo(int codiceVolo, String compagnia, Date data, Time orario, int ritardo, StatoVolo stato, String origine, String destinazione, ArrayList<Prenotazione> listaPrenotazioni) {
+    public Volo(int codiceVolo, String compagnia, Date data, Time orario, int ritardo, StatoVolo stato, String origine, String destinazione, List<Prenotazione> listaPrenotazioni) {
         this.codiceVolo = codiceVolo;
         this.compagnia = compagnia;
         this.data = data;

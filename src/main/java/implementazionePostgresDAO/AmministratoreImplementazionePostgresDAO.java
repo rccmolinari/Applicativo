@@ -21,11 +21,12 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
 
     public void inserisciVolo(Volo v) {
         String tipo = "";
-
+        String inPartenza = "inPartenza";
+        String inArrivo = "inArrivo";
         if (v instanceof VoloInPartenza) {
-            tipo = "inPartenza";
+            tipo = inPartenza;
         } else if (v instanceof VoloInArrivo) {
-            tipo = "inArrivo";
+            tipo = inArrivo;
         }
 
         PreparedStatement ps = null;
@@ -103,7 +104,7 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
 
             int updated = ps.executeUpdate();
             if (updated == 0) {
-                System.err.println("⚠️ Nessuna riga aggiornata. Codice volo inesistente?");
+                System.out.println("Nessuna riga aggiornata. Codice volo inesistente?");
             }
 
         } catch (SQLException e) {
