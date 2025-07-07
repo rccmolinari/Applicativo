@@ -19,7 +19,15 @@ public class Controller {
     String codiceBagaglio = "Codice Bagaglio";
     private Amministratore admin;
     private UtenteGenerico utente;
-
+    String tabletd = "<td>";
+    String tabletr = "<tr>";
+    String closetabletd = "</td>";
+    String closetabletr = "</tr>";
+    String cerca = "Cerca";
+    String errore = "Errore: ";
+    String modifica = "Modifica";
+    String risultato ="Risultato";
+    String codiceVolo = "Codice Volo";
     public void handlerVisualizzaPrenotazioni(DashBoardUser d) {
         ArrayList<Prenotazione> prenotazioni = new UtenteGenericoImplementazionePostgresDAO().listaPrenotazioni(utente);
 
@@ -56,7 +64,7 @@ public class Controller {
         JDialog popup = new JDialog();
         popup.setTitle("Prenotazioni Effettuate");
         popup.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
-        popup.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        popup.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         popup.setSize(650, 350);
         popup.setLocationRelativeTo(null);
 
@@ -84,7 +92,7 @@ public class Controller {
         JTextField dataNascitaField = creaCampo("Data_Nascita (yyyy-mm-dd)");
         JTextField nomeField = creaCampo("Nome");
         JTextField cognomeField = creaCampo("Cognome");
-        JTextField codiceVoloField = creaCampo("Codice Volo");
+        JTextField codiceVoloField = creaCampo(codiceVolo);
         JTextField numeroBagagliField = creaCampo("Numero Bagagli");
 
         formPanel.add(idDocumentoField);
@@ -120,7 +128,7 @@ public class Controller {
 
                 JOptionPane.showMessageDialog(dialog, "Prenotazione effettuata con " + numeroBagagli + " bagagli.");
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(dialog, "Errore: " + ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(dialog, errore + ex.getMessage(), errore, JOptionPane.ERROR_MESSAGE);
             }
         }, dialog);
 
@@ -154,7 +162,7 @@ public class Controller {
         campoNome.getDocument().addDocumentListener(svuotaBigliettoListener);
         campoCognome.getDocument().addDocumentListener(svuotaBigliettoListener);
 
-        JButton cercaBtn = creaBottoneConAzione("Cerca", () -> {
+        JButton cercaBtn = creaBottoneConAzione(cerca, () -> {
             try {
                 String biglietto = campoBiglietto.getText().trim();
                 String nome = campoNome.getText().trim();
@@ -166,7 +174,7 @@ public class Controller {
                 if (haBiglietto && haNomeCognome) {
                     JOptionPane.showMessageDialog(dialog,
                             "Scegli solo una modalità di ricerca.",
-                            "Errore", JOptionPane.ERROR_MESSAGE);
+                            errore, JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
@@ -183,16 +191,16 @@ public class Controller {
                         dao.cercaPrenotazione(utente, nome, cognome);
 
                 if (risultati.isEmpty()) {
-                    JOptionPane.showMessageDialog(dialog, "Nessuna prenotazione trovata.", "Risultato", JOptionPane.INFORMATION_MESSAGE);
+                    JOptionPane.showMessageDialog(dialog, "Nessuna prenotazione trovata.", risultato, JOptionPane.INFORMATION_MESSAGE);
                     return;
                 }
 
                 mostraPopupPrenotazioni(risultati, label);
 
             } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(dialog, "Numero biglietto non valido.", "Errore", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(dialog, "Numero biglietto non valido.", errore, JOptionPane.ERROR_MESSAGE);
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(dialog, "Errore: " + ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(dialog, errore + ex.getMessage(), errore, JOptionPane.ERROR_MESSAGE);
             }
         }, dialog);
 
@@ -250,7 +258,7 @@ public class Controller {
         label.setText(testo);
         label.setForeground(Color.WHITE);
 
-        JButton modificaBtn = new JButton("Modifica");
+        JButton modificaBtn = new JButton(modifica);
         modificaBtn.setFocusPainted(false);
         modificaBtn.setBackground(new Color(255, 162, 35));
         modificaBtn.setForeground(Color.BLACK);
@@ -275,14 +283,14 @@ public class Controller {
 
         sincronizzaCampi(idBagaglioField, numeroPrenotazioneField);
 
-        JButton cercaButton = creaBottoneConAzione("Cerca", () -> {
+        JButton cercaButton = creaBottoneConAzione(cerca, () -> {
             try {
                 ArrayList<Bagaglio> risultati = eseguiRicercaBagagli(idBagaglioField, numeroPrenotazioneField);
                 mostraPopupRisultati(risultati);
             } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(dialog, "Valore numerico non valido.", "Errore", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(dialog, "Valore numerico non valido.", errore, JOptionPane.ERROR_MESSAGE);
             } catch (Exception e) {
-                JOptionPane.showMessageDialog(dialog, "Errore: " + e.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(dialog, errore + e.getMessage(), errore, JOptionPane.ERROR_MESSAGE);
             }
         }, dialog);
 
@@ -310,7 +318,7 @@ public class Controller {
     }
     private void mostraPopupRisultati(ArrayList<Bagaglio> lista) {
         if (lista.isEmpty()) {
-            JOptionPane.showMessageDialog(null, "Nessun bagaglio trovato.", "Risultato", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Nessun bagaglio trovato.", risultato, JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
@@ -387,7 +395,7 @@ public class Controller {
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(dialog, "Il codice deve essere un numero intero.", "Errore di formato", JOptionPane.ERROR_MESSAGE);
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(dialog, "Errore durante la segnalazione: " + ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(dialog, "Errore durante la segnalazione: " + ex.getMessage(), errore, JOptionPane.ERROR_MESSAGE);
             }
         }, dialog);
 
@@ -439,7 +447,7 @@ public class Controller {
 
         // Configura e mostra il dialog modale centrato rispetto alla finestra padre.
         JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(d.getComboBox1());
-        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        dialog.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         dialog.setContentPane(panel);
         dialog.pack();
         dialog.setLocationRelativeTo(frame);
@@ -451,7 +459,7 @@ public class Controller {
 
         JPanel formPanel = creaFormPanel();
 
-        JTextField codiceField = creaCampoStandard("Codice Volo");
+        JTextField codiceField = creaCampoStandard(codiceVolo);
         JTextField compagniaField = creaCampoStandard("Compagnia");
         JTextField dataField = creaCampoStandard("Data Partenza (yyyy-mm-dd)");
         JTextField orarioField = creaCampoStandard("Orario Partenza (hh:mm:ss)");
@@ -473,7 +481,7 @@ public class Controller {
                 JOptionPane.showMessageDialog(dialog, "Volo inserito correttamente!");
                 dialog.dispose();
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(dialog, "Errore: " + ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(dialog, errore + ex.getMessage(), errore, JOptionPane.ERROR_MESSAGE);
             }
 
             visualizzaVoli(d);
@@ -483,7 +491,7 @@ public class Controller {
                 inArrivoCheck, localitaField, gateField, inserisciBtn);
 
         panel.add(formPanel);
-        SwingUtilities.invokeLater(() -> inArrivoCheck.requestFocusInWindow());
+        SwingUtilities.invokeLater(inArrivoCheck::requestFocusInWindow);
     }
 
     private JPanel creaFormPanel() {
@@ -529,11 +537,11 @@ public class Controller {
 
         if (!inArrivo) {
             if (gateField.getText().isBlank()) {
-                throw new IllegalArgumentException("Errore: gate non valido");
+                throw new IllegalArgumentException(errore + "gate non valido");
             }
             gate = Integer.parseInt(gateField.getText());
             if (gate <= 0) {
-                throw new IllegalArgumentException("Errore: il numero di gate deve essere maggiore di 0");
+                throw new IllegalArgumentException(errore + "il numero di gate deve essere maggiore di 0");
             }
         }
 
@@ -564,7 +572,7 @@ public class Controller {
 
             JLabel label = new JLabel("Volo " + v.getCodiceVolo() + " → " + v.getDestinazione() + " (" + v.getData() + ")");
             label.setForeground(Color.WHITE);
-            JButton modificaBtn = new JButton("Modifica");
+            JButton modificaBtn = new JButton(modifica);
             modificaBtn.setBackground(new Color(255, 162, 35));
             modificaBtn.setForeground(Color.BLACK);
 
@@ -605,7 +613,7 @@ public class Controller {
         formPanelMG.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
         formPanelMG.setBackground(new Color(43, 48, 52));
 
-        JTextField codiceFieldGate = creaCampo("Codice Volo");
+        JTextField codiceFieldGate = creaCampo(codiceVolo);
         JTextField gateFieldGate = creaCampo("Nuovo Gate");
 
         // Colori coerenti
@@ -622,7 +630,7 @@ public class Controller {
                 int nuovoGate = Integer.parseInt(gateFieldGate.getText().trim());
 
                 if (nuovoGate <= 0) {
-                    JOptionPane.showMessageDialog(dialog, "Il numero di gate deve essere maggiore di 0.", "Errore", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(dialog, "Il numero di gate deve essere maggiore di 0.", errore, JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
@@ -636,9 +644,9 @@ public class Controller {
                 visualizzaVoli(d);
                 dialog.dispose();
             } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(dialog, "Inserisci valori numerici validi.", "Errore", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(dialog, "Inserisci valori numerici validi.", errore, JOptionPane.ERROR_MESSAGE);
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(dialog, "Errore: " + ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(dialog, errore + ex.getMessage(), errore, JOptionPane.ERROR_MESSAGE);
             }
         }, dialog);
 
@@ -654,16 +662,16 @@ public class Controller {
         JPanel formPanel = creaFormPanel(3);
         JTextField campoIdBagaglio = creaCampoStandard("ID Bagaglio (opzionale)");
         JTextField campoNumeroPrenotazione = creaCampoStandard("Numero Prenotazione (opzionale)");
-        gestisciMutuaEsclusioneCampi(campoIdBagaglio, campoNumeroPrenotazione);
+        sincronizzaCampi(campoIdBagaglio, campoNumeroPrenotazione);
 
-        JButton cercaBtn = creaBottoneConAzione("Cerca", () -> {
+        JButton cercaBtn = creaBottoneConAzione(cerca, () -> {
             try {
                 ArrayList<Bagaglio> risultati = eseguiRicercaBagagli(campoIdBagaglio, campoNumeroPrenotazione);
                 mostraRisultatiBagagli(risultati, dialog);
             } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(dialog, "Valore numerico non valido", "Errore", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(dialog, "Valore numerico non valido", errore, JOptionPane.ERROR_MESSAGE);
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(dialog, "Errore", "Errore", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(dialog, errore, errore, JOptionPane.ERROR_MESSAGE);
             }
         }, dialog);
 
@@ -683,23 +691,6 @@ public class Controller {
     }
 
 
-    private void gestisciMutuaEsclusioneCampi(JTextField campo1, JTextField campo2) {
-        final boolean[] blocco = {false};
-        DocumentListener listener = new DocumentListener() {
-            public void insertUpdate(DocumentEvent e) { aggiorna(); }
-            public void removeUpdate(DocumentEvent e) { aggiorna(); }
-            public void changedUpdate(DocumentEvent e) { aggiorna(); }
-            private void aggiorna() {
-                if (blocco[0]) return;
-                blocco[0] = true;
-                if (!campo1.getText().trim().isEmpty()) campo2.setText("");
-                if (!campo2.getText().trim().isEmpty()) campo1.setText("");
-                blocco[0] = false;
-            }
-        };
-        campo1.getDocument().addDocumentListener(listener);
-        campo2.getDocument().addDocumentListener(listener);
-    }
 
     private ArrayList<Bagaglio> eseguiRicercaBagagli(JTextField idField, JTextField prenotazioneField) {
         AmministratoreImplementazionePostgresDAO dao = new AmministratoreImplementazionePostgresDAO();
@@ -726,7 +717,7 @@ public class Controller {
 
     private void mostraRisultatiBagagli(ArrayList<Bagaglio> risultati, JDialog dialog) {
         if (risultati.isEmpty()) {
-            JOptionPane.showMessageDialog(dialog, "Nessun bagaglio trovato.", "Risultato", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(dialog, "Nessun bagaglio trovato.", risultato, JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
@@ -791,7 +782,7 @@ public class Controller {
         statoComboBox.setBackground(new Color(60, 63, 65));
         statoComboBox.setForeground(Color.WHITE);
 
-        JButton modificaBtn2 = creaBottoneConAzione("Modifica", () -> {
+        JButton modificaBtn2 = creaBottoneConAzione(modifica, () -> {
             try {
                 int codice = Integer.parseInt(codiceBagaglioField.getText().trim());
                 String statoSelezionato = (String) statoComboBox.getSelectedItem();
@@ -804,12 +795,12 @@ public class Controller {
                 new AmministratoreImplementazionePostgresDAO().aggiornaBagaglio(b, stato);
                 JOptionPane.showMessageDialog(dialog, "Stato del bagaglio aggiornato correttamente.");
             } catch (NumberFormatException e1) {
-                JOptionPane.showMessageDialog(dialog, "Codice bagaglio non valido.", "Errore", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(dialog, "Codice bagaglio non valido.", errore, JOptionPane.ERROR_MESSAGE);
             } catch (IllegalArgumentException ex) {
-                JOptionPane.showMessageDialog(dialog, "Errore durante l'assegnazione dello stato.", "Errore", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(dialog, "Errore durante l'assegnazione dello stato.", errore, JOptionPane.ERROR_MESSAGE);
             } catch (Exception ex) {
                 ex.printStackTrace();
-                JOptionPane.showMessageDialog(dialog, "Errore: " + ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(dialog, errore + ex.getMessage(), errore, JOptionPane.ERROR_MESSAGE);
             }
         }, dialog);
 
@@ -903,11 +894,10 @@ public class Controller {
                 return;
             }
             default:
-                System.out.println("Default");
         }
 
         JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(d.getComboBox1());
-        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        dialog.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         dialog.setContentPane(panel);
         dialog.pack();
         dialog.setLocationRelativeTo(frame);
@@ -988,7 +978,7 @@ public class Controller {
 
         registrati.addActionListener(e -> {
             if (emailField.getText().trim().isEmpty() || passwordField.getPassword().length == 0) {
-                JOptionPane.showMessageDialog(dialog, "Compila tutti i campi", "Errore", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(dialog, "Compila tutti i campi", errore, JOptionPane.ERROR_MESSAGE);
             } else {
                 try {
                     boolean result = registraUtente(emailField.getText().trim(), new String(passwordField.getPassword()));
@@ -996,10 +986,10 @@ public class Controller {
                         JOptionPane.showMessageDialog(dialog, "Registrazione effettuata con successo!", "Info", JOptionPane.INFORMATION_MESSAGE);
                         dialog.dispose();
                     } else {
-                        JOptionPane.showMessageDialog(dialog, "Errore registrazione, l'utente già esiste", "Errore", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(dialog, errore + "registrazione, l'utente già esiste", errore, JOptionPane.ERROR_MESSAGE);
                     }
                 } catch (IllegalArgumentException ex) {
-                    JOptionPane.showMessageDialog(dialog, ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(dialog, ex.getMessage(), errore, JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
@@ -1031,7 +1021,7 @@ public class Controller {
 
         StringBuilder html = new StringBuilder("<html><body style='color:white;font-family:sans-serif;'>");
         html.append("<table border='1' cellpadding='4' cellspacing='0'>")
-                .append("<tr>")
+                .append(tabletr)
                 .append("<th>Codice</th>")
                 .append("<th>Compagnia</th>")
                 .append("<th>Data</th>")
@@ -1041,21 +1031,30 @@ public class Controller {
                 .append("<th>Origine</th>")
                 .append("<th>Destinazione</th>")
                 .append("<th>Gate</th>")
-                .append("</tr>");
+                .append(closetabletr);
 
         for (Volo v : voli) {
-            html.append("<tr>")
-                    .append("<td>").append(v.getCodiceVolo()).append("</td>")
-                    .append("<td>").append(v.getCompagnia()).append("</td>")
-                    .append("<td>").append(v.getData()).append("</td>")
-                    .append("<td>").append(v.getOrario()).append("</td>")
-                    .append("<td>").append(v.getRitardo()).append("</td>")
-                    .append("<td>").append(v.getStato()).append("</td>")
-                    .append("<td>").append(v.getOrigine()).append("</td>")
-                    .append("<td>").append(v.getDestinazione()).append("</td>")
-                    .append("<td>").append((v instanceof VoloInPartenza) ? ((VoloInPartenza) v).getGate() : "-").append("</td>")
-                    .append("</tr>");
+            html.append(tabletr)
+                    .append(tabletd).append(v.getCodiceVolo()).append(closetabletd)
+                    .append(tabletd).append(v.getCompagnia()).append(closetabletd)
+                    .append(tabletd).append(v.getData()).append(closetabletd)
+                    .append(tabletd).append(v.getOrario()).append(closetabletd)
+                    .append(tabletd).append(v.getRitardo()).append(closetabletd)
+                    .append(tabletd).append(v.getStato()).append(closetabletd)
+                    .append(tabletd).append(v.getOrigine()).append(closetabletd)
+                    .append(tabletd).append(v.getDestinazione()).append(closetabletd);
+
+            // Gate con pattern matching, ma in un blocco if
+            html.append(tabletd);
+            if (v instanceof VoloInPartenza vinp) {
+                html.append(vinp.getGate());
+            } else {
+                html.append("-");
+            }
+            html.append(closetabletd)
+                    .append(closetabletr);
         }
+
 
         html.append("</table></body></html>");
 
@@ -1071,7 +1070,7 @@ public class Controller {
 
         StringBuilder html = new StringBuilder("<html><body style='color:white;font-family:sans-serif;'>");
         html.append("<table border='1' cellpadding='4' cellspacing='0'>")
-                .append("<tr>")
+                .append(tabletr)
                 .append("<th>Codice</th>")
                 .append("<th>Compagnia</th>")
                 .append("<th>Data</th>")
@@ -1081,21 +1080,30 @@ public class Controller {
                 .append("<th>Origine</th>")
                 .append("<th>Destinazione</th>")
                 .append("<th>Gate</th>")
-                .append("</tr>");
+                .append(closetabletr);
 
         for (Volo v : voli) {
             html.append("<tr>")
-                    .append("<td>").append(v.getCodiceVolo()).append("</td>")
-                    .append("<td>").append(v.getCompagnia()).append("</td>")
-                    .append("<td>").append(v.getData()).append("</td>")
-                    .append("<td>").append(v.getOrario()).append("</td>")
-                    .append("<td>").append(v.getRitardo()).append("</td>")
-                    .append("<td>").append(v.getStato()).append("</td>")
-                    .append("<td>").append(v.getOrigine()).append("</td>")
-                    .append("<td>").append(v.getDestinazione()).append("</td>")
-                    .append("<td>").append((v instanceof VoloInPartenza) ? ((VoloInPartenza) v).getGate() : "-").append("</td>")
-                    .append("</tr>");
+                    .append(tabletd).append(v.getCodiceVolo()).append(closetabletd)
+                    .append(tabletd).append(v.getCompagnia()).append(closetabletd)
+                    .append(tabletd).append(v.getData()).append(closetabletd)
+                    .append(tabletd).append(v.getOrario()).append(closetabletd)
+                    .append(tabletd).append(v.getRitardo()).append(closetabletd)
+                    .append(tabletd).append(v.getStato()).append(closetabletd)
+                    .append(tabletd).append(v.getOrigine()).append(closetabletd)
+                    .append(tabletd).append(v.getDestinazione()).append(closetabletd);
+
+            html.append(tabletd);
+            if (v instanceof VoloInPartenza voloinp) {
+                html.append((voloinp.getGate()));
+            } else {
+                html.append("-");
+            }
+            html.append(closetabletd);
+
+            html.append(closetabletr);
         }
+
 
         html.append("</table></body></html>");
 
@@ -1138,8 +1146,7 @@ public class Controller {
         panel.add(creaEtichetta("Origine:")); panel.add(origineField);
         panel.add(creaEtichetta("Destinazione:")); panel.add(destinazioneField);
 
-        if (volo instanceof VoloInPartenza) {
-            VoloInPartenza v = (VoloInPartenza) volo;
+        if (volo instanceof VoloInPartenza v) {
             gateField = creaCampo(String.valueOf(v.getGate()));
             panel.add(creaEtichetta("Gate:")); panel.add(gateField);
         }
@@ -1179,7 +1186,7 @@ public class Controller {
                 JOptionPane.showMessageDialog(null, "Volo aggiornato con successo!");
                 dialog.dispose();
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(null, "Errore: " + ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, errore + ex.getMessage(), errore, JOptionPane.ERROR_MESSAGE);
             }
         });
 
@@ -1218,7 +1225,7 @@ public class Controller {
         JDialog dialog = new JDialog();
         dialog.setTitle("Modifica Prenotazione");
         dialog.setModal(true);
-        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        dialog.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBackground(new Color(43, 48, 52));

@@ -18,13 +18,13 @@ public class DashBoardUser {
     private JPanel welcomeText;
 
     // Bottone per uscire dall'app (qui chiude proprio il programma)
-    private JButton LOGOUTUSER;
+    private JButton logoutUser;
 
     // Label dove mostriamo il nome o ID dell'utente loggato
     private JLabel welcomeTextLabel;
 
     // ComboBox che dà all’utente una lista di azioni possibili (tipo visualizza voli, prenota ecc.)
-    private JComboBox comboBox1;
+    private JComboBox<String> comboBox1;
 
     // Label nascosta che useremo per mostrare messaggi o risultati in pagina
     private JLabel outputLabel;
@@ -45,7 +45,7 @@ public class DashBoardUser {
         String [] choices = {"", "Visualizza Prenotazioni", "Prenota Volo", "Cerca Prenotazione", "Cerca Bagagli", "Segnala Smarrimento"};
 
         // Impostiamo la comboBox con queste opzioni
-        comboBox1.setModel(new DefaultComboBoxModel(choices));
+        comboBox1.setModel(new DefaultComboBoxModel<>(choices));
 
         this.username = username;
 
@@ -58,32 +58,26 @@ public class DashBoardUser {
         outputLabel.setVisible(false);
 
         // Quando l’utente cambia selezione nella comboBox, passiamo la scelta al controller
-        comboBox1.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                if (e.getStateChange() == ItemEvent.SELECTED) {
-                    String itemSelezionato = (String) e.getItem();
+        comboBox1.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                String itemSelezionato = (String) e.getItem();
 
-                    if (!itemSelezionato.isEmpty()) { // evita il reset se già su default
-                        controller.selectedItem(itemSelezionato, DashBoardUser.this);
+                if (!itemSelezionato.isEmpty()) {
+                    controller.selectedItem(itemSelezionato, DashBoardUser.this);
 
-                        // Torna al valore di default
-                        comboBox1.setSelectedIndex(0);
-                    }
+                    // Torna al valore di default
+                    comboBox1.setSelectedIndex(0);
                 }
             }
         });
+
 
         // Mostriamo l’ID o nome dell’utente nell’etichetta di benvenuto
         welcomeTextLabel.setText("ID: "+username);
 
         // Il bottone logout chiude tutto (da migliorare magari con logout vero)
-        LOGOUTUSER.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.exit(0);
-            }
-        });
+        logoutUser.addActionListener(e -> System.exit(0));
+
         // Carica i voli di default alla prima apertura
         controller.visualizzaVoli(this);
 
@@ -131,19 +125,19 @@ public class DashBoardUser {
         this.welcomePanel = welcomePanel;
     }
 
-    public JButton getLOGOUTUSER() {
-        return LOGOUTUSER;
+    public JButton getLogoutUser() {
+        return logoutUser;
     }
 
-    public void setLOGOUTUSER(JButton LOGOUTUSER) {
-        this.LOGOUTUSER = LOGOUTUSER;
+    public void setLogoutUser(JButton logoutUser) {
+        this.logoutUser = logoutUser;
     }
 
-    public JComboBox getComboBox1() {
+    public JComboBox<String> getComboBox1() {
         return comboBox1;
     }
 
-    public void setComboBox1(JComboBox comboBox1) {
+    public void setComboBox1(JComboBox<String> comboBox1) {
         this.comboBox1 = comboBox1;
     }
 
@@ -161,10 +155,6 @@ public class DashBoardUser {
 
     public void setChoiceDialog(JDialog choiceDialog) {
         this.choiceDialog = choiceDialog;
-    }
-
-    private void createUIComponents() {
-        // Se vuoi aggiungere componenti customizzati mettili qui
     }
 
 

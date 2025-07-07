@@ -3,34 +3,32 @@ package database;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ConnessioneDatabase {
 
+    private static final Logger LOGGER = Logger.getLogger(ConnessioneDatabase.class.getName());
+
     // ATTRIBUTI
     private static ConnessioneDatabase instance;
-    public Connection connection = null;
-    private final String nome = "postgres";
-    private final String password = "admin";
-    private final String url = "jdbc:postgresql://localhost:5432/aereoporto";
-    private final String driver = "org.postgresql.Driver";
+    public Connection connection;
+    private static final String NOME = "postgres";
+    private static final String PASSWORD = "admin";
+    private static final String URL = "jdbc:postgresql://localhost:5432/aereoporto";
 
     // COSTRUTTORE
     private ConnessioneDatabase() throws SQLException {
         try {
-            Class.forName(driver);
-            connection = DriverManager.getConnection(url, nome, password);
-
-        } catch (ClassNotFoundException ex) {
-            System.out.println("Database Connection Creation Failed : " + ex.getMessage());
+            connection = DriverManager.getConnection(URL, NOME, PASSWORD);
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Database Connection Creation Failed: {0}", ex.getMessage());
+            throw ex;
         }
-
     }
 
-
     public static ConnessioneDatabase getInstance() throws SQLException {
-        if (instance == null) {
-            instance = new ConnessioneDatabase();
-        } else if (instance.connection.isClosed()) {
+        if (instance == null || instance.connection == null || instance.connection.isClosed()) {
             instance = new ConnessioneDatabase();
         }
         return instance;

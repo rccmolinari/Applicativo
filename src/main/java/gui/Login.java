@@ -1,8 +1,6 @@
 package gui;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import controller.Controller;
@@ -13,7 +11,7 @@ public class Login {
     private JTextField login;
 
     // Bottone per confermare il login (submit)
-    private JButton INVIOButton;
+    private JButton buttonInvio;
 
     // Pannello principale che contiene tutta l'interfaccia grafica della schermata di login
     private JPanel mainPanel;
@@ -26,7 +24,7 @@ public class Login {
     private JPasswordField passwordField1;
 
     // Bottone che permette di aprire la schermata di registrazione (per utenti nuovi)
-    private JButton REGISTRATIButton;
+    private JButton buttonRegistrati;
 
     // Riferimento al controller che gestisce la logica di login e registrazione,
     // separando la UI dalla logica applicativa (pattern MVC)
@@ -70,67 +68,53 @@ public class Login {
         });
 
         // Configuro l'azione da fare quando si preme il bottone "INVIO"
-        INVIOButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+        buttonInvio.addActionListener(e -> {
+            // Prendo i dati inseriti dall'utente nei campi
+            String username = login.getText(); // o email
+            String password = new String(passwordField1.getPassword());
 
-                // Prendo i dati inseriti dall'utente nei campi
-                String username = login.getText(); // o email
-                String password = new String(passwordField1.getPassword());
+            // Chiamo il metodo di login del controller
+            controller.login(username, password);
 
-                // Chiamo il metodo di login del controller
-                controller.login(username, password);
+            // Prendo il JFrame contenitore
+            JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(buttonInvio);
+            JPanel content;
 
-                // Prendo il JFrame contenitore
-                JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(INVIOButton);
-                JPanel content;
+            // Controllo chi ha effettuato il login
+            if (controller.getUtente() != null) {
+                content = new DashBoardUser(username, controller).getHomePage();
+                frame.setContentPane(content);
+                frame.setLocationRelativeTo(null);
+                frame.setVisible(true);
+                frame.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+                frame.pack();
 
-                // Controllo chi ha effettuato il login
-                if (controller.getUtente() != null) {
-                    content = new DashBoardUser(username, controller).getHomePage();
-                    frame.setContentPane(content);
-                    frame.setLocationRelativeTo(null);
-                    frame.setVisible(true);
-                    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                    frame.pack();
+            } else if (controller.getAdmin() != null) {
+                content = new DashBoardAdmin(username, controller).getDashboardAdminPage();
+                frame.setContentPane(content);
+                frame.setLocationRelativeTo(null);
+                frame.setVisible(true);
+                frame.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+                frame.pack();
 
-                } else if (controller.getAdmin() != null) {
-                    content = new DashBoardAdmin(username, controller).getDashboardAdminPage();
-                    frame.setContentPane(content);
-                    frame.setLocationRelativeTo(null);
-                    frame.setVisible(true);
-                    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                    frame.pack();
-
-                } else {
-                    // Login fallito
-                    JOptionPane.showMessageDialog(null,
-                            "Login fallito! Utente non registrato!",
-                            "Errore di autenticazione",
-                            JOptionPane.ERROR_MESSAGE
-                    );
-                }
+            } else {
+                // Login fallito
+                JOptionPane.showMessageDialog(null,
+                        "Login fallito! Utente non registrato!",
+                        "Errore di autenticazione",
+                        JOptionPane.ERROR_MESSAGE
+                );
             }
         });
+
 
 
 
         // Se clicchi su "REGISTRATI", chiamo il metodo per aprire l'interfaccia di registrazione
-        REGISTRATIButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // Passo questa istanza di Login al controller per gestire la transizione
-                controller.interfacciaRegistrazione();
-            }
-        });
+        buttonRegistrati.addActionListener(e -> controller.interfacciaRegistrazione());
+
     }
 
-    /**
-     * Metodo vuoto richiesto da IntelliJ o altri tool per creare componenti personalizzati.
-     * Qui si potrebbe implementare la creazione manuale di componenti Swing se necessario.
-     */
-    private void createUIComponents() {
-    }
 
     // --- Getter e Setter ---
     // Consentono di accedere e modificare i componenti UI da altre classi,
@@ -152,12 +136,12 @@ public class Login {
         this.passwordField1 = password;
     }
 
-    public JButton getINVIOButton() {
-        return INVIOButton;
+    public JButton getButtonInvio() {
+        return buttonInvio;
     }
 
-    public void setINVIOButton(JButton INVIOButton) {
-        this.INVIOButton = INVIOButton;
+    public void setButtonInvio(JButton buttonInvio) {
+        this.buttonInvio = buttonInvio;
     }
 
     public JPanel getMainPanel() {

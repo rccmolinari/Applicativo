@@ -3,10 +3,7 @@ package gui;
 import controller.Controller;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 
 public class DashBoardAdmin {
 
@@ -29,10 +26,10 @@ public class DashBoardAdmin {
     private JLabel welcomeTextLabel;
 
     // Bottone per uscire o logout (qui chiude semplicemente tutto il programma)
-    private JButton LOGOUTUSER;
+    private JButton logoutUser;
 
     // Menu a tendina con le azioni che l’admin può scegliere di fare (es. visualizza voli, aggiorna voli...)
-    private JComboBox comboBox1;
+    private JComboBox<String> comboBox1;
 
     // Label che usiamo per mostrare messaggi di output o feedback dopo un’azione
     private JLabel outputLabel;
@@ -88,21 +85,22 @@ public class DashBoardAdmin {
         this.welcomeTextLabel = welcomeTextLabel;
     }
 
-    public JButton getLOGOUTUSER() {
-        return LOGOUTUSER;
+    public JButton getLogoutUser() {
+        return logoutUser;
     }
 
-    public void setLOGOUTUSER(JButton LOGOUTUSER) {
-        this.LOGOUTUSER = LOGOUTUSER;
+    public void setLogoutUser(JButton logoutUser) {
+        this.logoutUser = logoutUser;
     }
 
-    public JComboBox getComboBox1() {
+    public JComboBox<String> getComboBox1() {
         return comboBox1;
     }
 
-    public void setComboBox1(JComboBox comboBox1) {
+    public void setComboBox1(JComboBox<String> comboBox1) {
         this.comboBox1 = comboBox1;
     }
+
 
     public JLabel getOutputLabel() {
         return outputLabel;
@@ -135,36 +133,28 @@ public class DashBoardAdmin {
         // Abilito la comboBox, la riempio con le scelte e nascondo la label output che non serve subito
         comboBox1.setEnabled(true);
         outputLabel.setVisible(false);
-        comboBox1.setModel(new DefaultComboBoxModel(choices));
+        comboBox1.setModel(new DefaultComboBoxModel<>(choices));
 
         // Quando cambia la selezione, mando la scelta al controller per far partire l’azione giusta
-        comboBox1.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                if (e.getStateChange() == ItemEvent.SELECTED) {
-                    String itemSelezionato = (String) e.getItem();
+        comboBox1.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                String itemSelezionato = (String) e.getItem();
 
-                    if (!itemSelezionato.isEmpty()) { // evita il reset se già su default
-                        controller.selectedItem(itemSelezionato, DashBoardAdmin.this);
-
-                        // Torna al valore di default
-                    }
-                    comboBox1.setSelectedIndex(0);
-                    controller.visualizzaVoli(DashBoardAdmin.this);
+                if (!itemSelezionato.isEmpty()) {
+                    controller.selectedItem(itemSelezionato, DashBoardAdmin.this);
                 }
+
+                comboBox1.setSelectedIndex(0);
+                controller.visualizzaVoli(DashBoardAdmin.this);
             }
         });
+
 
         // Faccio vedere in alto chi è loggato (l’admin)
         welcomeTextLabel.setText("ID: " + username);
 
         // Il bottone logout per ora chiude semplicemente tutto (da migliorare in futuro)
-        LOGOUTUSER.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.exit(0);
-            }
-        });
+        logoutUser.addActionListener(e -> System.exit(0));
         controller.visualizzaVoli(this);
     }
 
