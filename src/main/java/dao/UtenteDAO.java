@@ -4,7 +4,6 @@ import model.*;
 import model.Volo;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public interface UtenteDAO {
 

@@ -9,6 +9,6 @@ public class Main {
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
         frame.pack();
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
     }
 }

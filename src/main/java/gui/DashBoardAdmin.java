@@ -45,61 +45,10 @@ public class DashBoardAdmin {
 
     // Tutti i getter e setter servono per accedere o modificare i componenti GUI da altre parti del programma
 
-    public JLabel getAdminLabel() {
-        return adminLabel;
-    }
-
-    public void setAdminLabel(JLabel adminLabel) {
-        this.adminLabel = adminLabel;
-    }
-
-    public JPanel getHomePage() {
-        return homePage;
-    }
-
-    public void setHomePage(JPanel homePage) {
-        this.homePage = homePage;
-    }
-
-    public JPanel getWelcomePanel() {
-        return welcomePanel;
-    }
-
-    public void setWelcomePanel(JPanel welcomePanel) {
-        this.welcomePanel = welcomePanel;
-    }
-
-    public JPanel getWelcomeText() {
-        return welcomeText;
-    }
-
-    public void setWelcomeText(JPanel welcomeText) {
-        this.welcomeText = welcomeText;
-    }
-
-    public JLabel getWelcomeTextLabel() {
-        return welcomeTextLabel;
-    }
-
-    public void setWelcomeTextLabel(JLabel welcomeTextLabel) {
-        this.welcomeTextLabel = welcomeTextLabel;
-    }
-
-    public JButton getLogoutUser() {
-        return logoutUser;
-    }
-
-    public void setLogoutUser(JButton logoutUser) {
-        this.logoutUser = logoutUser;
-    }
-
     public JComboBox<String> getComboBox1() {
         return comboBox1;
     }
 
-    public void setComboBox1(JComboBox<String> comboBox1) {
-        this.comboBox1 = comboBox1;
-    }
 
 
     public JLabel getOutputLabel() {
@@ -161,10 +110,6 @@ public class DashBoardAdmin {
     // Metodo per ottenere il pannello principale della dashboard, così si può inserire nel frame principale
     public JPanel getDashboardAdminPage() {
         return dashboardAdminPage;
-    }
-
-    public void setDashboardAdminPage(JPanel dashboardAdminPage) {
-        this.dashboardAdminPage = dashboardAdminPage;
     }
 
     // Per gestire il dialog di scelta da altre classi se serve aprirlo o chiuderlo

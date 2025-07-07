@@ -8,6 +8,8 @@ import java.awt.*;
 import java.sql.Time;
 import java.util.ArrayList;
 import java.sql.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import gui.*;
 import javax.swing.*;
@@ -799,9 +801,10 @@ public class Controller {
             } catch (IllegalArgumentException ex) {
                 JOptionPane.showMessageDialog(dialog, "Errore durante l'assegnazione dello stato.", errore, JOptionPane.ERROR_MESSAGE);
             } catch (Exception ex) {
-                ex.printStackTrace();
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Errore imprevisto durante l'aggiornamento dello stato del bagaglio", ex);
                 JOptionPane.showMessageDialog(dialog, errore + ex.getMessage(), errore, JOptionPane.ERROR_MESSAGE);
             }
+
         }, dialog);
 
         formPanelAB.add(codiceBagaglioField);
@@ -931,9 +934,6 @@ public class Controller {
     // Getter e setter per gestire gli utenti attivi nel controller
     public Amministratore getAdmin() {
         return admin;
-    }
-    public void setAdmin(Amministratore admin) {
-        this.admin = admin;
     }
     public UtenteGenerico getUtente() {
         return utente;
@@ -1305,7 +1305,7 @@ public class Controller {
             } catch (NumberFormatException nfe) {
                 JOptionPane.showMessageDialog(null, "Inserisci un numero valido di bagagli.", "Errore", JOptionPane.ERROR_MESSAGE);
             } catch (Exception ex) {
-                ex.printStackTrace();
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Errore durante l'aggiornamento", ex);
                 JOptionPane.showMessageDialog(null, "Errore durante l'aggiornamento.", "Errore", JOptionPane.ERROR_MESSAGE);
             }
         });

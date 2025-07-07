@@ -85,68 +85,17 @@ public class DashBoardUser {
 
     // Qui sotto ci sono tutti i getter e setter per i componenti, utili per modificarli o leggerli da fuori
 
-    public JLabel getWelcomeTextLabel() {
-        return welcomeTextLabel;
-    }
-
-    public void setWelcomeTextLabel(JLabel welcomeTextLabel) {
-        this.welcomeTextLabel = welcomeTextLabel;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public void setWelcomeText(JPanel welcomeText) {
-        this.welcomeText = welcomeText;
-    }
-
     public JPanel getHomePage() {
         return homePage;
-    }
-
-    public void setHomePage(JPanel homePage) {
-        this.homePage = homePage;
-    }
-
-    public JPanel getWelcomeText() {
-        return welcomeText;
-    }
-
-    public JPanel getWelcomePanel() {
-        return welcomePanel;
-    }
-
-    public void setWelcomePanel(JPanel welcomePanel) {
-        this.welcomePanel = welcomePanel;
-    }
-
-    public JButton getLogoutUser() {
-        return logoutUser;
-    }
-
-    public void setLogoutUser(JButton logoutUser) {
-        this.logoutUser = logoutUser;
     }
 
     public JComboBox<String> getComboBox1() {
         return comboBox1;
     }
 
-    public void setComboBox1(JComboBox<String> comboBox1) {
-        this.comboBox1 = comboBox1;
-    }
 
     public JLabel getOutputLabel() {
         return outputLabel;
-    }
-
-    public void setOutputLabel(JLabel outputLabel) {
-        this.outputLabel = outputLabel;
     }
 
     public JDialog getChoiceDialog() {
