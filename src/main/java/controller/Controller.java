@@ -1328,7 +1328,7 @@ public class Controller {
         dialog.setVisible(true);
     }
 
-    private class Mpmv extends RuntimeException {
+    private static class Mpmv extends RuntimeException {
         public Mpmv(String message) {
             super(message);
         }
