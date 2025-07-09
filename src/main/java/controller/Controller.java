@@ -1174,12 +1174,12 @@ public class Controller {
                 String origine = origineField.getText();
                 String destinazione = destinazioneField.getText();
                 if(origine.equals(destinazione)) {
-                    throw new RuntimeException(errore + "origine e destinazione non possono essere uguali");
+                    throw new Mpmv(errore + "origine e destinazione non possono essere uguali");
                 }
                 if (volo instanceof VoloInPartenza) {
                     int gate = Integer.parseInt(finalGateField.getText());
                     if(gate <= 0) {
-                        throw new RuntimeException(errore + "il numero di gate deve essere maggiore di 0");
+                        throw new Mpmv(errore + "il numero di gate deve essere maggiore di 0");
                     }
                     VoloInPartenza vPartModificato = new VoloInPartenza(
                             nuovoCodice, compagnia, data, orario, ritardo,
@@ -1328,6 +1328,10 @@ public class Controller {
         dialog.setVisible(true);
     }
 
-
+    private class Mpmv extends RuntimeException {
+        public Mpmv(String message) {
+            super(message);
+        }
+    }
 }
 

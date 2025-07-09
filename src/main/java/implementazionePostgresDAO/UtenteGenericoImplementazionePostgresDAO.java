@@ -67,8 +67,7 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
             }
 
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Errore durante la visualizzazione dei voli", e);
-            throw new RuntimeException("Errore durante la visualizzazione dei voli", e);
+            throw new CustomExc("Errore durante la visualizzazione dei voli", e);
         }
 
         return lista;
@@ -123,8 +122,7 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
             }
 
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Errore durante il recupero delle prenotazioni", e);
-            throw new RuntimeException("Errore durante il recupero delle prenotazioni", e);
+            throw new CustomExc("Errore durante il recupero delle prenotazioni", e);
         }
 
         return lista;
@@ -140,8 +138,7 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
                 throw new SQLException("Volo non esistente, non disponibile o già decollato.");
             }
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Errore durante il controllo del volo", e);
-            throw new RuntimeException("Volo non esistente, non disponibile o già decollato.", e);
+            throw new CustomExc("Volo non esistente, non disponibile o già decollato.", e);
         }
         final String SQL_PASSEGGERO = """
         INSERT INTO passeggero (id_documento, nome, cognome, data_nascita)
@@ -214,7 +211,7 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
             } catch (SQLException rollbackEx) {
                 LOGGER.log(Level.SEVERE, "Errore nel rollback", rollbackEx);
             }
-            throw new PrenotazioneException("Errore durante la prenotazione", e);
+            throw new CustomExc("Errore durante la prenotazione", e);
         }
         finally {
             try {
@@ -296,8 +293,7 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
             }
 
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Errore durante la ricerca della prenotazione", e);
-            throw new PrenotazioneException("Errore durante la ricerca della prenotazione", e);
+            throw new CustomExc("Errore durante la ricerca della prenotazione", e);
         }
 
         return lista;
@@ -382,8 +378,7 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
             }
 
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Errore durante la ricerca della prenotazione per nome e cognome", e);
-            throw new PrenotazioneException("Errore durante la ricerca della prenotazione per nome e cognome", e);
+            throw new CustomExc("Errore durante la ricerca della prenotazione per nome e cognome", e);
         }
 
         return lista;
@@ -419,7 +414,6 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
 
         } catch (SQLException e) {
             String msg = "Errore durante la segnalazione di smarrimento";
-            LOGGER.log(Level.SEVERE, msg, e);
             throw new SQLException(msg, e);
         }
 
@@ -458,7 +452,7 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
             } catch (SQLException rollbackEx) {
                 LOGGER.log(Level.SEVERE, "Errore durante il rollback", rollbackEx);
             }
-            throw new ModificaPrenotazioneException("Errore durante modifica prenotazione: " + e.getMessage(), e);
+            throw new CustomExc("Errore durante modifica prenotazione: " + e.getMessage(), e);
 
         } finally {
             try {
@@ -503,8 +497,7 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
             }
 
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Errore durante la ricerca del bagaglio", e);
-            throw new RuntimeException("Errore durante la ricerca del bagaglio", e);
+            throw new CustomExc("Errore durante la ricerca del bagaglio", e);
         }
 
         return lista;
@@ -543,7 +536,7 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
             if (LOGGER.isLoggable(Level.SEVERE)) {
                 LOGGER.log(Level.SEVERE, String.format("Errore durante la ricerca dei bagagli per la prenotazione n° %d", p.getNumeroBiglietto()), e);
             }
-            throw new RuntimeException("Errore durante la ricerca dei bagagli per la prenotazione", e);
+            throw new CustomExc("Errore durante la ricerca dei bagagli per la prenotazione", e);
         }
 
         return lista;
@@ -555,17 +548,12 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
     }
 
 
-    private static class PrenotazioneException extends RuntimeException {
-        public PrenotazioneException(String message, Throwable cause) {
+    private static class CustomExc extends RuntimeException {
+        public CustomExc(String message, Throwable cause) {
             super(message, cause);
         }
     }
 
-    private static class ModificaPrenotazioneException extends RuntimeException {
-        public ModificaPrenotazioneException(String message, Throwable cause) {
-            super(message, cause);
-        }
-    }
 
 }
 

@@ -22,7 +22,7 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
         try {
             connection = ConnessioneDatabase.getInstance().connection;
         } catch (SQLException e) {
-            throw new ConnessioneDatabaseException("Errore nella connessione al database", e);
+            throw new CustomExc("Errore nella connessione al database", e);
         }
     }
 
@@ -59,8 +59,7 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
             LOGGER.info("Volo inserito con successo: " + v.getCodiceVolo());
 
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Errore durante l'inserimento del volo", e);
-            throw new RuntimeException("Errore durante l'inserimento del volo: " + v.getCodiceVolo(), e);
+            throw new CustomExc("Errore durante l'inserimento del volo: " + v.getCodiceVolo(), e);
         }
     }
 
@@ -100,8 +99,7 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
             }
 
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Errore durante l'aggiornamento del volo", e);
-            throw new RuntimeException("Errore durante l'aggiornamento del volo: " + v.getCodiceVolo(), e);
+            throw new CustomExc("Errore durante l'aggiornamento del volo: " + v.getCodiceVolo(), e);
         }
     }
 
@@ -114,14 +112,12 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
             checkStmt.setInt(1, volo.getCodiceVolo());
             try (ResultSet rs = checkStmt.executeQuery()) {
                 if (!rs.next()) {
-                    LOGGER.warning("Tentativo di modifica gate per un volo non esistente: " + volo.getCodiceVolo());
-                    throw new RuntimeException("Il volo con codice " + volo.getCodiceVolo() + " non esiste.");
+                    throw new CustomExc("Il volo con codice " + volo.getCodiceVolo() + " non esiste.", new RuntimeException());
                 }
 
                 String tipoVolo = rs.getString("tipo_volo");
                 if (!"inPartenza".equalsIgnoreCase(tipoVolo)) {
-                    LOGGER.warning("Modifica gate negata: il volo " + volo.getCodiceVolo() + " non è di tipo 'inPartenza' (trovato: " + tipoVolo + ")");
-                    throw new RuntimeException("Il gate può essere modificato solo per voli in partenza.");
+                    throw new CustomExc("Il gate può essere modificato solo per voli in partenza.", new RuntimeException());
                 }
             }
 
@@ -133,8 +129,7 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
             }
 
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Errore durante la modifica del gate", e);
-            throw new RuntimeException("Errore durante la modifica del gate per il volo: " + volo.getCodiceVolo(), e);
+            throw new CustomExc("Errore durante la modifica del gate per il volo: " + volo.getCodiceVolo(), e);
         }
     }
 
@@ -151,8 +146,7 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
             checkStmt.setInt(1, bagaglio.getCodiceBagaglio());
             try (ResultSet rs = checkStmt.executeQuery()) {
                 if (!rs.next()) {
-                    LOGGER.log(Level.WARNING, "Bagaglio con ID {0} non trovato", bagaglio.getCodiceBagaglio());
-                    throw new RuntimeException("Bagaglio con ID " + bagaglio.getCodiceBagaglio() + " non esiste.");
+                    throw new CustomExc("Bagaglio con ID " + bagaglio.getCodiceBagaglio() + " non esiste.", new RuntimeException());
                 }
             }
 
@@ -164,8 +158,7 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
             LOGGER.log(Level.INFO, "Stato bagaglio aggiornato a {0} per ID {1}", new Object[]{stato, bagaglio.getCodiceBagaglio()});
 
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Errore durante l'aggiornamento del bagaglio", e);
-            throw new RuntimeException("Errore durante l'aggiornamento del bagaglio con ID: " + bagaglio.getCodiceBagaglio(), e);
+            throw new CustomExc("Errore durante l'aggiornamento del bagaglio con ID: " + bagaglio.getCodiceBagaglio(), e);
         }
     }
 
@@ -195,8 +188,7 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
             }
 
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Errore durante il recupero dei bagagli smarriti", e);
-            throw new RuntimeException("Errore durante il recupero dei bagagli smarriti", e);
+            throw new CustomExc("Errore durante il recupero dei bagagli smarriti", e);
         }
 
         return lista;
@@ -242,8 +234,7 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
             }
 
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Errore durante la visualizzazione dei voli", e);
-            throw new RuntimeException("Errore durante la visualizzazione dei voli", e);
+            throw new CustomExc("Errore durante la visualizzazione dei voli", e);
         }
 
         return lista;
@@ -277,8 +268,7 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
             }
 
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Errore durante la ricerca del bagaglio", e);
-            throw new RuntimeException("Errore durante la ricerca del bagaglio", e);
+            throw new CustomExc("Errore durante la ricerca del bagaglio", e);
         }
 
         return lista;
@@ -308,15 +298,14 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
             }
 
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Errore durante la ricerca bagagli per prenotazione", e);
-            throw new RuntimeException("Errore durante la ricerca bagagli per prenotazione", e);
+            throw new CustomExc("Errore durante la ricerca bagagli per prenotazione", e);
         }
 
         return lista;
     }
 
-    public static class ConnessioneDatabaseException extends RuntimeException {
-        public ConnessioneDatabaseException(String message, Throwable cause) {
+    public static class CustomExc extends RuntimeException {
+        public CustomExc(String message, Throwable cause) {
             super(message, cause);
         }
     }
