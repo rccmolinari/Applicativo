@@ -924,7 +924,7 @@ public class Controller {
         btn.setBackground(new Color(255, 162, 35));
         btn.setForeground(Color.BLACK);
         btn.addActionListener(e -> {
-            azione.run(); // Esegui la query specifica
+            azione.run();
             dialog.dispose();
         });
         return btn;
@@ -1128,8 +1128,11 @@ public class Controller {
         JTextField codiceField = creaCampo(String.valueOf(volo.getCodiceVolo()));
         codiceField.setEditable(false);
         JTextField compagniaField = creaCampo(volo.getCompagnia());
+        compagniaField.setEditable(false);
         JTextField dataField = creaCampo(volo.getData().toString());
+        dataField.setEditable(false);
         JTextField orarioField = creaCampo(volo.getOrario().toString());
+        orarioField.setEditable(false);
         JTextField ritardoField = creaCampo(String.valueOf(volo.getRitardo()));
         JTextField statoField = creaCampo(volo.getStato().name());
         JTextField origineField = creaCampo(volo.getOrigine());
@@ -1147,8 +1150,11 @@ public class Controller {
         panel.add(creaEtichetta("Destinazione:")); panel.add(destinazioneField);
 
         if (volo instanceof VoloInPartenza v) {
+            origineField.setEditable(false);
             gateField = creaCampo(String.valueOf(v.getGate()));
             panel.add(creaEtichetta("Gate:")); panel.add(gateField);
+        } else {
+            destinazioneField.setEditable(false);
         }
 
         JButton conferma = new JButton("Conferma modifica");
@@ -1167,9 +1173,14 @@ public class Controller {
                 StatoVolo stato = StatoVolo.valueOf(statoField.getText().toUpperCase());
                 String origine = origineField.getText();
                 String destinazione = destinazioneField.getText();
-
+                if(origine.equals(destinazione)) {
+                    throw new RuntimeException(errore + "origine e destinazione non possono essere uguali");
+                }
                 if (volo instanceof VoloInPartenza) {
                     int gate = Integer.parseInt(finalGateField.getText());
+                    if(gate <= 0) {
+                        throw new RuntimeException(errore + "il numero di gate deve essere maggiore di 0");
+                    }
                     VoloInPartenza vPartModificato = new VoloInPartenza(
                             nuovoCodice, compagnia, data, orario, ritardo,
                             stato, destinazione, new ArrayList<>(), gate
@@ -1182,6 +1193,7 @@ public class Controller {
                     );
                     new AmministratoreImplementazionePostgresDAO().aggiornaVolo(vArrModificato);
                 }
+
 
                 JOptionPane.showMessageDialog(null, "Volo aggiornato con successo!");
                 dialog.dispose();

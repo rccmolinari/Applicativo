@@ -68,6 +68,7 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
 
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Errore durante la visualizzazione dei voli", e);
+            throw new RuntimeException("Errore durante la visualizzazione dei voli", e);
         }
 
         return lista;
@@ -123,6 +124,7 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
 
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Errore durante il recupero delle prenotazioni", e);
+            throw new RuntimeException("Errore durante il recupero delle prenotazioni", e);
         }
 
         return lista;
@@ -284,6 +286,7 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
 
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Errore durante la ricerca della prenotazione", e);
+            throw new PrenotazioneException("Errore durante la ricerca della prenotazione", e);
         }
 
         return lista;
@@ -369,6 +372,7 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
 
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Errore durante la ricerca della prenotazione per nome e cognome", e);
+            throw new PrenotazioneException("Errore durante la ricerca della prenotazione per nome e cognome", e);
         }
 
         return lista;
@@ -489,6 +493,7 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
 
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Errore durante la ricerca del bagaglio", e);
+            throw new RuntimeException("Errore durante la ricerca del bagaglio", e);
         }
 
         return lista;
@@ -527,6 +532,7 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
             if (LOGGER.isLoggable(Level.SEVERE)) {
                 LOGGER.log(Level.SEVERE, String.format("Errore durante la ricerca dei bagagli per la prenotazione n° %d", p.getNumeroBiglietto()), e);
             }
+            throw new RuntimeException("Errore durante la ricerca dei bagagli per la prenotazione", e);
         }
 
         return lista;

@@ -60,6 +60,7 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
 
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Errore durante l'inserimento del volo", e);
+            throw new RuntimeException("Errore durante l'inserimento del volo: " + v.getCodiceVolo(), e);
         }
     }
 
@@ -100,38 +101,71 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
 
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Errore durante l'aggiornamento del volo", e);
+            throw new RuntimeException("Errore durante l'aggiornamento del volo: " + v.getCodiceVolo(), e);
         }
     }
 
     @Override
     public void modificaGate(VoloInPartenza volo) {
-        final String SQL = "UPDATE volo SET gate = ? WHERE codice_volo = ?";
+        final String CHECK_SQL = "SELECT tipo_volo FROM volo WHERE codice_volo = ?";
+        final String UPDATE_SQL = "UPDATE volo SET gate = ? WHERE codice_volo = ?";
 
-        try (PreparedStatement ps = connection.prepareStatement(SQL)) {
-            ps.setInt(1, volo.getGate());
-            ps.setInt(2, volo.getCodiceVolo());
+        try (PreparedStatement checkStmt = connection.prepareStatement(CHECK_SQL)) {
+            checkStmt.setInt(1, volo.getCodiceVolo());
+            try (ResultSet rs = checkStmt.executeQuery()) {
+                if (!rs.next()) {
+                    LOGGER.warning("Tentativo di modifica gate per un volo non esistente: " + volo.getCodiceVolo());
+                    throw new RuntimeException("Il volo con codice " + volo.getCodiceVolo() + " non esiste.");
+                }
 
-            ps.executeUpdate();
-            LOGGER.info("Gate aggiornato per il volo: " + volo.getCodiceVolo());
+                String tipoVolo = rs.getString("tipo_volo");
+                if (!"inPartenza".equalsIgnoreCase(tipoVolo)) {
+                    LOGGER.warning("Modifica gate negata: il volo " + volo.getCodiceVolo() + " non è di tipo 'inPartenza' (trovato: " + tipoVolo + ")");
+                    throw new RuntimeException("Il gate può essere modificato solo per voli in partenza.");
+                }
+            }
+
+            try (PreparedStatement updateStmt = connection.prepareStatement(UPDATE_SQL)) {
+                updateStmt.setInt(1, volo.getGate());
+                updateStmt.setInt(2, volo.getCodiceVolo());
+                updateStmt.executeUpdate();
+                LOGGER.info("Gate aggiornato per il volo: " + volo.getCodiceVolo());
+            }
 
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Errore durante la modifica del gate", e);
+            throw new RuntimeException("Errore durante la modifica del gate per il volo: " + volo.getCodiceVolo(), e);
         }
     }
 
     @Override
     public void aggiornaBagaglio(Bagaglio bagaglio, StatoBagaglio stato) {
-        final String SQL = "UPDATE bagaglio SET stato_bagaglio = ? WHERE id_bagaglio = ?";
+        final String CHECK_SQL = "SELECT 1 FROM bagaglio WHERE id_bagaglio = ?";
+        final String UPDATE_SQL = "UPDATE bagaglio SET stato_bagaglio = ? WHERE id_bagaglio = ?";
 
-        try (PreparedStatement ps = connection.prepareStatement(SQL)) {
-            ps.setString(1, stato.toString());
-            ps.setInt(2, bagaglio.getCodiceBagaglio());
+        try (
+                PreparedStatement checkStmt = connection.prepareStatement(CHECK_SQL);
+                PreparedStatement updateStmt = connection.prepareStatement(UPDATE_SQL)
+        ) {
+            // Verifica esistenza del bagaglio
+            checkStmt.setInt(1, bagaglio.getCodiceBagaglio());
+            try (ResultSet rs = checkStmt.executeQuery()) {
+                if (!rs.next()) {
+                    LOGGER.log(Level.WARNING, "Bagaglio con ID {0} non trovato", bagaglio.getCodiceBagaglio());
+                    throw new RuntimeException("Bagaglio con ID " + bagaglio.getCodiceBagaglio() + " non esiste.");
+                }
+            }
 
-            ps.executeUpdate();
+            // Esegue aggiornamento
+            updateStmt.setString(1, stato.toString());
+            updateStmt.setInt(2, bagaglio.getCodiceBagaglio());
+            updateStmt.executeUpdate();
+
             LOGGER.log(Level.INFO, "Stato bagaglio aggiornato a {0} per ID {1}", new Object[]{stato, bagaglio.getCodiceBagaglio()});
 
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Errore durante l'aggiornamento del bagaglio", e);
+            throw new RuntimeException("Errore durante l'aggiornamento del bagaglio con ID: " + bagaglio.getCodiceBagaglio(), e);
         }
     }
 
@@ -162,6 +196,7 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
 
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Errore durante il recupero dei bagagli smarriti", e);
+            throw new RuntimeException("Errore durante il recupero dei bagagli smarriti", e);
         }
 
         return lista;
@@ -208,6 +243,7 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
 
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Errore durante la visualizzazione dei voli", e);
+            throw new RuntimeException("Errore durante la visualizzazione dei voli", e);
         }
 
         return lista;
@@ -242,6 +278,7 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
 
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Errore durante la ricerca del bagaglio", e);
+            throw new RuntimeException("Errore durante la ricerca del bagaglio", e);
         }
 
         return lista;
@@ -272,6 +309,7 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
 
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Errore durante la ricerca bagagli per prenotazione", e);
+            throw new RuntimeException("Errore durante la ricerca bagagli per prenotazione", e);
         }
 
         return lista;
