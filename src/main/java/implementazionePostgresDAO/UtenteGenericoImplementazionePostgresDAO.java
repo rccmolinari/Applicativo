@@ -132,6 +132,17 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
 
     @Override
     public void prenotaVolo(UtenteGenerico utente, Volo volo, Passeggero passeggero, ArrayList<Bagaglio> bagagli) {
+        final String check= "SELECT 1 FROM volo WHERE codice_volo = ? AND stato_volo <> 'CANCELLATO' AND stato_volo <> 'DECOLLATO'";
+        try (PreparedStatement psCheck = connection.prepareStatement(check)) {
+            psCheck.setInt(1, volo.getCodiceVolo());
+            ResultSet rs = psCheck.executeQuery();
+            if (!rs.next()) {
+                throw new SQLException("Volo non esistente, non disponibile o già decollato.");
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Errore durante il controllo del volo", e);
+            throw new RuntimeException("Volo non esistente, non disponibile o già decollato.", e);
+        }
         final String SQL_PASSEGGERO = """
         INSERT INTO passeggero (id_documento, nome, cognome, data_nascita)
         VALUES (?, ?, ?, ?)
