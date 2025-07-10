@@ -10,14 +10,14 @@ import java.util.List;
 public class UtenteGenerico extends Utente {
 
     /** Lista dei voli prenotati dall'utente. */
-    protected List<Volo> listaPrenotazioni;
+    protected List<Prenotazione> listaPrenotazioni;
 
     /**
      * Restituisce la lista delle prenotazioni dell'utente.
      *
      * @return lista di oggetti {@code Volo} prenotati
      */
-    public List<Volo> getListaPrenotazioni() {
+    public List<Prenotazione> getListaPrenotazioni() {
         return listaPrenotazioni;
     }
 
@@ -26,7 +26,7 @@ public class UtenteGenerico extends Utente {
      *
      * @param listaPrenotazioni lista di voli da assegnare
      */
-    public void setListaPrenotazioni(List<Volo> listaPrenotazioni) {
+    public void setListaPrenotazioni(List<Prenotazione> listaPrenotazioni) {
         this.listaPrenotazioni = listaPrenotazioni;
     }
 
@@ -37,7 +37,7 @@ public class UtenteGenerico extends Utente {
      * @param password password dell'utente
      * @param listaPrenotazioni lista dei voli prenotati
      */
-    public UtenteGenerico(String login, String password, List<Volo> listaPrenotazioni) {
+    public UtenteGenerico(String login, String password, List<Prenotazione> listaPrenotazioni) {
         super(login, password);
         this.listaPrenotazioni = listaPrenotazioni;
     }

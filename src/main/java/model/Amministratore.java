@@ -11,8 +11,8 @@ public class Amministratore extends Utente {
     /**
      * Costruttore completo della classe, permette il login dell'Amministratore.
      *
-     * @param login    the login
-     * @param password the password
+     * @param login email/username dell'amministratore
+     * @param password password
      */
     public Amministratore(String login, String password) {
         super(login, password);
