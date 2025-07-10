@@ -25,9 +25,9 @@ import javax.swing.event.DocumentListener;
  *
  * Dipendenze principali:
  *
- *   <li>{@code AmministratoreImplementazionePostgresDAO} per operazioni admin</li>
- *   <li>{@code UtenteGenericoImplementazionePostgresDAO} per operazioni utente</li>
- *   <li>{@code LoginImplementazionePostgresDAO} per autenticazione e registrazione</li>
+ *   -@code AmministratoreImplementazionePostgresDAO} per operazioni admin
+ *   -@code UtenteGenericoImplementazionePostgresDAO} per operazioni utente
+ *   -@code LoginImplementazionePostgresDAO} per autenticazione e registrazione
  *
  */
 public class Controller {
