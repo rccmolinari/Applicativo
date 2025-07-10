@@ -4,129 +4,124 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * The type Passeggero.
+ * Rappresenta un passeggero che effettua una o più prenotazioni.
+ * Contiene dati anagrafici e la lista delle sue prenotazioni.
  */
 public class Passeggero {
 
-    /**
-     * The Id documento.
-     */
+    /** Identificativo univoco del documento del passeggero (es. passaporto, carta d'identità). */
     protected String idDocumento;
-    /**
-     * The Nome.
-     */
+
+    /** Nome del passeggero. */
     protected String nome;
-    /**
-     * The Cognome.
-     */
+
+    /** Cognome del passeggero. */
     protected String cognome;
-    /**
-     * The Data nascita.
-     */
+
+    /** Data di nascita del passeggero. */
     protected Date dataNascita;
-    /**
-     * The Lista prenotazioni.
-     */
+
+    /** Lista delle prenotazioni associate a questo passeggero. */
     protected List<Prenotazione> listaPrenotazioni;
 
     /**
-     * Gets id documento.
+     * Restituisce l'identificativo del documento.
      *
-     * @return the id documento
+     * @return id del documento
      */
     public String getIdDocumento() {
         return idDocumento;
     }
 
     /**
-     * Sets id documento.
+     * Imposta l'identificativo del documento.
      *
-     * @param idDocumento the id documento
+     * @param idDocumento identificativo del documento da assegnare
      */
     public void setIdDocumento(String idDocumento) {
         this.idDocumento = idDocumento;
     }
 
     /**
-     * Gets nome.
+     * Restituisce il nome del passeggero.
      *
-     * @return the nome
+     * @return nome
      */
     public String getNome() {
         return nome;
     }
 
     /**
-     * Sets nome.
+     * Imposta il nome del passeggero.
      *
-     * @param nome the nome
+     * @param nome nome da assegnare
      */
     public void setNome(String nome) {
         this.nome = nome;
     }
 
     /**
-     * Gets cognome.
+     * Restituisce il cognome del passeggero.
      *
-     * @return the cognome
+     * @return cognome
      */
     public String getCognome() {
         return cognome;
     }
 
     /**
-     * Sets cognome.
+     * Imposta il cognome del passeggero.
      *
-     * @param cognome the cognome
+     * @param cognome cognome da assegnare
      */
     public void setCognome(String cognome) {
         this.cognome = cognome;
     }
 
     /**
-     * Gets data nascita.
+     * Restituisce la data di nascita del passeggero.
      *
-     * @return the data nascita
+     * @return data di nascita
      */
     public Date getDataNascita() {
         return dataNascita;
     }
 
     /**
-     * Sets data nascita.
+     * Imposta la data di nascita del passeggero.
      *
-     * @param dataNascita the data nascita
+     * @param dataNascita data da assegnare
      */
     public void setDataNascita(Date dataNascita) {
         this.dataNascita = dataNascita;
     }
 
     /**
-     * Gets lista prenotazioni.
+     * Restituisce la lista delle prenotazioni associate al passeggero.
      *
-     * @return the lista prenotazioni
+     * @return lista di prenotazioni
      */
     public List<Prenotazione> getListaPrenotazioni() {
         return listaPrenotazioni;
     }
 
     /**
-     * Sets lista prenotazioni.
+     * Imposta la lista delle prenotazioni associate al passeggero.
      *
-     * @param listaPrenotazioni the lista prenotazioni
+     * @param listaPrenotazioni lista da assegnare
      */
     public void setListaPrenotazioni(List<Prenotazione> listaPrenotazioni) {
         this.listaPrenotazioni = listaPrenotazioni;
     }
 
     /**
-     * Instantiates a new Passeggero.
+     * Costruttore completo del passeggero.
      *
-     * @param idDocumento       the id documento
-     * @param nome               the nome
-     * @param cognome            the cognome
-     * @param dataNascita       the data nascita
-     * @param listaPrenotazioni the lista prenotazioni
+     * @param idDocumento identificativo del documento
+     * @param nome nome del passeggero
+     * @param cognome cognome del passeggero
+     * @param dataNascita data di nascita
+     * @param listaPrenotazioni lista delle prenotazioni
      */
     public Passeggero(String idDocumento, String nome, String cognome, Date dataNascita, List<Prenotazione> listaPrenotazioni) {
         this.idDocumento = idDocumento;
@@ -137,7 +132,7 @@ public class Passeggero {
     }
 
     /**
-     * Instantiates a new Passeggero.
+     * Costruttore vuoto.
      */
     public Passeggero() {}
 }

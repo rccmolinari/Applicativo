@@ -4,45 +4,45 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * The type Volo in partenza.
+ * Estende {@link Volo} per rappresentare un volo in partenza.
+ * Imposta automaticamente "NAP" come città di origine.
  */
 public class VoloInPartenza extends Volo {
 
-    /**
-     * The Gate.
-     */
+    /** Numero del gate di imbarco assegnato al volo. */
     protected int gate;
 
     /**
-     * Gets gate.
+     * Restituisce il numero del gate assegnato al volo in partenza.
      *
-     * @return the gate
+     * @return il numero del gate
      */
     public int getGate() {
         return gate;
     }
 
     /**
-     * Sets gate.
+     * Imposta il numero del gate per il volo in partenza.
      *
-     * @param gate the gate
+     * @param gate numero del gate da assegnare
      */
     public void setGate(int gate) {
         this.gate = gate;
     }
 
     /**
-     * Instantiates a new Volo in partenza.
+     * Costruttore completo per inizializzare un volo in partenza.
+     * L'origine è automaticamente impostata su "NAP".
      *
-     * @param codiceVolo        the codice volo
-     * @param compagnia          the compagnia
-     * @param data               the data
-     * @param orario             the orario
-     * @param ritardo            the ritardo
-     * @param statoVolo         the stato volo
-     * @param destinazione       the destinazione
-     * @param listaPrenotazioni the lista prenotazioni
-     * @param gate               the gate
+     * @param codiceVolo codice identificativo del volo
+     * @param compagnia compagnia aerea
+     * @param data data di partenza
+     * @param orario orario di partenza
+     * @param ritardo minuti di ritardo rispetto all'orario previsto
+     * @param statoVolo stato attuale del volo
+     * @param destinazione città di destinazione
+     * @param listaPrenotazioni lista di prenotazioni associate al volo
+     * @param gate numero del gate di imbarco
      */
     public VoloInPartenza(int codiceVolo, String compagnia, Date data, Time orario, int ritardo, StatoVolo statoVolo, String destinazione, List<Prenotazione> listaPrenotazioni, int gate) {
         super(codiceVolo, compagnia, data, orario, ritardo, statoVolo, "NAP", destinazione, listaPrenotazioni);
@@ -50,10 +50,8 @@ public class VoloInPartenza extends Volo {
     }
 
     /**
-     * Instantiates a new Volo in partenza.
+     * Costruttore di default.
      */
     public VoloInPartenza() {
     }
-
-
 }

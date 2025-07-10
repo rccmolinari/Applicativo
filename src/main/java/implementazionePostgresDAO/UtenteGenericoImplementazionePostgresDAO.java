@@ -13,6 +13,13 @@ import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Implementazione dell'interfaccia {@link UtenteGenericoDAO} che consente a un utente
+ * generico di interagire con il sistema di gestione voli tramite PostgreSQL.
+ * Le funzionalità includono la visualizzazione dei voli, gestione prenotazioni,
+ * modifica bagagli, segnalazione smarrimento e ricerca.
+ */
+
 public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoDAO {
     private static final Random RANDOM = new Random();
     private static final Logger LOGGER = Logger.getLogger(UtenteGenericoImplementazionePostgresDAO.class.getName());
@@ -25,6 +32,10 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
     private static final String ID_BAGAGLIO = "id_bagaglio";
     private Connection connection;
 
+    /**
+     * Costruttore: inizializza la connessione al database.
+     */
+
     public UtenteGenericoImplementazionePostgresDAO() {
         try {
             connection = ConnessioneDatabase.getInstance().connection;
@@ -33,10 +44,19 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
         }
     }
 
+    /**
+     * Recupera dal database l'elenco di tutti i voli (anche già decollati o cancellati).
+     * Ogni volo viene istanziato in base al tipo (arrivo o partenza), e vengono popolati i campi
+     * rilevanti come compagnia, data, orario, gate, origine, destinazione e stato.
+     *
+     * @return una lista di oggetti {@link Volo}, ordinata per data e orario previsto.
+     * @throws CustomExc se si verifica un errore durante l'accesso al database.
+     */
+
     @Override
     public ArrayList<Volo> visualizzaVoli() {
         ArrayList<Volo> lista = new ArrayList<>();
-        final String QUERY = "SELECT codice_volo, compagnia, data_volo, orario_previsto, ritardo, stato_volo, tipo_volo, aeroporto_destinazione, aeroporto_origine, gate FROM volo WHERE stato_volo <> 'CANCELLATO' ORDER BY data_volo, orario_previsto";
+        final String QUERY = "SELECT codice_volo, compagnia, data_volo, orario_previsto, ritardo, stato_volo, tipo_volo, aeroporto_destinazione, aeroporto_origine, gate FROM volo ORDER BY data_volo, orario_previsto";
 
         try (PreparedStatement ps = connection.prepareStatement(QUERY);
              ResultSet rs = ps.executeQuery()) {
@@ -73,6 +93,15 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
         return lista;
     }
 
+    /**
+     * Recupera tutte le prenotazioni effettuate da un utente specifico.
+     * Ogni prenotazione include le informazioni del passeggero e la lista dei bagagli,
+     * se presenti. I risultati sono aggregati per numero di biglietto.
+     *
+     * @param utente utente autenticato (username e password usati per identificare le prenotazioni).
+     * @return lista delle prenotazioni associate all'utente.
+     * @throws CustomExc se si verifica un errore durante la lettura dei dati dal database.
+     */
 
     @Override
     public ArrayList<Prenotazione> listaPrenotazioni(UtenteGenerico utente) {
@@ -127,6 +156,22 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
 
         return lista;
     }
+
+    /**
+     * Esegue la prenotazione di un volo da parte di un utente autenticato.
+     * L'operazione viene eseguita in una transazione che comprende:
+     *   -Verifica della validità del volo
+     *   -Inserimento del passeggero (se nuovo)
+     *   -Creazione della prenotazione
+     *   -Inserimento dei bagagli
+     * In caso di errore, viene effettuato il rollback.
+     *
+     * @param utente utente autenticato che esegue la prenotazione.
+     * @param volo volo da prenotare.
+     * @param passeggero passeggero a cui è intestata la prenotazione.
+     * @param bagagli lista di bagagli da registrare per la prenotazione.
+     * @throws CustomExc se la prenotazione fallisce in qualsiasi punto della transazione.
+     */
 
     @Override
     public void prenotaVolo(UtenteGenerico utente, Volo volo, Passeggero passeggero, ArrayList<Bagaglio> bagagli) {
@@ -222,6 +267,17 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
         }
     }
 
+    /**
+     * Cerca una prenotazione specifica tramite numero di biglietto.
+     * I dati sono restituiti solo se il biglietto appartiene all'utente autenticato.
+     * Vengono inclusi anche i dati del passeggero e dei bagagli.
+     *
+     * @param utente utente autenticato.
+     * @param numeroBiglietto identificativo della prenotazione da cercare.
+     * @return lista con la prenotazione trovata (al massimo una).
+     * @throws CustomExc se si verifica un errore durante l'accesso al database.
+     */
+
     @Override
     public ArrayList<Prenotazione> cercaPrenotazione(UtenteGenerico utente, int numeroBiglietto) {
         ArrayList<Prenotazione> lista = new ArrayList<>();
@@ -298,6 +354,18 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
 
         return lista;
     }
+
+    /**
+     * Cerca tutte le prenotazioni effettuate da un utente in cui il passeggero
+     * corrisponde al nome e cognome forniti. Vengono incluse anche le informazioni
+     * sui bagagli e sul volo associato.
+     *
+     * @param utente utente autenticato.
+     * @param nome nome del passeggero.
+     * @param cognome cognome del passeggero.
+     * @return lista delle prenotazioni corrispondenti.
+     * @throws CustomExc se si verifica un errore durante la ricerca.
+     */
 
     @Override
     public ArrayList<Prenotazione> cercaPrenotazione(UtenteGenerico utente, String nome, String cognome) {
@@ -384,6 +452,17 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
         return lista;
     }
 
+    /**
+     * Permette all'utente di segnalare come smarrito un bagaglio registrato
+     * a suo nome. L'aggiornamento avviene solo se il bagaglio è effettivamente
+     * associato a una prenotazione dell'utente.
+     *
+     * @param bagaglio bagaglio da marcare come smarrito.
+     * @param utente utente autenticato proprietario del bagaglio.
+     * @throws SQLException se il bagaglio non appartiene all'utente o in caso di errore durante l'update.
+     */
+
+
     @Override
     public void segnalaSmarrimento(Bagaglio bagaglio, UtenteGenerico utente) throws SQLException {
         final String SQL = """
@@ -418,6 +497,16 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
         }
 
     }
+
+    /**
+     * Aggiorna l'elenco dei bagagli associati a una prenotazione.
+     * Elimina tutti i bagagli precedenti e inserisce quelli nuovi.
+     * L'intera operazione è eseguita in transazione. Viene eseguito un rollback in caso di errore.
+     *
+     * @param prenotazione prenotazione da aggiornare.
+     * @param nuoviBagagli nuova lista di bagagli da associare.
+     * @throws CustomExc se si verifica un errore durante l’operazione o durante il rollback.
+     */
 
     @Override
     public void modificaPrenotazione(Prenotazione prenotazione, ArrayList<Bagaglio> nuoviBagagli) {
@@ -463,6 +552,17 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
         }
     }
 
+    /**
+     * Cerca un bagaglio specifico per ID, verificando che appartenga all’utente.
+     * Restituisce una lista con il bagaglio se trovato.
+     *
+     * @param b bagaglio da cercare (contenente l’ID).
+     * @param u utente autenticato.
+     * @return lista contenente il bagaglio trovato.
+     * @throws CustomExc se si verifica un errore durante l'accesso al database.
+     */
+
+
     @Override
     public ArrayList<Bagaglio> cercaBagaglio(Bagaglio b, UtenteGenerico u) {
         ArrayList<Bagaglio> lista = new ArrayList<>();
@@ -503,6 +603,16 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
         return lista;
     }
 
+    /**
+     * Recupera tutti i bagagli associati a una prenotazione specifica.
+     * Vengono mostrati solo se la prenotazione appartiene all’utente autenticato.
+     *
+     * @param p prenotazione di riferimento.
+     * @param u utente autenticato.
+     * @return lista dei bagagli associati alla prenotazione.
+     * @throws CustomExc se si verifica un errore durante la query o nella connessione.
+     */
+
     @Override
     public ArrayList<Bagaglio> cercaBagaglio(Prenotazione p, UtenteGenerico u) {
         ArrayList<Bagaglio> lista = new ArrayList<>();
@@ -542,11 +652,23 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
         return lista;
     }
 
+    /**
+     * Genera in modo pseudo-casuale un numero di posto tra 1 e 100.
+     * Questo metodo è usato per assegnare un numero di posto casuale
+     * a una prenotazione nel momento della conferma.
+     *
+     * @return numero intero compreso tra 1 e 100.
+     */
+
 
     private int generaPostoRandom() {
         return RANDOM.nextInt(100) + 1;
     }
 
+    /**
+     * Eccezione personalizzata per gestire errori specifici dell'implementazione.
+     * Viene lanciata quando si verificano problemi durante le operazioni di accesso al database.
+     */
 
     private static class CustomExc extends RuntimeException {
         public CustomExc(String message, Throwable cause) {

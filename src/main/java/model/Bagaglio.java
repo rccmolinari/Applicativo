@@ -1,83 +1,26 @@
 package model;
 
 /**
- * The type Bagaglio.
+ * Rappresenta un bagaglio associato a una prenotazione.
+ * Ogni bagaglio è identificato da un codice univoco e ha uno stato attuale (es. registrato, smarrito, recuperato).
  */
 public class Bagaglio {
 
-    /**
-     * The Codice bagaglio.
-     */
+    /** Codice identificativo univoco del bagaglio. */
     protected int codiceBagaglio;
-    /**
-     * The Stato bagaglio.
-     */
+
+    /** Stato corrente del bagaglio (es. REGISTRATO, SMARRITO, RITROVATO). */
     protected StatoBagaglio statoBagaglio;
-    /**
-     * The Prenotazione.
-     */
+
+    /** Prenotazione a cui è associato il bagaglio. */
     protected Prenotazione prenotazione;
 
     /**
-     * Gets codice bagaglio.
+     * Costruttore completo.
      *
-     * @return the codice bagaglio
-     */
-    public int getCodiceBagaglio() {
-        return codiceBagaglio;
-    }
-
-    /**
-     * Sets codice bagaglio.
-     *
-     * @param codiceBagaglio the codice bagaglio
-     */
-    public void setCodiceBagaglio(int codiceBagaglio) {
-        this.codiceBagaglio = codiceBagaglio;
-    }
-
-    /**
-     * Gets stato bagaglio.
-     *
-     * @return the stato bagaglio
-     */
-    public StatoBagaglio getStatoBagaglio() {
-        return statoBagaglio;
-    }
-
-    /**
-     * Sets stato bagaglio.
-     *
-     * @param statoBagaglio the stato bagaglio
-     */
-    public void setStatoBagaglio(StatoBagaglio statoBagaglio) {
-        this.statoBagaglio = statoBagaglio;
-    }
-
-    /**
-     * Gets prenotazione.
-     *
-     * @return the prenotazione
-     */
-    public Prenotazione getPrenotazione() {
-        return prenotazione;
-    }
-
-    /**
-     * Sets prenotazione.
-     *
-     * @param prenotazione the prenotazione
-     */
-    public void setPrenotazione(Prenotazione prenotazione) {
-        this.prenotazione = prenotazione;
-    }
-
-    /**
-     * Instantiates a new Bagaglio.
-     *
-     * @param statoBagaglio  the stato bagaglio
-     * @param codiceBagaglio the codice bagaglio
-     * @param prenotazione    the prenotazione
+     * @param statoBagaglio  stato attuale del bagaglio
+     * @param codiceBagaglio codice identificativo del bagaglio
+     * @param prenotazione   prenotazione associata al bagaglio
      */
     public Bagaglio(StatoBagaglio statoBagaglio, int codiceBagaglio, Prenotazione prenotazione) {
         this.statoBagaglio = statoBagaglio;
@@ -85,10 +28,63 @@ public class Bagaglio {
         this.prenotazione = prenotazione;
     }
 
-
+    /**
+     * Costruttore vuoto per creazione e inizializzazione successiva.
+     */
+    public Bagaglio() {
+    }
 
     /**
-     * Instantiates a new Bagaglio.
+     * Restituisce il codice identificativo del bagaglio.
+     *
+     * @return intero con codice bagaglio
      */
-    public Bagaglio() {}
+    public int getCodiceBagaglio() {
+        return codiceBagaglio;
+    }
+
+    /**
+     * Imposta il codice identificativo del bagaglio.
+     *
+     * @param codiceBagaglio codice numerico del bagaglio
+     */
+    public void setCodiceBagaglio(int codiceBagaglio) {
+        this.codiceBagaglio = codiceBagaglio;
+    }
+
+    /**
+     * Restituisce lo stato attuale del bagaglio.
+     *
+     * @return enumerazione {@code StatoBagaglio}
+     */
+    public StatoBagaglio getStatoBagaglio() {
+        return statoBagaglio;
+    }
+
+    /**
+     * Imposta un nuovo stato per il bagaglio.
+     *
+     * @param statoBagaglio valore dell'enumerazione {@code StatoBagaglio}
+     */
+    public void setStatoBagaglio(StatoBagaglio statoBagaglio) {
+        this.statoBagaglio = statoBagaglio;
+    }
+
+    /**
+     * Restituisce la prenotazione associata a questo bagaglio.
+     *
+     * @return oggetto {@code Prenotazione}
+     */
+    public Prenotazione getPrenotazione() {
+        return prenotazione;
+    }
+
+    /**
+     * Associa una prenotazione al bagaglio.
+     *
+     * @param prenotazione oggetto {@code Prenotazione} da assegnare
+     */
+    public void setPrenotazione(Prenotazione prenotazione) {
+        this.prenotazione = prenotazione;
+    }
 }

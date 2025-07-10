@@ -10,11 +10,18 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Implementazione dell'interfaccia {@link LoginDAO} per l'accesso e la registrazione
+ * degli utenti su database PostgreSQL.
+ */
 public class LoginImplementazionePostgresDAO implements LoginDAO {
 
     private static final Logger LOGGER = Logger.getLogger(LoginImplementazionePostgresDAO.class.getName());
     private Connection connection;
 
+    /**
+     * Costruttore della classe. Inizializza la connessione al database.
+     */
     public LoginImplementazionePostgresDAO() {
         try {
             connection = ConnessioneDatabase.getInstance().connection;
@@ -23,7 +30,14 @@ public class LoginImplementazionePostgresDAO implements LoginDAO {
         }
     }
 
-    // 0 = fallito, 1 = utente, 2 = admin
+    /**
+     * Verifica le credenziali di accesso per un utente o un amministratore.
+     *
+     * @param email    l'email (username) dell'utente.
+     * @param password la password dell'utente.
+     * @return 0 se il login fallisce, 1 se è un utente generico, 2 se è un amministratore.
+     */
+
     @Override
     public int login(String email, String password) {
         final String QUERY_UTENTE = "SELECT username, password FROM utente_generico WHERE username = ? AND password = ?";
@@ -57,6 +71,13 @@ public class LoginImplementazionePostgresDAO implements LoginDAO {
         return 0;
     }
 
+    /**
+     * Registra un nuovo utente nel database.
+     *
+     * @param email l'email (o username) da registrare.
+     * @param password la password associata.
+     * @return true se la registrazione ha avuto successo, false se l'utente è già esistente o c'è stato un errore.
+     */
     @Override
     public boolean registrazione(String email, String password) {
         final String QUERY_CHECK = "SELECT username FROM utente_generico WHERE username = ?";

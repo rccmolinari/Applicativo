@@ -6,50 +6,41 @@ import java.util.List;
 
 /**
  * Rappresenta un volo disponibile per la prenotazione.
+ * Contiene informazioni dettagliate come compagnia, orario, stato e prenotazioni associate.
  */
 public class Volo {
 
-    /**
-     * Codice del volo.
-     */
+    /** Codice del volo. */
     protected int codiceVolo;
-    /**
-     * Compagnia aerea.
-     */
+
+    /** Compagnia aerea. */
     protected String compagnia;
-    /**
-     * Data
-     */
+
+    /** Data del volo. */
     protected Date data;
-    /**
-     * The Orario.
-     */
+
+    /** Orario di partenza del volo. */
     protected Time orario;
-    /**
-     * The Ritardo.
-     */
+
+    /** Eventuale ritardo in minuti. */
     protected int ritardo;
-    /**
-     * The Stato.
-     */
+
+    /** Stato corrente del volo. */
     protected StatoVolo stato;
-    /**
-     * The Origine.
-     */
+
+    /** Aeroporto o città di origine. */
     protected String origine;
-    /**
-     * The Destinazione.
-     */
+
+    /** Aeroporto o città di destinazione. */
     protected String destinazione;
-    /**
-     * The Lista prenotazioni.
-     */
+
+    /** Lista di prenotazioni associate al volo. */
     protected List<Prenotazione> listaPrenotazioni;
 
     /**
      * Restituisce il codice identificativo del volo.
      *
-     * @return the codice volo
+     * @return codice volo
      */
     public int getCodiceVolo() {
         return codiceVolo;
@@ -58,16 +49,16 @@ public class Volo {
     /**
      * Imposta il codice identificativo del volo.
      *
-     * @param codiceVolo the codice volo
+     * @param codiceVolo codice da assegnare
      */
     public void setCodiceVolo(int codiceVolo) {
         this.codiceVolo = codiceVolo;
     }
 
     /**
-     * Restituice la compagnia aerea.
+     * Restituisce la compagnia aerea.
      *
-     * @return the compagnia
+     * @return nome della compagnia
      */
     public String getCompagnia() {
         return compagnia;
@@ -76,7 +67,7 @@ public class Volo {
     /**
      * Imposta la compagnia aerea.
      *
-     * @param compagnia the compagnia
+     * @param compagnia nome della compagnia
      */
     public void setCompagnia(String compagnia) {
         this.compagnia = compagnia;
@@ -85,7 +76,7 @@ public class Volo {
     /**
      * Restituisce la data del volo.
      *
-     * @return the data
+     * @return data del volo
      */
     public Date getData() {
         return data;
@@ -94,16 +85,16 @@ public class Volo {
     /**
      * Imposta la data del volo.
      *
-     * @param data the data
+     * @param data data da assegnare
      */
     public void setData(Date data) {
         this.data = data;
     }
 
     /**
-     * Restituisce l'orario di partenza del volo.
+     * Restituisce l'orario di partenza.
      *
-     * @return the orario
+     * @return orario del volo
      */
     public Time getOrario() {
         return orario;
@@ -112,43 +103,43 @@ public class Volo {
     /**
      * Imposta l'orario di partenza del volo.
      *
-     * @param orario the orario
+     * @param orario orario da assegnare
      */
     public void setOrario(Time orario) {
         this.orario = orario;
     }
 
     /**
-     * Restituisce l'eventuale ritardo del volo.
+     * Restituisce l'entità del ritardo del volo.
      *
-     * @return the ritardo
+     * @return minuti di ritardo
      */
     public int getRitardo() {
         return ritardo;
     }
 
     /**
-     * Imposta l'eventuale ritardo del volo.
+     * Imposta l'entità del ritardo del volo.
      *
-     * @param ritardo the ritardo
+     * @param ritardo minuti di ritardo
      */
     public void setRitardo(int ritardo) {
         this.ritardo = ritardo;
     }
 
     /**
-     * Restituisce lo stato del volo.
+     * Restituisce lo stato attuale del volo.
      *
-     * @return the stato
+     * @return oggetto {@code StatoVolo}
      */
     public StatoVolo getStato() {
         return stato;
     }
 
     /**
-     * Imposta lo stato del volo.
+     * Imposta lo stato attuale del volo.
      *
-     * @param stato the stato
+     * @param stato stato da assegnare
      */
     public void setStato(StatoVolo stato) {
         this.stato = stato;
@@ -157,7 +148,7 @@ public class Volo {
     /**
      * Restituisce la città di origine.
      *
-     * @return the origine
+     * @return origine del volo
      */
     public String getOrigine() {
         return origine;
@@ -166,7 +157,7 @@ public class Volo {
     /**
      * Imposta la città di origine.
      *
-     * @param origine the origine
+     * @param origine origine da assegnare
      */
     public void setOrigine(String origine) {
         this.origine = origine;
@@ -175,7 +166,7 @@ public class Volo {
     /**
      * Restituisce la città di destinazione.
      *
-     * @return the destinazione
+     * @return destinazione del volo
      */
     public String getDestinazione() {
         return destinazione;
@@ -184,42 +175,42 @@ public class Volo {
     /**
      * Imposta la città di destinazione.
      *
-     * @param destinazione the destinazione
+     * @param destinazione destinazione da assegnare
      */
     public void setDestinazione(String destinazione) {
         this.destinazione = destinazione;
     }
 
     /**
-     * Restituisce la lista delle prenotazioni.
+     * Restituisce la lista delle prenotazioni associate al volo.
      *
-     * @return the lista prenotazioni
+     * @return lista di {@code Prenotazione}
      */
     public List<Prenotazione> getListaPrenotazioni() {
         return listaPrenotazioni;
     }
 
     /**
-     * Imposta la lista delle prenotazioni.
+     * Imposta la lista delle prenotazioni associate al volo.
      *
-     * @param listaPrenotazioni the lista prenotazioni
+     * @param listaPrenotazioni lista da associare
      */
     public void setListaPrenotazioni(List<Prenotazione> listaPrenotazioni) {
         this.listaPrenotazioni = listaPrenotazioni;
     }
 
     /**
-     * Costruttore completo per inizializzare tutti i campi del volo.
+     * Costruttore completo del volo.
      *
-     * @param codiceVolo        the codice volo
-     * @param compagnia          the compagnia
-     * @param data               the data
-     * @param orario             the orario
-     * @param ritardo            the ritardo
-     * @param stato              the stato
-     * @param origine            the origine
-     * @param destinazione       the destinazione
-     * @param listaPrenotazioni the lista prenotazioni
+     * @param codiceVolo codice identificativo
+     * @param compagnia nome compagnia
+     * @param data data del volo
+     * @param orario orario di partenza
+     * @param ritardo eventuale ritardo in minuti
+     * @param stato stato del volo
+     * @param origine città di origine
+     * @param destinazione città di destinazione
+     * @param listaPrenotazioni lista delle prenotazioni
      */
     public Volo(int codiceVolo, String compagnia, Date data, Time orario, int ritardo, StatoVolo stato, String origine, String destinazione, List<Prenotazione> listaPrenotazioni) {
         this.codiceVolo = codiceVolo;
@@ -237,5 +228,4 @@ public class Volo {
      * Costruttore di default.
      */
     public Volo() {}
-
 }

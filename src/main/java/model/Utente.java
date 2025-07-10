@@ -1,26 +1,21 @@
 package model;
 
-import java.util.List;
-
 /**
  * Rappresenta un utente base del sistema.
  * Contiene credenziali di accesso e funzionalità comuni a tutti gli utenti.
  */
 public class Utente {
 
-    /**
-     * Login dell'utente (username).
-     */
+    /** Login dell'utente (username). */
     protected String login;
-    /**
-     * Password associata all'utente
-     */
+
+    /** Password associata all'utente. */
     protected String password;
 
     /**
      * Restituisce il login dell'utente.
      *
-     * @return the login
+     * @return stringa contenente il login (username)
      */
     public String getLogin() {
         return login;
@@ -29,7 +24,7 @@ public class Utente {
     /**
      * Imposta il login dell'utente.
      *
-     * @param login the login
+     * @param login nuovo valore per il login
      */
     public void setLogin(String login) {
         this.login = login;
@@ -38,7 +33,7 @@ public class Utente {
     /**
      * Restituisce la password dell'utente.
      *
-     * @return the password
+     * @return stringa contenente la password
      */
     public String getPassword() {
         return password;
@@ -47,36 +42,26 @@ public class Utente {
     /**
      * Imposta la password dell'utente.
      *
-     * @param password the password
+     * @param password nuova password da assegnare
      */
     public void setPassword(String password) {
         this.password = password;
     }
 
     /**
-     * Metodo per visualizzare i voli disponibili.
-     *
-     * @return the string
-     */
-    public List<Volo> visualizzaVoli(List<Volo> voli) {
-        return voli;
-    }
-
-    /**
-     * Costruttore di default.
+     * Costruttore vuoto dell'utente.
+     * Utile per framework di serializzazione/deserializzazione.
      */
     public Utente() {}
 
     /**
-     * Costruttore con parametri.
+     * Costruttore completo dell'utente.
      *
-     * @param login    the login
-     * @param password the password
+     * @param login    nome utente per l'accesso
+     * @param password password associata all'account
      */
     public Utente(String login, String password) {
         this.login = login;
         this.password = password;
     }
-
-
 }

@@ -3,175 +3,168 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The type Prenotazione.
+ * Rappresenta una prenotazione effettuata da un utente per un determinato volo.
+ * Ogni prenotazione è associata a un passeggero, una lista di bagagli e un numero di biglietto.
  */
 public class Prenotazione {
 
-    /**
-     * The Utente.
-     */
+    /** Utente che ha effettuato la prenotazione. */
     protected UtenteGenerico utente;
-    /**
-     * The Volo.
-     */
+
+    /** Volo prenotato. */
     protected Volo volo;
-    /**
-     * The Numero biglietto.
-     */
+
+    /** Numero del biglietto associato alla prenotazione. */
     protected int numeroBiglietto;
-    /**
-     * The Numero assegnato.
-     */
+
+    /** Numero assegnato al passeggero (es. posto o riferimento interno). */
     protected int numeroAssegnato;
-    /**
-     * The Stato prenotazione.
-     */
+
+    /** Stato corrente della prenotazione. */
     protected StatoPrenotazione statoPrenotazione;
-    /**
-     * The Passeggero.
-     */
+
+    /** Passeggero per cui è stata effettuata la prenotazione. */
     protected Passeggero passeggero;
-    /**
-     * The Lista bagagli.
-     */
+
+    /** Lista di bagagli associati a questa prenotazione. */
     public List<Bagaglio> listaBagagli = new ArrayList<>();
 
     /**
-     * Gets volo.
+     * Restituisce il volo associato.
      *
-     * @return the volo
+     * @return oggetto {@code Volo}
      */
     public Volo getVolo() {
         return volo;
     }
 
     /**
-     * Sets volo.
+     * Imposta il volo associato alla prenotazione.
      *
-     * @param volo the volo
+     * @param volo volo da associare
      */
     public void setVolo(Volo volo) {
         this.volo = volo;
     }
 
     /**
-     * Gets utente.
+     * Restituisce l'utente che ha effettuato la prenotazione.
      *
-     * @return the utente
+     * @return oggetto {@code UtenteGenerico}
      */
     public UtenteGenerico getUtente() {
         return utente;
     }
 
     /**
-     * Sets utente.
+     * Imposta l'utente che ha effettuato la prenotazione.
      *
-     * @param utente the utente
+     * @param utente utente da associare
      */
     public void setUtente(UtenteGenerico utente) {
         this.utente = utente;
     }
 
     /**
-     * Gets numero biglietto.
+     * Restituisce il numero del biglietto.
      *
-     * @return the numero biglietto
+     * @return numero biglietto
      */
     public int getNumeroBiglietto() {
         return numeroBiglietto;
     }
 
     /**
-     * Sets numero biglietto.
+     * Imposta il numero del biglietto.
      *
-     * @param numeroBiglietto the numero biglietto
+     * @param numeroBiglietto numero da assegnare
      */
     public void setNumeroBiglietto(int numeroBiglietto) {
         this.numeroBiglietto = numeroBiglietto;
     }
 
     /**
-     * Gets numero assegnato.
+     * Restituisce il numero assegnato (es. numero posto).
      *
-     * @return the numero assegnato
+     * @return numero assegnato
      */
     public int getNumeroAssegnato() {
         return numeroAssegnato;
     }
 
     /**
-     * Sets numero assegnato.
+     * Imposta il numero assegnato (es. numero posto).
      *
-     * @param numeroAssegnato the numero assegnato
+     * @param numeroAssegnato numero da assegnare
      */
     public void setNumeroAssegnato(int numeroAssegnato) {
         this.numeroAssegnato = numeroAssegnato;
     }
 
     /**
-     * Gets stato prenotazione.
+     * Restituisce lo stato attuale della prenotazione.
      *
-     * @return the stato prenotazione
+     * @return oggetto {@code StatoPrenotazione}
      */
     public StatoPrenotazione getStatoPrenotazione() {
         return statoPrenotazione;
     }
 
     /**
-     * Sets stato prenotazione.
+     * Imposta lo stato della prenotazione.
      *
-     * @param statoPrenotazione the stato prenotazione
+     * @param statoPrenotazione stato da assegnare
      */
     public void setStatoPrenotazione(StatoPrenotazione statoPrenotazione) {
         this.statoPrenotazione = statoPrenotazione;
     }
 
     /**
-     * Gets passeggero.
+     * Restituisce il passeggero associato alla prenotazione.
      *
-     * @return the passeggero
+     * @return oggetto {@code Passeggero}
      */
     public Passeggero getPasseggero() {
         return passeggero;
     }
 
     /**
-     * Sets passeggero.
+     * Imposta il passeggero associato alla prenotazione.
      *
-     * @param passeggero the passeggero
+     * @param passeggero oggetto da associare
      */
     public void setPasseggero(Passeggero passeggero) {
         this.passeggero = passeggero;
     }
 
     /**
-     * Gets lista bagagli.
+     * Restituisce la lista dei bagagli associati.
      *
-     * @return the lista bagagli
+     * @return lista di {@code Bagaglio}
      */
     public List<Bagaglio> getListaBagagli() {
         return listaBagagli;
     }
 
     /**
-     * Sets lista bagagli.
+     * Imposta la lista dei bagagli associati.
      *
-     * @param listaBagagli the lista bagagli
+     * @param listaBagagli lista da associare
      */
     public void setListaBagagli(List<Bagaglio> listaBagagli) {
         this.listaBagagli = listaBagagli;
     }
 
     /**
-     * Instantiates a new Prenotazione.
+     * Costruttore completo della prenotazione.
      *
-     * @param utente             the utente
-     * @param volo               the volo
-     * @param numeroAssegnato   the numero assegnato
-     * @param numeroBiglietto   the numero biglietto
-     * @param statoPrenotazione the stato prenotazione
-     * @param passeggero         the passeggero
-     * @param listaBagagli      the lista bagagli
+     * @param utente utente che prenota
+     * @param volo volo selezionato
+     * @param numeroAssegnato numero assegnato (posto)
+     * @param numeroBiglietto numero del biglietto
+     * @param statoPrenotazione stato della prenotazione
+     * @param passeggero passeggero associato
+     * @param listaBagagli lista dei bagagli
      */
     public Prenotazione(UtenteGenerico utente, Volo volo, int numeroAssegnato, int numeroBiglietto, StatoPrenotazione statoPrenotazione, Passeggero passeggero, List<Bagaglio> listaBagagli) {
         this.utente = utente;
@@ -184,8 +177,7 @@ public class Prenotazione {
     }
 
     /**
-     * Instantiates a new Prenotazione.
+     * Costruttore vuoto.
      */
     public Prenotazione() {}
-
 }

@@ -18,6 +18,12 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
     private String idBagaglio = "id_bagaglio";
     private String statoBagaglio = "stato_bagaglio";
 
+    /**
+     * Costruttore della classe. Inizializza la connessione al database tramite singleton.
+     *
+     * @throws CustomExc se la connessione al database fallisce.
+     */
+
     public AmministratoreImplementazionePostgresDAO() {
         try {
             connection = ConnessioneDatabase.getInstance().connection;
@@ -26,6 +32,13 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
         }
     }
 
+    /**
+     * Inserisce un nuovo volo nel database, specificando tutte le informazioni essenziali,
+     * inclusi data, orario, tipo volo (arrivo o partenza), gate (solo per voli in partenza) e stato.
+     *
+     * @param v il volo da inserire, può essere istanza di {@link VoloInPartenza} o {@link VoloInArrivo}.
+     * @throws CustomExc se si verifica un errore durante l'inserimento nel database.
+     */
 
     @Override
     public void inserisciVolo(Volo v) {
@@ -62,6 +75,14 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
             throw new CustomExc("Errore durante l'inserimento del volo: " + v.getCodiceVolo(), e);
         }
     }
+
+    /**
+     * Aggiorna i dati di un volo già esistente, identificato tramite il codice volo.
+     *  È aggiornabile solo il campo della destinazione / origine.
+     *
+     * @param v il volo aggiornato con le nuove informazioni.
+     * @throws CustomExc se si verifica un errore o se il codice volo non è presente nel database.
+     */
 
     @Override
     public void aggiornaVolo(Volo v) {
@@ -103,6 +124,14 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
         }
     }
 
+    /**
+     * Modifica il gate di un volo in partenza.
+     * L'operazione è valida solo per voli con tipo "inPartenza".
+     *
+     * @param volo il volo in partenza di cui aggiornare il gate.
+     * @throws CustomExc se il volo non esiste, non è un volo in partenza, o si verifica un errore SQL.
+     */
+
     @Override
     public void modificaGate(VoloInPartenza volo) {
         final String CHECK_SQL = "SELECT tipo_volo FROM volo WHERE codice_volo = ?";
@@ -133,6 +162,15 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
         }
     }
 
+    /**
+     * Aggiorna lo stato di un bagaglio specifico nel database.
+     * L'operazione è consentita solo se il bagaglio esiste.
+     *
+     * @param bagaglio oggetto contenente l’ID del bagaglio da aggiornare.
+     * @param stato nuovo stato da impostare, ad esempio {@code CONSEGNATO}, {@code SMARRITO}, ecc.
+     * @throws CustomExc se il bagaglio non esiste o si verifica un errore nell’update.
+     */
+
     @Override
     public void aggiornaBagaglio(Bagaglio bagaglio, StatoBagaglio stato) {
         final String CHECK_SQL = "SELECT 1 FROM bagaglio WHERE id_bagaglio = ?";
@@ -161,6 +199,14 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
             throw new CustomExc("Errore durante l'aggiornamento del bagaglio con ID: " + bagaglio.getCodiceBagaglio(), e);
         }
     }
+
+    /**
+     * Recupera tutti i bagagli che risultano attualmente smarriti nel sistema.
+     * Vengono restituite anche le informazioni minime sulla prenotazione associata.
+     *
+     * @return lista dei bagagli marcati con stato "smarrito".
+     * @throws CustomExc se si verifica un errore durante la lettura dal database.
+     */
 
     @Override
     public ArrayList<Bagaglio> visualizzaSmarrimento() {
@@ -193,6 +239,16 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
 
         return lista;
     }
+
+    /**
+     * Recupera l'elenco completo di tutti i voli presenti nel database,
+     * indipendentemente dal loro stato. I voli vengono ordinati per data e orario.
+     * Ogni riga viene mappata su un oggetto {@link VoloInPartenza} o {@link VoloInArrivo}.
+     *
+     * @return lista di voli disponibili nel sistema.
+     * @throws CustomExc se si verifica un errore durante l'accesso al database.
+     */
+
 
     @Override
     public ArrayList<Volo> visualizzaVoli() {
@@ -240,6 +296,17 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
         return lista;
     }
 
+    /**
+     * Cerca un bagaglio in base al suo identificativo.
+     * Poiché è un'operazione amministrativa, non è vincolata all'utente.
+     *
+     * @param b oggetto contenente almeno l'ID del bagaglio da cercare.
+     * @param u parametro ignorato (richiesto dall'interfaccia ma non utilizzato qui).
+     * @return lista con il bagaglio trovato, se esiste.
+     * @throws CustomExc se si verifica un errore nella query.
+     */
+
+
     @Override
     public ArrayList<Bagaglio> cercaBagaglio(Bagaglio b, UtenteGenerico u) {
         ArrayList<Bagaglio> lista = new ArrayList<>();
@@ -274,6 +341,17 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
         return lista;
     }
 
+    /**
+     * Recupera tutti i bagagli associati a una determinata prenotazione.
+     * Poiché l'operazione è lato amministratore, l'utente non viene validato.
+     *
+     * @param p prenotazione da cui recuperare i bagagli.
+     * @param u parametro ignorato (richiesto dall'interfaccia ma non utilizzato qui).
+     * @return lista dei bagagli collegati alla prenotazione specificata.
+     * @throws CustomExc se si verifica un errore durante la ricerca.
+     */
+
+
     @Override
     public ArrayList<Bagaglio> cercaBagaglio(Prenotazione p, UtenteGenerico u) {
         ArrayList<Bagaglio> lista = new ArrayList<>();
@@ -303,6 +381,11 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
 
         return lista;
     }
+
+    /**
+     * Eccezione personalizzata per mascherare le eccezioni SQL come {@link RuntimeException}.
+     * Utilizzata per propagare errori critici durante l’accesso al database.
+     */
 
     public static class CustomExc extends RuntimeException {
         public CustomExc(String message, Throwable cause) {

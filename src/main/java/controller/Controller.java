@@ -16,6 +16,20 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+/**
+ * La classe {@code Controller} gestisce la logica applicativa dell'interfaccia grafica per un sistema
+ * di gestione voli, prenotazioni, bagagli e utenti. Funziona come coordinatore tra la GUI e le DAO
+ * che interagiscono con il database PostgreSQL.
+ * Supporta sia operazioni lato utente (visualizzazione prenotazioni, ricerca, prenotazione voli, ecc.),
+ * che lato amministratore (gestione voli, aggiornamento bagagli, gate, smarrimenti, ecc.).
+ *
+ * Dipendenze principali:
+ *
+ *   <li>{@code AmministratoreImplementazionePostgresDAO} per operazioni admin</li>
+ *   <li>{@code UtenteGenericoImplementazionePostgresDAO} per operazioni utente</li>
+ *   <li>{@code LoginImplementazionePostgresDAO} per autenticazione e registrazione</li>
+ *
+ */
 public class Controller {
     String fontSerif = "SansSerif";
     String codiceBagaglio = "Codice Bagaglio";
@@ -30,6 +44,13 @@ public class Controller {
     String modifica = "Modifica";
     String risultato ="Risultato";
     String codiceVolo = "Codice Volo";
+
+    /**
+     * Visualizza in una tabella tutte le prenotazioni effettuate dall'utente corrente.
+     *
+     * @param d dashboard utente da aggiornare
+     */
+
     public void handlerVisualizzaPrenotazioni(DashBoardUser d) {
         ArrayList<Prenotazione> prenotazioni = new UtenteGenericoImplementazionePostgresDAO().listaPrenotazioni(utente);
 
@@ -82,6 +103,14 @@ public class Controller {
         popup.setVisible(true);
         visualizzaVoli(d);
     }
+
+    /**
+     * Costruisce il form per effettuare una nuova prenotazione e la salva nel database.
+     *
+     * @param panel  contenitore grafico
+     * @param dialog dialog corrente
+     * @param d      dashboard utente
+     */
 
     public void handlerPrenotaVolo(JPanel panel, JDialog dialog, DashBoardUser d) {
         panel.setLayout(new GridLayout(1, 1));
@@ -139,6 +168,15 @@ public class Controller {
 
         visualizzaVoli(d);
     }
+
+    /**
+     * Consente la ricerca di prenotazioni dell’utente tramite numero biglietto o dati anagrafici.
+     *
+     * @param panel  contenitore grafico
+     * @param label  etichetta su cui visualizzare il risultato testuale
+     * @param dialog dialog corrente
+     * @param d      dashboard utente
+     */
 
     public void handlerCercaPrenotazione(JPanel panel, JLabel label, JDialog dialog, DashBoardUser d) {
         panel.setLayout(new GridLayout(1, 1));
@@ -211,6 +249,14 @@ public class Controller {
         visualizzaVoli(d);
     }
 
+    /**
+     * Mostra un popup con l'elenco delle prenotazioni trovate.
+     * Ogni riga include un bottone per modificarne il numero di bagagli.
+     *
+     * @param risultati elenco delle prenotazioni trovate
+     * @param label     etichetta associata alla visualizzazione testuale
+     */
+
     private void mostraPopupPrenotazioni(ArrayList<Prenotazione> risultati, JLabel label) {
         JPanel listaPanel = new JPanel();
         listaPanel.setLayout(new BoxLayout(listaPanel, BoxLayout.Y_AXIS));
@@ -235,6 +281,14 @@ public class Controller {
         popup.setLocationRelativeTo(null);
         popup.setVisible(true);
     }
+
+    /**
+     * Crea una riga grafica contenente i dati sintetici di una prenotazione e un bottone di modifica.
+     *
+     * @param p     prenotazione da rappresentare
+     * @param label etichetta in cui mostrare il testo della riga
+     * @return pannello rappresentante la riga
+     */
 
     private JPanel creaRigaPrenotazione(Prenotazione p, JLabel label) {
         Passeggero passeggero = p.getPasseggero();
@@ -271,6 +325,15 @@ public class Controller {
 
         return riga;
     }
+
+    /**
+     * Permette la ricerca di un bagaglio associato alle proprie prenotazioni.
+     * La ricerca è mutuale tra ID bagaglio e numero prenotazione.
+     *
+     * @param panel  contenitore grafico
+     * @param dialog dialog corrente
+     */
+
     public void handlerCercaBagaglio(JPanel panel, JDialog dialog) {
         panel.setLayout(new GridLayout(1, 1));
 
@@ -300,6 +363,14 @@ public class Controller {
         panel.add(formPanel);
     }
 
+    /**
+     * Sincronizza due campi testo in modo che solo uno dei due possa contenere testo alla volta.
+     * Quando l'utente scrive nel primo campo, il secondo viene svuotato automaticamente, e viceversa.
+     *
+     * @param campo1 primo campo di testo
+     * @param campo2 secondo campo di testo
+     */
+
     private void sincronizzaCampi(JTextField campo1, JTextField campo2) {
         final boolean[] blocco = {false};
         DocumentListener listener = new DocumentListener() {
@@ -318,6 +389,13 @@ public class Controller {
         campo1.getDocument().addDocumentListener(listener);
         campo2.getDocument().addDocumentListener(listener);
     }
+
+    /**
+     * Mostra i risultati di una ricerca bagagli per utente in una finestra modale.
+     *
+     * @param lista lista di bagagli da visualizzare
+     */
+
     private void mostraPopupRisultati(ArrayList<Bagaglio> lista) {
         if (lista.isEmpty()) {
             JOptionPane.showMessageDialog(null, "Nessun bagaglio trovato.", risultato, JOptionPane.INFORMATION_MESSAGE);
@@ -366,6 +444,13 @@ public class Controller {
         popup.setVisible(true);
     }
 
+    /**
+     * Consente all’utente autenticato di segnalare lo smarrimento di un proprio bagaglio.
+     *
+     * @param panel  contenitore grafico
+     * @param dialog dialog corrente
+     * @param d      dashboard utente
+     */
 
     public void handlerSegnalaSmarrimento(JPanel panel, JDialog dialog, DashBoardUser d) {
         panel.setLayout(new GridLayout(1, 1));
@@ -407,6 +492,7 @@ public class Controller {
 
         visualizzaVoli(d);
     }
+
     public void selectedItem(String item, DashBoardUser d) {
         String selected = (String) d.getComboBox1().getSelectedItem();
         if (selected == null || selected.trim().isEmpty()) return;
@@ -456,6 +542,15 @@ public class Controller {
         dialog.setVisible(true);
     }
 
+    /**
+     * Crea e inserisce un nuovo volo nel database tramite DAO.
+     * Supporta voli in arrivo e in partenza con campi condizionati.
+     *
+     * @param panel  contenitore grafico
+     * @param dialog dialog corrente
+     * @param d      dashboard admin
+     */
+
     public void handlerInserisciVolo(JPanel panel, JDialog dialog, DashBoardAdmin d) {
         panel.setLayout(new GridLayout(1, 1));
 
@@ -496,12 +591,26 @@ public class Controller {
         SwingUtilities.invokeLater(inArrivoCheck::requestFocusInWindow);
     }
 
+    /**
+     * Crea un pannello verticale a una colonna per moduli grafici.
+     * Versione fissa con 8 righe.
+     *
+     * @return pannello form configurato
+     */
+
     private JPanel creaFormPanel() {
         JPanel form = new JPanel(new GridLayout(8, 1, 10, 10));
         form.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
         form.setBackground(new Color(43, 48, 52));
         return form;
     }
+
+    /**
+     * Crea un campo di input con stile coerente all'interfaccia scura (sfondo scuro e testo bianco).
+     *
+     * @param placeholder testo iniziale o suggerimento
+     * @return campo di testo configurato
+     */
 
     private JTextField creaCampoStandard(String placeholder) {
         JTextField campo = creaCampo(placeholder);
@@ -511,12 +620,27 @@ public class Controller {
         return campo;
     }
 
+    /**
+     * Crea una checkbox con stile grafico coerente.
+     *
+     * @param label etichetta da mostrare accanto alla checkbox
+     * @return checkbox configurata
+     */
     private JCheckBox creaCheckbox(String label) {
         JCheckBox check = new JCheckBox(label);
         check.setForeground(Color.WHITE);
         check.setBackground(new Color(43, 48, 52));
         return check;
     }
+
+    /**
+     * Configura il comportamento dinamico della checkbox "In arrivo".
+     * Modifica i campi località e gate in base alla selezione.
+     *
+     * @param check          checkbox "In arrivo"
+     * @param localitaField  campo località da aggiornare
+     * @param gateField      campo gate da abilitare/disabilitare
+     */
 
     private void configuraCheckbox(JCheckBox check, JTextField localitaField, JTextField gateField) {
         check.addActionListener(e -> {
@@ -527,6 +651,20 @@ public class Controller {
         });
     }
 
+    /**
+     * Costruisce un oggetto {@code Volo} (in arrivo o in partenza) partendo dai valori
+     * inseriti in un form grafico.
+     *
+     * @param codiceField     campo codice volo
+     * @param compagniaField  campo compagnia aerea
+     * @param dataField       campo data partenza
+     * @param orarioField     campo orario partenza
+     * @param inArrivo        flag che indica se è un volo in arrivo
+     * @param localitaField   campo origine o destinazione
+     * @param gateField       campo numero gate (solo per partenza)
+     * @return oggetto {@code VoloInArrivo} o {@code VoloInPartenza}
+     * @throws IllegalArgumentException se i dati sono inconsistenti o incompleti
+     */
     private Volo costruisciVoloDaInput(JTextField codiceField, JTextField compagniaField, JTextField dataField,
                                        JTextField orarioField, boolean inArrivo, JTextField localitaField,
                                        JTextField gateField) {
@@ -554,12 +692,24 @@ public class Controller {
         }
     }
 
+    /**
+     * Aggiunge in ordine tutti i componenti forniti al pannello specificato.
+     *
+     * @param form        pannello contenitore
+     * @param componenti  componenti da aggiungere
+     */
+
     private void aggiungiComponentiForm(JPanel form, JComponent... componenti) {
         for (JComponent c : componenti) {
             form.add(c);
         }
     }
 
+    /**
+     * Mostra la lista dei voli e consente di selezionare un volo da modificare.
+     *
+     * @param d dashboard admin
+     */
 
     public void handlerAggiornaVolo(DashBoardAdmin d) {
         ArrayList<Volo> voli = new AmministratoreImplementazionePostgresDAO().visualizzaVoli();
@@ -607,6 +757,14 @@ public class Controller {
         voloDialog.setVisible(true);
         visualizzaVoli(d);
     }
+
+    /**
+     * Permette la modifica del gate di un volo in partenza.
+     *
+     * @param panel  contenitore grafico
+     * @param dialog dialog corrente
+     * @param d      dashboard admin
+     */
 
     public void handlerModificaGate(JPanel panel, JDialog dialog, DashBoardAdmin d) {
         panel.setLayout(new GridLayout(1, 1));
@@ -658,6 +816,15 @@ public class Controller {
 
         panel.add(formPanelMG);
     }
+
+    /**
+     * Ricerca bagagli tramite ID o numero prenotazione, con risultati visualizzati in tabella.
+     *
+     * @param panel  contenitore grafico
+     * @param dialog dialog corrente
+     * @param d      dashboard admin
+     */
+
     public void handlerCercaBagagloAdmin(JPanel panel, JDialog dialog, DashBoardAdmin d) {
         panel.setLayout(new GridLayout(1, 1));
 
@@ -685,6 +852,14 @@ public class Controller {
         visualizzaVoli(d);
     }
 
+    /**
+     * Crea un pannello verticale a una colonna con numero righe personalizzato.
+     *
+     * @param righe numero di righe desiderate
+     * @return pannello form configurato
+     */
+
+
     private JPanel creaFormPanel(int righe) {
         JPanel form = new JPanel(new GridLayout(righe, 1, 10, 10));
         form.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
@@ -692,7 +867,15 @@ public class Controller {
         return form;
     }
 
-
+    /**
+     * Esegue la ricerca di bagagli tramite ID o numero prenotazione.
+     * Lancia eccezioni se i campi sono entrambi vuoti o entrambi compilati.
+     *
+     * @param idField             campo ID bagaglio
+     * @param prenotazioneField  campo numero prenotazione
+     * @return lista di bagagli trovati
+     * @throws IllegalArgumentException se i campi sono incompatibili
+     */
 
     private ArrayList<Bagaglio> eseguiRicercaBagagli(JTextField idField, JTextField prenotazioneField) {
         AmministratoreImplementazionePostgresDAO dao = new AmministratoreImplementazionePostgresDAO();
@@ -716,6 +899,13 @@ public class Controller {
             return dao.cercaBagaglio(p, null);
         }
     }
+
+    /**
+     * Mostra i risultati della ricerca bagagli in una finestra a scorrimento.
+     *
+     * @param risultati lista di bagagli trovati
+     * @param dialog dialog corrente da usare come riferimento per i messaggi
+     */
 
     private void mostraRisultatiBagagli(ArrayList<Bagaglio> risultati, JDialog dialog) {
         if (risultati.isEmpty()) {
@@ -764,6 +954,14 @@ public class Controller {
         popup.setLocationRelativeTo(null);
         popup.setVisible(true);
     }
+
+    /**
+     * Consente la modifica dello stato di un bagaglio (es. REGISTRATO -> IN CONSEGNA).
+     *
+     * @param panel  contenitore grafico
+     * @param dialog dialog corrente
+     * @param d      dashboard admin
+     */
 
     public void handlerAggiornaBagaglio(JPanel panel, JDialog dialog, DashBoardAdmin d) {
         panel.setLayout(new GridLayout(1, 1));
@@ -815,6 +1013,12 @@ public class Controller {
         visualizzaVoli(d);
     }
 
+    /**
+     * Mostra la lista dei bagagli smarriti segnalati dagli utenti.
+     *
+     * @param d dashboard admin
+     */
+
     public void handlerVisualizzaSmarrimenti(DashBoardAdmin d) {
         ArrayList<Bagaglio> listaSmarriti = new AmministratoreImplementazionePostgresDAO().visualizzaSmarrimento();
 
@@ -862,6 +1066,7 @@ public class Controller {
 
         visualizzaVoli(d);
     }
+
     public void selectedItem(String item, DashBoardAdmin d) {
         if (item == null || item.trim().isEmpty()) return;
         JPanel panel = new JPanel();
@@ -909,16 +1114,29 @@ public class Controller {
     }
 
     /**
-     * Metodo helper per creare JTextField con colori personalizzati
-     * Sfondo grigio e testo bianco per migliorare la leggibilità su sfondo scuro.
-     * Il testo passato è usato come "placeholder" che però non scompare se si scrive.
+     * Crea un {@code JTextField} con stile grafico predefinito e colore coerente.
+     *
+     * @param placeholder testo iniziale o indicazione del campo
+     * @return campo di testo configurato
      */
+
     private JTextField creaCampo(String placeholder) {
         JTextField field = new JTextField(placeholder);
         field.setBackground(new Color(107, 112, 119));
         field.setForeground(Color.WHITE);
         return field;
     }
+
+    /**
+     * Crea un bottone con testo e azione associata.
+     * Dopo l'esecuzione dell'azione, chiude automaticamente il dialog specificato.
+     *
+     * @param testo  etichetta del bottone
+     * @param azione azione da eseguire al click
+     * @param dialog dialog da chiudere dopo l'esecuzione
+     * @return bottone configurato
+     */
+
     private JButton creaBottoneConAzione(String testo, Runnable azione, JDialog dialog) {
         JButton btn = new JButton(testo);
         btn.setBackground(new Color(255, 162, 35));
@@ -931,16 +1149,27 @@ public class Controller {
     }
 
 
-    // Getter e setter per gestire gli utenti attivi nel controller
+    /**
+     * Restituisce l'oggetto {@code Amministratore} autenticato, se presente.
+     *
+     * @return amministratore loggato o {@code null}
+     */
     public Amministratore getAdmin() {
         return admin;
     }
+
     public UtenteGenerico getUtente() {
         return utente;
     }
+
     public void setUtente(UtenteGenerico utente) {
         this.utente = utente;
     }
+
+    /**
+     * Mostra l'interfaccia grafica per la registrazione di un nuovo utente.
+     * Effettua un check di esistenza e salva su database se valido.
+     */
 
     public void interfacciaRegistrazione() {
         JDialog dialog = new JDialog();
@@ -1010,11 +1239,25 @@ public class Controller {
         dialog.setVisible(true);
     }
 
+    /**
+     * Registra un nuovo utente in PostgreSQL.
+     *
+     * @param email    username/email da registrare
+     * @param password password associata
+     * @return {@code true} se la registrazione è andata a buon fine, {@code false} se l'utente già esiste
+     */
 
     public boolean registraUtente(String email, String password) {
         LoginImplementazionePostgresDAO tmp =  new LoginImplementazionePostgresDAO();
         return tmp.registrazione(email, password);
     }
+
+    /**
+     * Carica e visualizza i voli in una tabella HTML nella dashboard utente.
+     *
+     * @param view interfaccia grafica {@code DashBoardUser} in cui mostrare i voli
+     */
+
     public void visualizzaVoli(DashBoardUser view) {
         AmministratoreImplementazionePostgresDAO adao = new AmministratoreImplementazionePostgresDAO();
         ArrayList<Volo> voli = adao.visualizzaVoli();
@@ -1063,7 +1306,11 @@ public class Controller {
         output.setVisible(true);
     }
 
-
+    /**
+     * Carica e visualizza i voli in una tabella HTML nella dashboard admin.
+     *
+     * @param view interfaccia grafica {@code DashBoardAdmin} in cui mostrare i voli
+     */
     public void visualizzaVoli(DashBoardAdmin view) {
         AmministratoreImplementazionePostgresDAO adao = new AmministratoreImplementazionePostgresDAO();
         ArrayList<Volo> voli = adao.visualizzaVoli();
@@ -1112,7 +1359,13 @@ public class Controller {
         output.setVisible(true);
     }
 
-
+    /**
+     * Mostra una dialog modale per la modifica dei dati di un volo esistente.
+     * Consente di aggiornare il ritardo, stato, origine/destinazione e gate (solo per voli in partenza).
+     * I dati modificati vengono salvati tramite il DAO amministratore.
+     *
+     * @param volo il volo da modificare (istanza di {@code VoloInArrivo} o {@code VoloInPartenza})
+     */
 
 
     private void mostraPopupModificaVolo(Volo volo) {
@@ -1211,13 +1464,28 @@ public class Controller {
         dialog.setVisible(true);
     }
 
-    // Etichetta bianca personalizzata
+    /**
+     * Crea una {@code JLabel} con il testo fornito, utilizzando uno stile coerente
+     * con l'interfaccia scura dell'applicazione.
+     *
+     * @param testo testo da visualizzare nell'etichetta
+     * @return etichetta creata
+     */
+
     private JLabel creaEtichetta(String testo) {
         JLabel label = new JLabel(testo);
         label.setForeground(Color.WHITE);
         return label;
     }
 
+
+    /**
+     * Esegue l'autenticazione verificando credenziali tramite DAO.
+     * Imposta internamente {@code utente} o {@code admin} se l'accesso ha successo.
+     *
+     * @param email    username/email dell'utente
+     * @param password password in chiaro
+     */
 
     public void login(String email, String password) {
         this.utente = null;
@@ -1232,6 +1500,13 @@ public class Controller {
             this.admin = new Amministratore(email, password);
         }
     }
+
+    /**
+     * Mostra una dialog per modificare il numero di bagagli associati a una prenotazione.
+     * I campi relativi al passeggero sono in sola lettura. L'aggiornamento avviene tramite DAO utente.
+     *
+     * @param p prenotazione da modificare
+     */
 
     private void mostraPopupModificaPrenotazione(Prenotazione p) {
         JDialog dialog = new JDialog();

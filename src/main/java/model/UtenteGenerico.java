@@ -3,38 +3,39 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Estende {@link Utente} per rappsentare un utente generico che può eddettuare prenotazioni.
+ * Estende {@link Utente} per rappresentare un utente generico che può effettuare prenotazioni di voli ed effetuare operazioni derivate,
+ * quali ricerca bagagli, ricerca prenotazioni ecc.
+ * Questo tipo di utente ha accesso alle funzionalità standard e possiede una lista di voli prenotati.
  */
 public class UtenteGenerico extends Utente {
 
-    /**
-     * Lista dei voli prenotati dall'utente.
-     */
+    /** Lista dei voli prenotati dall'utente. */
     protected List<Volo> listaPrenotazioni;
 
     /**
      * Restituisce la lista delle prenotazioni dell'utente.
      *
-     * @return the lista prenotazioni
+     * @return lista di oggetti {@code Volo} prenotati
      */
-    public List<Volo>getListaPrenotazioni() {
+    public List<Volo> getListaPrenotazioni() {
         return listaPrenotazioni;
     }
 
     /**
-     * Imposta la lista delle prenotazioni.
+     * Imposta la lista delle prenotazioni dell'utente.
      *
-     * @param listaPrenotazioni the lista prenotazioni
+     * @param listaPrenotazioni lista di voli da assegnare
      */
     public void setListaPrenotazioni(List<Volo> listaPrenotazioni) {
         this.listaPrenotazioni = listaPrenotazioni;
     }
+
     /**
      * Costruttore completo.
      *
-     * @param login              the login
-     * @param password           the password
-     * @param listaPrenotazioni the lista prenotazioni
+     * @param login nome utente
+     * @param password password dell'utente
+     * @param listaPrenotazioni lista dei voli prenotati
      */
     public UtenteGenerico(String login, String password, List<Volo> listaPrenotazioni) {
         super(login, password);
@@ -42,11 +43,12 @@ public class UtenteGenerico extends Utente {
     }
 
     /**
-     * Costruttore di default.
+     * Costruttore con solo credenziali, utile per login o registrazione iniziale.
+     *
+     * @param login nome utente
+     * @param password password dell'utente
      */
     public UtenteGenerico(String login, String password) {
         super(login, password);
     }
-
-
 }

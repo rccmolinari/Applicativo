@@ -6,105 +6,100 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
+/**
+ * Classe GUI che rappresenta la dashboard dell'utente generico.
+ * Permette l'interazione con le funzionalità principali: visualizzazione e prenotazione voli, gestione bagagli, ecc.
+ * Comunica con il {@link controller.Controller} per l'esecuzione delle logiche applicative.
+ */
 public class DashBoardUser {
 
-    // Questo è il pannello principale che contiene tutta la pagina dell'utente
     private JPanel homePage;
-
-    // Qui mettiamo la parte della pagina dedicata al messaggio di benvenuto
     private JPanel welcomePanel;
-
-    // Il pannello che contiene solo il testo di benvenuto
     private JPanel welcomeText;
-
-    // Bottone per uscire dall'app (qui chiude proprio il programma)
     private JButton logoutUser;
-
-    // Label dove mostriamo il nome o ID dell'utente loggato
     private JLabel welcomeTextLabel;
-
-    // ComboBox che dà all’utente una lista di azioni possibili (tipo visualizza voli, prenota ecc.)
     private JComboBox<String> comboBox1;
-
-    // Label nascosta che useremo per mostrare messaggi o risultati in pagina
     private JLabel outputLabel;
-
-    // Username dell’utente, così possiamo usarlo per personalizzare un po’ l’interfaccia
     private String username;
-
-    // Dialog modale che usiamo per finestre extra o scelte particolari
     private JDialog choiceDialog = null;
-
-    // Riferimento al controller, serve per far partire le azioni vere quando l’utente interagisce
     private Controller controller;
 
-    // Qui inizializziamo tutto, mettiamo la lista delle azioni a disposizione e i listener per gestire le scelte
+    /**
+     * Costruttore della dashboard per utente generico.
+     * Inizializza i componenti grafici, popola il menu a tendina con le azioni disponibili
+     * e configura i listener per la gestione degli eventi.
+     *
+     * @param username   identificativo dell'utente (es. ID o nome)
+     * @param controller riferimento al controller per eseguire le azioni richieste
+     */
     public DashBoardUser(String username, Controller controller) {
         this.controller = controller;
-        // Scelte che l’utente può fare nel menu a tendina
-        String [] choices = {"", "Visualizza Prenotazioni", "Prenota Volo", "Cerca Prenotazione", "Cerca Bagagli", "Segnala Smarrimento"};
-
-        // Impostiamo la comboBox con queste opzioni
+        String[] choices = {"", "Visualizza Prenotazioni", "Prenota Volo", "Cerca Prenotazione", "Cerca Bagagli", "Segnala Smarrimento"};
         comboBox1.setModel(new DefaultComboBoxModel<>(choices));
-
         this.username = username;
-
-        // Abilitiamo la comboBox e gli diamo un colore un po’ più gradevole
         comboBox1.setEnabled(true);
         comboBox1.setBackground(new Color(107, 112, 119));
         comboBox1.setForeground(new Color(0, 0, 0));
-
-        // Di default non mostriamo output, lo attiveremo solo se serve
         outputLabel.setVisible(false);
 
-        // Quando l’utente cambia selezione nella comboBox, passiamo la scelta al controller
         comboBox1.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 String itemSelezionato = (String) e.getItem();
-
                 if (!itemSelezionato.isEmpty()) {
                     controller.selectedItem(itemSelezionato, DashBoardUser.this);
-
-                    // Torna al valore di default
                     comboBox1.setSelectedIndex(0);
                 }
             }
         });
 
-
-        // Mostriamo l’ID o nome dell’utente nell’etichetta di benvenuto
-        welcomeTextLabel.setText("ID: "+username);
-
-        // Il bottone logout chiude tutto (da migliorare magari con logout vero)
+        welcomeTextLabel.setText("ID: " + username);
         logoutUser.addActionListener(e -> System.exit(0));
-
-        // Carica i voli di default alla prima apertura
         controller.visualizzaVoli(this);
-
     }
 
-    // Qui sotto ci sono tutti i getter e setter per i componenti, utili per modificarli o leggerli da fuori
-
+    /**
+     * Restituisce il pannello principale della GUI utente.
+     *
+     * @return pannello principale {@code homePage}
+     */
     public JPanel getHomePage() {
         return homePage;
     }
 
+    /**
+     * Restituisce la combo box che contiene le azioni disponibili per l'utente.
+     *
+     * @return {@code JComboBox} con le opzioni di scelta
+     */
     public JComboBox<String> getComboBox1() {
         return comboBox1;
     }
 
-
+    /**
+     * Restituisce la label utilizzata per mostrare messaggi o risultati dinamici all'utente.
+     *
+     * @return {@code JLabel} per output testuale
+     */
     public JLabel getOutputLabel() {
         return outputLabel;
     }
 
+    /**
+     * Restituisce il dialog modale attualmente associato alla dashboard.
+     * Utilizzato per mostrare finestre secondarie (es. popup di conferma o moduli).
+     *
+     * @return {@code JDialog} corrente
+     */
     public JDialog getChoiceDialog() {
         return choiceDialog;
     }
 
+    /**
+     * Imposta il dialog modale da utilizzare per l'interazione secondaria dell'interfaccia.
+     *
+     * @param choiceDialog nuovo {@code JDialog} da associare
+     */
     public void setChoiceDialog(JDialog choiceDialog) {
         this.choiceDialog = choiceDialog;
     }
-
-
 }
