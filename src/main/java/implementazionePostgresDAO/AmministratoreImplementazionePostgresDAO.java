@@ -200,6 +200,62 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
         }
     }
 
+    @Override
+    public ArrayList<Volo> cercaVolo(Volo v) {
+        ArrayList<Volo> risultati = new ArrayList<>();
+        final String QUERY_CODICE = "SELECT * FROM volo WHERE codice_volo = ?";
+        final String QUERY_ORIG_DEST = "SELECT * FROM volo WHERE aeroporto_origine = ? AND aeroporto_destinazione = ?";
+
+        try {
+            PreparedStatement ps;
+            Integer codice = v.getCodiceVolo();
+
+            if (codice != null && codice > 0) {
+                ps = connection.prepareStatement(QUERY_CODICE);
+                ps.setInt(1, codice);
+            } else if (v.getOrigine() != null && v.getDestinazione() != null) {
+                ps = connection.prepareStatement(QUERY_ORIG_DEST);
+                ps.setString(1, v.getOrigine());
+                ps.setString(2, v.getDestinazione());
+            } else {
+                return risultati; // lista vuota se parametri assenti
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String tipo = rs.getString("tipo_volo");
+                    Volo risultato;
+
+                    if ("inPartenza".equalsIgnoreCase(tipo)) {
+                        risultato = new VoloInPartenza();
+                        ((VoloInPartenza) risultato).setGate(rs.getInt("gate"));
+                    } else if ("inArrivo".equalsIgnoreCase(tipo)) {
+                        risultato = new VoloInArrivo();
+                    } else {
+                        continue;
+                    }
+
+                    risultato.setCodiceVolo(rs.getInt("codice_volo"));
+                    risultato.setCompagnia(rs.getString("compagnia"));
+                    risultato.setData(rs.getDate("data_volo"));
+                    risultato.setOrario(rs.getTime("orario_previsto"));
+                    risultato.setRitardo(rs.getInt("ritardo"));
+                    risultato.setStato(StatoVolo.fromString(rs.getString("stato_volo")));
+                    risultato.setOrigine(rs.getString("aeroporto_origine"));
+                    risultato.setDestinazione(rs.getString("aeroporto_destinazione"));
+
+                    risultati.add(risultato);
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new CustomExc("Errore durante la ricerca dei voli", e);
+        }
+
+        return risultati;
+    }
+
+
     /**
      * Recupera tutti i bagagli che risultano attualmente smarriti nel sistema.
      * Vengono restituite anche le informazioni minime sulla prenotazione associata.
@@ -381,7 +437,34 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
 
         return lista;
     }
+    public ArrayList<Prenotazione> cercaPasseggero(Passeggero p) {
+        ArrayList<Prenotazione> lista = new ArrayList<>();
+        final String SQL = """
+            SELECT pr.*
+            FROM prenotazione pr
+            JOIN passeggero pas ON pr.numero_biglietto = pas.numero_biglietto
+            WHERE pas.nome = ? AND pas.cognome = ?
+            """;
 
+        try (PreparedStatement ps = connection.prepareStatement(SQL)) {
+            ps.setString(1, p.getNome());
+            ps.setString(2, p.getCognome());
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Prenotazione pren = new Prenotazione();
+                    pren.setNumeroBiglietto(rs.getInt("numero_biglietto"));
+                    pren.setVolo(new Volo()); // Popolare con i dati del volo se necessario
+                    lista.add(pren);
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new CustomExc("Errore durante la ricerca del passeggero", e);
+        }
+
+        return lista;
+    }
     /**
      * Eccezione personalizzata per mascherare le eccezioni SQL come {@link RuntimeException}.
      * Utilizzata per propagare errori critici durante l’accesso al database.

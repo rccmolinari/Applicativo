@@ -95,6 +95,13 @@ public class Controller {
         visualizzaVoli(d);
     }
 
+    /** Inizializza un pannello contenitore per il dialog delle prenotazioni.
+     * Utilizza GridBagLayout per gestire la disposizione degli elementi.
+     *
+     * @param scrollPane pannello di scorrimento contenente la tabella delle prenotazioni
+     * @return pannello contenitore configurato
+     */
+
     private JPanel initContenitore(JScrollPane scrollPane) {
         JPanel contenitore = new JPanel(new GridBagLayout());
         contenitore.setBackground(new Color(43, 48, 52));
@@ -321,6 +328,12 @@ public class Controller {
 
         return riga;
     }
+
+    /** Inizializza una riga con border e colore di sfondo specifici.
+     *
+     * @return pannello riga inizializzato
+     */
+
     public JPanel initRiga() {
         JPanel riga = new JPanel(new BorderLayout());
         riga.setBackground(new Color(60, 63, 65));
@@ -395,7 +408,11 @@ public class Controller {
         campo2.getDocument().addDocumentListener(listener);
     }
 
-
+    /** Inzializza una Lista di bagagli in un pannello con righe.
+     *
+     * @param lista lista di bagagli da visualizzare
+     * @return pannello contenente le righe dei bagagli
+     */
 
     private JPanel initListaPanel(ArrayList<Bagaglio> lista) {
         JPanel listaPanel = new JPanel();
@@ -421,6 +438,12 @@ public class Controller {
         }
         return listaPanel;
     }
+
+    /** Inizializza un pannello di scorrimento per visualizzare i risultati della ricerca bagagli.
+     *
+     * @param listaPanel pannello contenente le righe dei bagagli trovati
+     * @return JScrollPane configurato con il pannello dei risultati
+     */
 
     private JScrollPane initScrollPanel(JPanel listaPanel) {
         JScrollPane scrollPane = new JScrollPane(listaPanel);
@@ -504,7 +527,143 @@ public class Controller {
 
         visualizzaVoli(d);
     }
+    public void handlerCercaVolo(JPanel panel, JDialog dialog) {
+        panel.setLayout(new GridLayout(1, 1));
+        JPanel formPanel = new JPanel(new GridLayout(4, 1, 10, 10));
+        formPanel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
+        formPanel.setBackground(new Color(43, 48, 52));
 
+        JTextField codiceVoloField = creaCampo("Codice Volo (opzionale)");
+        JTextField origineField = creaCampo("Origine (opzionale)");
+        JTextField destinazioneField = creaCampo("Destinazione (opzionale)");
+
+        sincronizzaCampi(codiceVoloField, origineField);
+        sincronizzaCampi(codiceVoloField, destinazioneField);
+
+        JButton cercaBtn = creaBottoneConAzione(cerca, () ->
+                        eseguiRicercaVolo(codiceVoloField, origineField, destinazioneField, dialog),
+                dialog
+        );
+
+        formPanel.add(codiceVoloField);
+        formPanel.add(origineField);
+        formPanel.add(destinazioneField);
+        formPanel.add(cercaBtn);
+        panel.add(formPanel);
+    }
+
+    private void eseguiRicercaVolo(JTextField codiceField, JTextField origineField, JTextField destinazioneField, JDialog dialog) {
+        try {
+            String codStr = codiceField.getText().trim();
+            String origine = origineField.getText().trim();
+            String destinazione = destinazioneField.getText().trim();
+
+            boolean cercaPerCodice = !codStr.isEmpty();
+            boolean cercaPerOrigDest = !origine.isEmpty() && !destinazione.isEmpty();
+
+            if (cercaPerCodice && cercaPerOrigDest) {
+                JOptionPane.showMessageDialog(dialog, "Compila solo una modalità di ricerca.", errore, JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            if (!cercaPerCodice && !cercaPerOrigDest) {
+                JOptionPane.showMessageDialog(dialog, "Inserisci almeno un criterio di ricerca.", "Campi vuoti", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            Volo v = new Volo();
+            if (cercaPerCodice) {
+                int codice;
+                try {
+                    codice = Integer.parseInt(codStr);
+                } catch (NumberFormatException e) {
+                    JOptionPane.showMessageDialog(dialog, "Il codice volo deve essere un numero intero.", errore, JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                if (codice <= 0) {
+                    JOptionPane.showMessageDialog(dialog, "Il codice volo deve essere un numero positivo.", errore, JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                v.setCodiceVolo(codice);
+            } else {
+                v.setOrigine(origine);
+                v.setDestinazione(destinazione);
+            }
+
+            ArrayList<Volo> risultati = new UtenteGenericoImplementazionePostgresDAO().cercaVolo(v);
+
+            if (risultati.isEmpty()) {
+                JOptionPane.showMessageDialog(dialog, "Nessun volo trovato.", "Risultato", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+
+            mostraRisultatiNelPopup(risultati, dialog);
+
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(dialog, errore + ex.getMessage(), errore, JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void mostraRisultatiNelPopup(ArrayList<Volo> voli, JDialog parentDialog) {
+        JDialog popup = new JDialog(parentDialog, "Risultati Ricerca Volo", true);
+        popup.setSize(700, 500);
+        popup.setLocationRelativeTo(parentDialog);
+        popup.setResizable(false);
+        popup.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+
+        JPanel contenuto = new JPanel(new BorderLayout());
+        contenuto.setBackground(new Color(43, 48, 52));
+        contenuto.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        JTextArea area = new JTextArea();
+        area.setEditable(false);
+        area.setFont(new Font("Monospaced", Font.PLAIN, 14));
+        area.setBackground(new Color(43, 48, 52));
+        area.setForeground(Color.WHITE);
+        area.setBorder(null);
+
+        StringBuilder sb = new StringBuilder();
+        for (Volo v : voli) {
+            sb.append(costruisciDettagliVolo(v)).append("\n------------------------------\n");
+        }
+        area.setText(sb.toString());
+
+        JScrollPane scrollPane = new JScrollPane(area);
+        scrollPane.setBorder(null);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+
+        contenuto.add(scrollPane, BorderLayout.CENTER);
+        popup.setContentPane(contenuto);
+        popup.setVisible(true);
+    }
+
+    private String costruisciDettagliVolo(Volo v) {
+        StringBuilder msg = new StringBuilder();
+        msg.append("Codice: ").append(v.getCodiceVolo()).append("\n")
+                .append("Compagnia: ").append(v.getCompagnia()).append("\n")
+                .append("Data: ").append(v.getData()).append("\n")
+                .append("Orario: ").append(v.getOrario()).append("\n")
+                .append("Ritardo: ").append(v.getRitardo()).append(" min\n")
+                .append("Stato: ").append(v.getStato()).append("\n")
+                .append("Origine: ").append(v.getOrigine()).append("\n")
+                .append("Destinazione: ").append(v.getDestinazione()).append("\n");
+
+        if (v instanceof VoloInPartenza vpart) {
+            msg.append("Gate: ").append(vpart.getGate()).append("\n");
+        }
+
+        return msg.toString();
+    }
+
+    /**
+     * Gestisce la selezione di un'azione dall'interfaccia utente.
+     * In base all'elemento selezionato, apre il dialog appropriato per l'azione richiesta.
+     *
+     * @param item elemento selezionato dalla combo box
+     * @param d    dashboard utente corrente
+     */
     public void selectedItem(String item, DashBoardUser d) {
         String selected = (String) d.getComboBox1().getSelectedItem();
         if (selected == null || selected.trim().isEmpty()) return;
@@ -539,6 +698,11 @@ public class Controller {
             case "Segnala Smarrimento":
                 handlerSegnalaSmarrimento(panel, dialog, d);
                 break;
+
+            case "Cerca Volo":
+                handlerCercaVolo(panel, dialog);
+                break;
+
 
 
 
@@ -747,6 +911,14 @@ public class Controller {
         visualizzaVoli(d);
     }
 
+    /**
+     * Crea una riga grafica per un volo, con etichetta e bottone di modifica.
+     *
+     * @param d dashboard admin corrente
+     * @param v volo da rappresentare
+     * @return pannello riga configurato
+     */
+
     private JPanel getRiga(DashBoardAdmin d, Volo v) {
         JPanel riga = new JPanel(new FlowLayout(FlowLayout.LEFT));
         riga.setBackground(new Color(107, 112, 119));
@@ -759,6 +931,14 @@ public class Controller {
         riga.add(modificaBtn);
         return riga;
     }
+
+    /**
+     * Crea un bottone di modifica per un volo, che apre un popup per modificarne i dettagli.
+     *
+     * @param d dashboard admin corrente
+     * @param v volo da modificare
+     * @return bottone configurato
+     */
 
     private JButton getJButton(DashBoardAdmin d, Volo v) {
         JButton modificaBtn = new JButton(modifica);
@@ -937,6 +1117,13 @@ public class Controller {
         scrollPane.setVisible(true);
     }
 
+    /**
+     * Inizializza un pannello per il form di modifica bagaglio.
+     * Contiene 3 righe con margini e colore di sfondo specifici.
+     *
+     * @return pannello form configurato
+     */
+
     private JPanel initFormPanelAB() {
         JPanel formPanel = new JPanel(new GridLayout(3, 1, 10, 10));
         formPanel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
@@ -1047,6 +1234,13 @@ public class Controller {
         visualizzaVoli(d);
     }
 
+    /** Metodo che gestisce la selezione di un elemento dal menu a tendina della dashboard admin.
+     * In base all'elemento selezionato, apre un dialog con le opzioni corrispondenti.
+     *
+     * @param item elemento selezionato
+     * @param d    dashboard admin corrente
+     */
+
     public void selectedItem(String item, DashBoardAdmin d) {
         if (item == null || item.trim().isEmpty()) return;
         JPanel panel = new JPanel();
@@ -1081,6 +1275,9 @@ public class Controller {
                 handlerVisualizzaSmarrimenti(d);
                 return;
             }
+            case "Cerca Volo":
+                handlerCercaVolo(panel, dialog);
+                break;
             default:
         }
 
@@ -1137,10 +1334,19 @@ public class Controller {
     public Amministratore getAdmin() {
         return admin;
     }
-
+    /** Restituisce l'oggetto {@code UtenteGenerico} autenticato, se presente.
+     *
+     * @return utente loggato o {@code null}
+     */
     public UtenteGenerico getUtente() {
         return utente;
     }
+
+    /**
+     * Imposta l'oggetto {@code UtenteGenerico} autenticato.
+     *
+     * @param utente utente da impostare
+     */
 
     public void setUtente(UtenteGenerico utente) {
         this.utente = utente;
@@ -1198,6 +1404,16 @@ public class Controller {
         dialog.setVisible(true);
     }
 
+    /**
+     * Crea un bottone di registrazione con azione associata.
+     * Controlla i campi e registra l'utente se valido.
+     *
+     * @param emailField   campo email/username
+     * @param passwordField campo password
+     * @param dialog       dialog corrente da usare per i messaggi
+     * @return bottone configurato
+     */
+
     private JButton getRegistrati(JTextField emailField, JPasswordField passwordField, JDialog dialog) {
         JButton registrati = new JButton("Registrati");
         registrati.setBackground(new Color(255, 162, 35));
@@ -1236,6 +1452,12 @@ public class Controller {
         LoginImplementazionePostgresDAO tmp =  new LoginImplementazionePostgresDAO();
         return tmp.registrazione(email, password);
     }
+
+    /**
+     * Costruisce l'HTML di base per la tabella dei voli.
+     *
+     * @return StringBuilder contenente l'HTML della tabella
+     */
 
     private StringBuilder tableBuild() {
         StringBuilder html = new StringBuilder("<html><body style='color:white;font-family:sans-serif;'>");
@@ -1580,6 +1802,10 @@ public class Controller {
         dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
     }
+
+    /** Crea una classe di Eccezione personalizzata per gestire errori specifici nella modifica dei voli.
+     * Utilizzata per segnalare problemi legati a errori runtime nel programma.
+     */
 
     private static class Mpmv extends RuntimeException {
         public Mpmv(String message) {

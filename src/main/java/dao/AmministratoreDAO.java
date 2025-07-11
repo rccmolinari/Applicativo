@@ -1,9 +1,6 @@
 package dao;
 
-import model.Bagaglio;
-import model.StatoBagaglio;
-import model.Volo;
-import model.VoloInPartenza;
+import model.*;
 
 import java.util.ArrayList;
 
@@ -19,5 +16,6 @@ public interface AmministratoreDAO extends UtenteDAO {
     void modificaGate(VoloInPartenza volo);
     void aggiornaBagaglio(Bagaglio bagaglio, StatoBagaglio stato);
     ArrayList<Bagaglio> visualizzaSmarrimento();
+    ArrayList<Prenotazione> cercaPasseggero(Passeggero passeggero);
 
 }

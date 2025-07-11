@@ -56,7 +56,7 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
     @Override
     public ArrayList<Volo> visualizzaVoli() {
         ArrayList<Volo> lista = new ArrayList<>();
-        final String QUERY = "SELECT codice_volo, compagnia, data_volo, orario_previsto, ritardo, stato_volo, tipo_volo, aeroporto_destinazione, aeroporto_origine, gate FROM volo ORDER BY data_volo, orario_previsto";
+        final String QUERY = "SELECT codice_volo, compagnia, data_volo, orario_previsto, ritardo, stato_volo, tipo_volo, aeroporto_destinazione, aeroporto_origine, gate FROM volo WHERE stato_volo <> 'CANCELLATO' AND stato_volo <> 'DECOLLATO' ORDER BY data_volo, orario_previsto";
 
         try (PreparedStatement ps = connection.prepareStatement(QUERY);
              ResultSet rs = ps.executeQuery()) {
@@ -270,16 +270,61 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
         }
     }
 
-    /**
-     * Cerca una prenotazione specifica tramite numero di biglietto.
-     * I dati sono restituiti solo se il biglietto appartiene all'utente autenticato.
-     * Vengono inclusi anche i dati del passeggero e dei bagagli.
-     *
-     * @param utente utente autenticato.
-     * @param numeroBiglietto identificativo della prenotazione da cercare.
-     * @return lista con la prenotazione trovata (al massimo una).
-     * @throws CustomExc se si verifica un errore durante l'accesso al database.
-     */
+    @Override
+    public ArrayList<Volo> cercaVolo(Volo v) {
+        ArrayList<Volo> risultati = new ArrayList<>();
+        final String QUERY_CODICE = "SELECT * FROM volo WHERE codice_volo = ?";
+        final String QUERY_ORIG_DEST = "SELECT * FROM volo WHERE aeroporto_origine = ? AND aeroporto_destinazione = ?";
+
+        try {
+            PreparedStatement ps;
+            Integer codice = v.getCodiceVolo();
+
+            if (codice != null && codice > 0) {
+                ps = connection.prepareStatement(QUERY_CODICE);
+                ps.setInt(1, codice);
+            } else if (v.getOrigine() != null && v.getDestinazione() != null) {
+                ps = connection.prepareStatement(QUERY_ORIG_DEST);
+                ps.setString(1, v.getOrigine());
+                ps.setString(2, v.getDestinazione());
+            } else {
+                return risultati; // lista vuota se parametri assenti
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String tipo = rs.getString("tipo_volo");
+                    Volo risultato;
+
+                    if ("inPartenza".equalsIgnoreCase(tipo)) {
+                        risultato = new VoloInPartenza();
+                        ((VoloInPartenza) risultato).setGate(rs.getInt("gate"));
+                    } else if ("inArrivo".equalsIgnoreCase(tipo)) {
+                        risultato = new VoloInArrivo();
+                    } else {
+                        continue;
+                    }
+
+                    risultato.setCodiceVolo(rs.getInt("codice_volo"));
+                    risultato.setCompagnia(rs.getString("compagnia"));
+                    risultato.setData(rs.getDate("data_volo"));
+                    risultato.setOrario(rs.getTime("orario_previsto"));
+                    risultato.setRitardo(rs.getInt("ritardo"));
+                    risultato.setStato(StatoVolo.fromString(rs.getString("stato_volo")));
+                    risultato.setOrigine(rs.getString("aeroporto_origine"));
+                    risultato.setDestinazione(rs.getString("aeroporto_destinazione"));
+
+                    risultati.add(risultato);
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new CustomExc("Errore durante la ricerca dei voli", e);
+        }
+
+        return risultati;
+    }
+
 
     @Override
     public ArrayList<Prenotazione> cercaPrenotazione(UtenteGenerico utente, int numeroBiglietto) {

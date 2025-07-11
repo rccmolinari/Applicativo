@@ -34,7 +34,7 @@ public class DashBoardUser {
      */
     public DashBoardUser(String username, Controller controller) {
         this.controller = controller;
-        String[] choices = {"", "Visualizza Prenotazioni", "Prenota Volo", "Cerca Prenotazione", "Cerca Bagagli", "Segnala Smarrimento"};
+        String[] choices = {"", "Visualizza Prenotazioni", "Prenota Volo", "Cerca Volo", "Cerca Prenotazione", "Cerca Bagagli", "Segnala Smarrimento"};
         comboBox1.setModel(new DefaultComboBoxModel<>(choices));
         this.username = username;
         comboBox1.setEnabled(true);
