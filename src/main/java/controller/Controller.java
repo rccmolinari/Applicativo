@@ -52,48 +52,119 @@ public class Controller {
     public void handlerVisualizzaPrenotazioni(DashBoardUser d) {
         ArrayList<Prenotazione> prenotazioni = new UtenteGenericoImplementazionePostgresDAO().listaPrenotazioni(utente);
 
-        String[] colonne = {"Biglietto", "Nome", "Cognome", "Posto", "Stato", "Bagagli"};
-        String[][] dati = new String[prenotazioni.size()][colonne.length];
+        JPanel listaPanel = new JPanel(new GridLayout(prenotazioni.size(), 1, 5, 5));
+        listaPanel.setBackground(new Color(43, 48, 52));
 
-        for (int i = 0; i < prenotazioni.size(); i++) {
-            Prenotazione p = prenotazioni.get(i);
+        for (Prenotazione p : prenotazioni) {
+            JPanel riga = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            riga.setBackground(new Color(107, 112, 119));
+
             Passeggero passeggero = p.getPasseggero();
-            dati[i] = new String[] {
-                    String.valueOf(p.getNumeroBiglietto()),
+            String testo = String.format("Biglietto %d – %s %s – Posto %d – %s – Bagagli: %d",
+                    p.getNumeroBiglietto(),
                     passeggero.getNome(),
                     passeggero.getCognome(),
-                    String.valueOf(p.getNumeroAssegnato()),
-                    p.getStatoPrenotazione().toString(),
-                    String.valueOf(p.getListaBagagli().size())
-            };
+                    p.getNumeroAssegnato(),
+                    p.getStatoPrenotazione(),
+                    p.getListaBagagli().size());
+
+            JLabel label = new JLabel(testo);
+            label.setForeground(Color.WHITE);
+
+            JButton dettagliBtn = new JButton("Dettagli Volo");
+            dettagliBtn.setFont(new Font("SansSerif", Font.PLAIN, 12));
+            dettagliBtn.setBackground(new Color(255, 162, 35));
+            dettagliBtn.setForeground(Color.WHITE);
+            dettagliBtn.setFocusPainted(false);
+
+            dettagliBtn.addActionListener(e -> mostraDettagliVolo(p.getVolo().getCodiceVolo()));
+
+            riga.add(label);
+            riga.add(dettagliBtn);
+            listaPanel.add(riga);
         }
 
-        JTable tabella = new JTable(dati, colonne);
-        tabella.setEnabled(false);
-        tabella.setFont(new Font(fontSerif, Font.PLAIN, 14));
-        tabella.setBackground(new Color(107, 112, 119));
-        tabella.setForeground(Color.WHITE);
-        tabella.setGridColor(Color.GRAY);
-        tabella.getTableHeader().setFont(new Font(fontSerif, Font.PLAIN, 14));
-        tabella.getTableHeader().setBackground(new Color(60, 63, 65));
-        tabella.getTableHeader().setForeground(Color.WHITE);
-
-        JScrollPane scrollPane = new JScrollPane(tabella);
-        scrollPane.setPreferredSize(new Dimension(600, 300));
+        JScrollPane scrollPane = new JScrollPane(listaPanel);
+        scrollPane.setPreferredSize(new Dimension(800, 400));
         scrollPane.getViewport().setBackground(new Color(43, 48, 52));
 
         JDialog popup = new JDialog();
         popup.setTitle("Prenotazioni Effettuate");
         popup.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
-        popup.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        popup.setSize(650, 350);
+        popup.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        popup.setContentPane(scrollPane);
+        popup.pack();
         popup.setLocationRelativeTo(null);
-
-        JPanel contenitore = initContenitore(scrollPane);
-        popup.setContentPane(contenitore);
         popup.setVisible(true);
+
         visualizzaVoli(d);
     }
+
+
+
+    private void mostraDettagliVolo(int codiceVolo) {
+        Volo volo = null;
+        try {
+            Volo query = new Volo();
+            query.setCodiceVolo(codiceVolo);
+
+            ArrayList<Volo> risultati = new UtenteGenericoImplementazionePostgresDAO().cercaVolo(query);
+
+            if (!risultati.isEmpty()) {
+                volo = risultati.getFirst();
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Errore durante il recupero del volo:\n" + e.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (volo == null) {
+            JOptionPane.showMessageDialog(null, "Nessun volo trovato con codice " + codiceVolo, "Volo non trovato", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        // Prepara contenuto dettagliato
+        StringBuilder msg = new StringBuilder();
+        msg.append("Codice: ").append(volo.getCodiceVolo()).append("\n")
+                .append("Compagnia: ").append(volo.getCompagnia()).append("\n")
+                .append("Data: ").append(volo.getData()).append("\n")
+                .append("Orario: ").append(volo.getOrario()).append("\n")
+                .append("Ritardo: ").append(volo.getRitardo()).append(" min\n")
+                .append("Stato: ").append(volo.getStato()).append("\n")
+                .append("Origine: ").append(volo.getOrigine()).append("\n")
+                .append("Destinazione: ").append(volo.getDestinazione()).append("\n");
+
+        if (volo instanceof VoloInPartenza vp) {
+            msg.append("Gate: ").append(vp.getGate()).append("\n");
+        }
+
+        JTextArea area = new JTextArea(msg.toString());
+        area.setEditable(false);
+        area.setBackground(new Color(43, 48, 52));
+        area.setForeground(Color.WHITE);
+        area.setFont(new Font("Monospaced", Font.PLAIN, 14));
+        area.setBorder(null);
+
+        JScrollPane scrollPane = new JScrollPane(area);
+        scrollPane.setBorder(null);
+        scrollPane.setPreferredSize(new Dimension(500, 250));
+        scrollPane.getViewport().setBackground(new Color(43, 48, 52));
+
+        JPanel contenitore = new JPanel(new BorderLayout());
+        contenitore.setBackground(new Color(43, 48, 52));
+        contenitore.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        contenitore.add(scrollPane, BorderLayout.CENTER);
+
+        JDialog dialog = new JDialog();
+        dialog.setTitle("Dettagli Volo");
+        dialog.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
+        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        dialog.setContentPane(contenitore);
+        dialog.pack();
+        dialog.setLocationRelativeTo(null);
+        dialog.setVisible(true);
+    }
+
 
     /** Inizializza un pannello contenitore per il dialog delle prenotazioni.
      * Utilizza GridBagLayout per gestire la disposizione degli elementi.

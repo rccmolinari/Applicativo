@@ -109,10 +109,11 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
         final String QUERY = """
         SELECT * FROM prenotazione pr
         JOIN passeggero pa ON pr.documento_passeggero = pa.id_documento
+        JOIN volo v ON pr.codice_volo = v.codice_volo
         LEFT JOIN bagaglio b ON b.numero_prenotazione = pr.numero_biglietto
         WHERE username = ? AND password = ?
         ORDER BY pr.numero_biglietto
-        """;
+    """;
 
         try (PreparedStatement ps = connection.prepareStatement(QUERY)) {
             ps.setString(1, utente.getLogin());
@@ -130,11 +131,34 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
                         passeggero.setNome(rs.getString("nome"));
                         passeggero.setCognome(rs.getString("cognome"));
 
+                        // Costruzione volo
+                        Volo volo;
+                        String tipo = rs.getString("tipo_volo");
+
+                        if ("inPartenza".equalsIgnoreCase(tipo)) {
+                            volo = new VoloInPartenza();
+                            ((VoloInPartenza) volo).setGate(rs.getInt("gate"));
+                        } else if ("inArrivo".equalsIgnoreCase(tipo)) {
+                            volo = new VoloInArrivo();
+                        } else {
+                            continue;
+                        }
+
+                        volo.setCodiceVolo(rs.getInt("codice_volo"));
+                        volo.setCompagnia(rs.getString("compagnia"));
+                        volo.setData(rs.getDate("data_volo"));
+                        volo.setOrario(rs.getTime("orario_previsto"));
+                        volo.setRitardo(rs.getInt("ritardo"));
+                        volo.setStato(StatoVolo.fromString(rs.getString("stato_volo")));
+                        volo.setOrigine(rs.getString("aeroporto_origine"));
+                        volo.setDestinazione(rs.getString("aeroporto_destinazione"));
+
                         p = new Prenotazione();
                         p.setNumeroBiglietto(numeroBiglietto);
                         p.setNumeroAssegnato(rs.getInt(POSTO_ASSEGNATO));
                         p.setStatoPrenotazione(StatoPrenotazione.fromString(rs.getString(STATO_PRENOTAZIONE)));
                         p.setPasseggero(passeggero);
+                        p.setVolo(volo);
 
                         lista.add(p);
                         ultimoBiglietto = numeroBiglietto;
@@ -156,6 +180,7 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
 
         return lista;
     }
+
 
     /**
      * Esegue la prenotazione di un volo da parte di un utente autenticato.
