@@ -87,32 +87,6 @@ public class DashBoardAdmin {
         return outputLabel;
     }
 
-    /**
-     * Imposta una nuova label per l'output testuale.
-     *
-     * @param outputLabel nuova {@code JLabel} da assegnare
-     */
-    public void setOutputLabel(JLabel outputLabel) {
-        this.outputLabel = outputLabel;
-    }
-
-    /**
-     * Restituisce l'identificativo dell'amministratore attualmente loggato.
-     *
-     * @return {@code String} contenente username o ID
-     */
-    public String getUsername() {
-        return username;
-    }
-
-    /**
-     * Imposta un nuovo identificativo per l'amministratore.
-     *
-     * @param username {@code String} da impostare come username
-     */
-    public void setUsername(String username) {
-        this.username = username;
-    }
 
     /**
      * Restituisce il dialog modale attualmente utilizzato dalla dashboard.

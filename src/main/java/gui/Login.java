@@ -120,14 +120,6 @@ public class Login {
     // Consentono di accedere e modificare i componenti UI da altre classi,
     // utile per aggiornare la UI o recuperarne dati.
 
-    public JTextField getLogin() {
-        return login;
-    }
-
-    public void setLogin(JTextField login) {
-        this.login = login;
-    }
-
     public JPasswordField getPassword() {
         return passwordField1;
     }
@@ -136,35 +128,9 @@ public class Login {
         this.passwordField1 = password;
     }
 
-    public JButton getButtonInvio() {
-        return buttonInvio;
-    }
-
-    public void setButtonInvio(JButton buttonInvio) {
-        this.buttonInvio = buttonInvio;
-    }
 
     public JPanel getMainPanel() {
         return mainPanel;
     }
 
-    public void setMainPanel(JPanel mainPanel) {
-        this.mainPanel = mainPanel;
-    }
-
-    public JPanel getLoginPanel() {
-        return loginPanel;
-    }
-
-    public void setLoginPanel(JPanel loginPanel) {
-        this.loginPanel = loginPanel;
-    }
-
-    public JPanel getTextPanel() {
-        return textPanel;
-    }
-
-    public void setTextPanel(JPanel textPanel) {
-        this.textPanel = textPanel;
-    }
 }

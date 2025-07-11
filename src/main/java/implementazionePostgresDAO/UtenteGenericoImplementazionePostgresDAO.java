@@ -214,8 +214,11 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
             psPasseggero.setString(3, passeggero.getCognome());
             psPasseggero.setDate(4, new java.sql.Date(passeggero.getDataNascita().getTime()));
             int passeggeroInserito = psPasseggero.executeUpdate();
-
-            LOGGER.info(String.format("Passeggero %s", passeggeroInserito > 0 ? "nuovo inserito" : "già esistente"));
+            if(passeggeroInserito > 0) {
+                LOGGER.info("Passeggero inserito con successo: " + passeggero.getIdDocumento());
+            } else {
+                LOGGER.info("Passeggero già esistente: " + passeggero.getIdDocumento());
+            }
 
             // Inserimento prenotazione
             psPrenotazione.setString(1, utente.getLogin());
