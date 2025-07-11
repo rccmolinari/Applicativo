@@ -259,8 +259,7 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
     @Override
     public ArrayList<Volo> visualizzaVoli() {
         ArrayList<Volo> lista = new ArrayList<>();
-        final String SQL = "SELECT codice_volo, compagnia, data_volo, orario_previsto, ritardo, stato_volo, tipo_volo, aeroporto_destinazione, aeroporto_origine, gate " +
-                "FROM volo ORDER BY data_volo, orario_previsto";
+        final String SQL = "SELECT codice_volo, compagnia, data_volo, orario_previsto, ritardo, stato_volo, tipo_volo, aeroporto_destinazione, aeroporto_origine, gate FROM volo WHERE stato_volo <> 'CANCELLATO' AND stato_volo <> 'DECOLLATO' ORDER BY data_volo, orario_previsto";
 
 
         try (PreparedStatement ps = connection.prepareStatement(SQL);
@@ -392,7 +391,7 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
         ArrayList<Prenotazione> lista = new ArrayList<>();
         final String QUERY = """
         SELECT p.numero_biglietto, p.stato_prenotazione, 
-               v.*, pa.nome, pa.cognome
+               v.*, pa.nome, pa.cognome, pa.id_documento, pa.data_nascita
         FROM prenotazione p
         JOIN volo v ON p.codice_volo = v.codice_volo
         JOIN passeggero pa ON p.documento_passeggero = pa.id_documento
@@ -405,7 +404,6 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    // Crea il volo dinamico in base al tipo
                     Volo volo;
                     String tipo = rs.getString(COL_TIPO_VOLO);
 
@@ -415,7 +413,7 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
                     } else if (IN_ARRIVO.equalsIgnoreCase(tipo)) {
                         volo = new VoloInArrivo();
                     } else {
-                        continue; // tipo non valido
+                        continue;
                     }
 
                     volo.setCodiceVolo(rs.getInt(COL_CODICE_VOLO));
@@ -427,13 +425,15 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
                     volo.setOrigine(rs.getString(COL_ORIGINE));
                     volo.setDestinazione(rs.getString(COL_DESTINAZIONE));
 
-                    // Costruisci il passeggero
                     Passeggero p = new Passeggero();
-                    p.setIdDocumento(passeggero.getIdDocumento());
+                    p.setIdDocumento(rs.getString("id_documento"));
                     p.setNome(rs.getString("nome"));
                     p.setCognome(rs.getString("cognome"));
+                    java.sql.Date sqlDate = rs.getDate("data_nascita");
+                    if (sqlDate != null) {
+                        p.setDataNascita(new java.util.Date(sqlDate.getTime()));
+                    }
 
-                    // Crea la prenotazione
                     Prenotazione pren = new Prenotazione();
                     pren.setNumeroBiglietto(rs.getInt(COL_NUMERO_BIGLIETTO));
                     pren.setStatoPrenotazione(StatoPrenotazione.valueOf(rs.getString("stato_prenotazione").toUpperCase()));

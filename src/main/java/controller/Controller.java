@@ -379,13 +379,15 @@ public class Controller {
 
     private JPanel creaRigaPrenotazione(Prenotazione p, JLabel label) {
         Passeggero passeggero = p.getPasseggero();
+        String dataNascita = new java.text.SimpleDateFormat("dd/MM/yyyy").format(passeggero.getDataNascita());
+
         String testo = String.format(
                 "Codice Volo: %d - Biglietto: %d - %s %s (%s) - Stato: %s - Bagagli: %d",
                 p.getVolo().getCodiceVolo(),
                 p.getNumeroBiglietto(),
                 passeggero.getNome(),
                 passeggero.getCognome(),
-                passeggero.getDataNascita(),
+                dataNascita,
                 p.getStatoPrenotazione(),
                 p.getListaBagagli().size()
         );
@@ -1366,26 +1368,34 @@ public class Controller {
 
         JTextArea area = new JTextArea();
         area.setEditable(false);
-        area.setFont(new Font(monospaced, Font.PLAIN, 14));
+        area.setFont(new Font("Monospaced", Font.PLAIN, 14));
         area.setBackground(new Color(43, 48, 52));
         area.setForeground(Color.WHITE);
         area.setBorder(null);
 
         StringBuilder sb = new StringBuilder();
+
+        if (!prenotazioni.isEmpty()) {
+            Passeggero p = prenotazioni.getFirst().getPasseggero();
+            sb.append("--- DATI PASSEGGERO ---\n")
+                    .append("Nome: ").append(p.getNome()).append(" ").append(p.getCognome()).append("\n")
+                    .append("ID Documento: ").append(p.getIdDocumento()).append("\n")
+                    .append("Data di Nascita: ").append(new java.text.SimpleDateFormat("dd/MM/yyyy").format(p.getDataNascita())).append("\n")
+                    .append("\n--- PRENOTAZIONI ---\n\n");
+        }
+
         for (Prenotazione pr : prenotazioni) {
             sb.append("Codice Prenotazione: ").append(pr.getNumeroBiglietto()).append("\n")
                     .append("Stato: ").append(pr.getStatoPrenotazione()).append("\n")
-                    .append("Passeggero: ").append(pr.getPasseggero().getNome()).append(" ").append(pr.getPasseggero().getCognome()).append("\n")
                     .append("Volo: ").append(pr.getVolo().getCodiceVolo()).append(" - ").append(pr.getVolo().getCompagnia()).append("\n")
                     .append("Da: ").append(pr.getVolo().getOrigine()).append(" a ").append(pr.getVolo().getDestinazione()).append("\n")
-                    .append(data).append(pr.getVolo().getData()).append("  Orario: ").append(pr.getVolo().getOrario()).append("\n")
-                    .append("Ritardo: ").append(pr.getVolo().getRitardo()).append(min)
+                    .append("Data: ").append(pr.getVolo().getData()).append("  Orario: ").append(pr.getVolo().getOrario()).append("\n")
+                    .append("Ritardo: ").append(pr.getVolo().getRitardo()).append(" min\n")
                     .append("Stato Volo: ").append(pr.getVolo().getStato()).append("\n");
 
             if (pr.getVolo() instanceof VoloInPartenza vpart) {
-                sb.append(gate).append(vpart.getGate()).append("\n");
+                sb.append("Gate: ").append(vpart.getGate()).append("\n");
             }
-
             sb.append("------------------------------\n");
         }
 
