@@ -22,12 +22,10 @@ import javax.swing.event.DocumentListener;
  * che interagiscono con il database PostgreSQL.
  * Supporta sia operazioni lato utente (visualizzazione prenotazioni, ricerca, prenotazione voli, ecc.),
  * che lato amministratore (gestione voli, aggiornamento bagagli, gate, smarrimenti, ecc.).
- *
  * Dipendenze principali:
- *
- *   -@code AmministratoreImplementazionePostgresDAO} per operazioni admin
- *   -@code UtenteGenericoImplementazionePostgresDAO} per operazioni utente
- *   -@code LoginImplementazionePostgresDAO} per autenticazione e registrazione
+ *   -@code [{mministratoreImplementazionePostgresDAO} per operazioni admin
+ *   -@code {UtenteGenericoImplementazionePostgresDAO} per operazioni utente
+ *   -@code {LoginImplementazionePostgresDAO} per autenticazione e registrazione
  *
  */
 public class Controller {
@@ -91,6 +89,13 @@ public class Controller {
         popup.setSize(650, 350);
         popup.setLocationRelativeTo(null);
 
+        JPanel contenitore = initContenitore(scrollPane);
+        popup.setContentPane(contenitore);
+        popup.setVisible(true);
+        visualizzaVoli(d);
+    }
+
+    private JPanel initContenitore(JScrollPane scrollPane) {
         JPanel contenitore = new JPanel(new GridBagLayout());
         contenitore.setBackground(new Color(43, 48, 52));
         GridBagConstraints gbc = new GridBagConstraints();
@@ -98,10 +103,7 @@ public class Controller {
         gbc.weightx = 1;
         gbc.weighty = 1;
         contenitore.add(scrollPane, gbc);
-
-        popup.setContentPane(contenitore);
-        popup.setVisible(true);
-        visualizzaVoli(d);
+        return contenitore;
     }
 
     /**
@@ -303,13 +305,7 @@ public class Controller {
                 p.getListaBagagli().size()
         );
 
-        JPanel riga = new JPanel(new BorderLayout());
-        riga.setBackground(new Color(60, 63, 65));
-        riga.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(80, 80, 80)),
-                BorderFactory.createEmptyBorder(6, 12, 6, 12)
-        ));
-        riga.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        JPanel riga = initRiga();
 
         label.setText(testo);
         label.setForeground(Color.WHITE);
@@ -325,7 +321,16 @@ public class Controller {
 
         return riga;
     }
-
+    public JPanel initRiga() {
+        JPanel riga = new JPanel(new BorderLayout());
+        riga.setBackground(new Color(60, 63, 65));
+        riga.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(80, 80, 80)),
+                BorderFactory.createEmptyBorder(6, 12, 6, 12)
+        ));
+        riga.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        return riga;
+    }
     /**
      * Permette la ricerca di un bagaglio associato alle proprie prenotazioni.
      * La ricerca è mutuale tra ID bagaglio e numero prenotazione.
@@ -390,18 +395,9 @@ public class Controller {
         campo2.getDocument().addDocumentListener(listener);
     }
 
-    /**
-     * Mostra i risultati di una ricerca bagagli per utente in una finestra modale.
-     *
-     * @param lista lista di bagagli da visualizzare
-     */
 
-    private void mostraPopupRisultati(ArrayList<Bagaglio> lista) {
-        if (lista.isEmpty()) {
-            JOptionPane.showMessageDialog(null, "Nessun bagaglio trovato.", risultato, JOptionPane.INFORMATION_MESSAGE);
-            return;
-        }
 
+    private JPanel initListaPanel(ArrayList<Bagaglio> lista) {
         JPanel listaPanel = new JPanel();
         listaPanel.setLayout(new BoxLayout(listaPanel, BoxLayout.Y_AXIS));
         listaPanel.setBackground(new Color(43, 48, 52));
@@ -414,13 +410,7 @@ public class Controller {
                     b.getPrenotazione() != null ? b.getPrenotazione().getNumeroBiglietto() : null
             );
 
-            JPanel riga = new JPanel(new BorderLayout());
-            riga.setBackground(new Color(60, 63, 65));
-            riga.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(new Color(80, 80, 80)),
-                    BorderFactory.createEmptyBorder(6, 12, 6, 12)
-            ));
-            riga.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+            JPanel riga = initRiga();
 
             JLabel label = new JLabel(testo);
             label.setForeground(Color.WHITE);
@@ -429,7 +419,10 @@ public class Controller {
             listaPanel.add(riga);
             listaPanel.add(Box.createVerticalStrut(8));
         }
+        return listaPanel;
+    }
 
+    private JScrollPane initScrollPanel(JPanel listaPanel) {
         JScrollPane scrollPane = new JScrollPane(listaPanel);
         scrollPane.setPreferredSize(new Dimension(700, 300));
         scrollPane.getViewport().setBackground(new Color(43, 48, 52));
@@ -442,6 +435,25 @@ public class Controller {
         popup.pack();
         popup.setLocationRelativeTo(null);
         popup.setVisible(true);
+        return scrollPane;
+    }
+
+    /**
+     * Mostra i risultati di una ricerca bagagli per utente in una finestra modale.
+     *
+     * @param lista lista di bagagli da visualizzare
+     */
+
+    private void mostraPopupRisultati(ArrayList<Bagaglio> lista) {
+        if (lista.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Nessun bagaglio trovato.", risultato, JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        JPanel listaPanel = initListaPanel(lista);
+
+        JScrollPane scrollPane =  initScrollPanel(listaPanel);
+        scrollPane.setVisible(true);
     }
 
     /**
@@ -560,7 +572,7 @@ public class Controller {
         JTextField compagniaField = creaCampoStandard("Compagnia");
         JTextField dataField = creaCampoStandard("Data Partenza (yyyy-mm-dd)");
         JTextField orarioField = creaCampoStandard("Orario Partenza (hh:mm:ss)");
-        JCheckBox inArrivoCheck = creaCheckbox("In arrivo");
+        JCheckBox inArrivoCheck = creaCheckbox();
         JTextField localitaField = creaCampoStandard("Destinazione");
         JTextField gateField = creaCampoStandard("Numero Gate:");
 
@@ -606,7 +618,7 @@ public class Controller {
     }
 
     /**
-     * Crea un campo di input con stile coerente all'interfaccia scura (sfondo scuro e testo bianco).
+     * Crea un campo di immissione con stile coerente all'interfaccia scura (sfondo scuro e testo bianco).
      *
      * @param placeholder testo iniziale o suggerimento
      * @return campo di testo configurato
@@ -621,13 +633,12 @@ public class Controller {
     }
 
     /**
-     * Crea una checkbox con stile grafico coerente.
+     * Crea una checkbox "In Arrivo" con stile grafico coerente.
      *
-     * @param label etichetta da mostrare accanto alla checkbox
      * @return checkbox configurata
      */
-    private JCheckBox creaCheckbox(String label) {
-        JCheckBox check = new JCheckBox(label);
+    private JCheckBox creaCheckbox() {
+        JCheckBox check = new JCheckBox("In Arrivo");
         check.setForeground(Color.WHITE);
         check.setBackground(new Color(43, 48, 52));
         return check;
@@ -719,29 +730,7 @@ public class Controller {
         listaPanel.setBackground(new Color(43, 48, 52));
 
         for (Volo v : voli) {
-            JPanel riga = new JPanel(new FlowLayout(FlowLayout.LEFT));
-            riga.setBackground(new Color(107, 112, 119));
-
-            JLabel label = new JLabel("Volo " + v.getCodiceVolo() + " → " + v.getDestinazione() + " (" + v.getData() + ")");
-            label.setForeground(Color.WHITE);
-            JButton modificaBtn = new JButton(modifica);
-            modificaBtn.setBackground(new Color(255, 162, 35));
-            modificaBtn.setForeground(Color.BLACK);
-
-            modificaBtn.addActionListener(ev -> {
-                d.getChoiceDialog().dispose();
-                if(v.getDestinazione().equals("NAP")) {
-                    VoloInArrivo voloina = (VoloInArrivo) v;
-                    mostraPopupModificaVolo(voloina);
-
-                } else {
-                    VoloInPartenza voloinp = (VoloInPartenza) v;
-                    mostraPopupModificaVolo(voloinp);
-                }
-            });
-
-            riga.add(label);
-            riga.add(modificaBtn);
+            JPanel riga = getRiga(d, v);
             listaPanel.add(riga);
         }
 
@@ -758,6 +747,38 @@ public class Controller {
         visualizzaVoli(d);
     }
 
+    private JPanel getRiga(DashBoardAdmin d, Volo v) {
+        JPanel riga = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        riga.setBackground(new Color(107, 112, 119));
+
+        JLabel label = new JLabel("Volo " + v.getCodiceVolo() + " → " + v.getDestinazione() + " (" + v.getData() + ")");
+        label.setForeground(Color.WHITE);
+        JButton modificaBtn = getJButton(d, v);
+
+        riga.add(label);
+        riga.add(modificaBtn);
+        return riga;
+    }
+
+    private JButton getJButton(DashBoardAdmin d, Volo v) {
+        JButton modificaBtn = new JButton(modifica);
+        modificaBtn.setBackground(new Color(255, 162, 35));
+        modificaBtn.setForeground(Color.BLACK);
+
+        modificaBtn.addActionListener(ev -> {
+            d.getChoiceDialog().dispose();
+            if(v.getDestinazione().equals("NAP")) {
+                VoloInArrivo voloina = (VoloInArrivo) v;
+                mostraPopupModificaVolo(voloina);
+
+            } else {
+                VoloInPartenza voloinp = (VoloInPartenza) v;
+                mostraPopupModificaVolo(voloinp);
+            }
+        });
+        return modificaBtn;
+    }
+
     /**
      * Permette la modifica del gate di un volo in partenza.
      *
@@ -769,9 +790,7 @@ public class Controller {
     public void handlerModificaGate(JPanel panel, JDialog dialog, DashBoardAdmin d) {
         panel.setLayout(new GridLayout(1, 1));
 
-        JPanel formPanelMG = new JPanel(new GridLayout(3, 1, 10, 10));
-        formPanelMG.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
-        formPanelMG.setBackground(new Color(43, 48, 52));
+        JPanel formPanelMG = initFormPanelAB();
 
         JTextField codiceFieldGate = creaCampo(codiceVolo);
         JTextField gateFieldGate = creaCampo("Nuovo Gate");
@@ -828,7 +847,7 @@ public class Controller {
     public void handlerCercaBagagloAdmin(JPanel panel, JDialog dialog, DashBoardAdmin d) {
         panel.setLayout(new GridLayout(1, 1));
 
-        JPanel formPanel = creaFormPanel(3);
+        JPanel formPanel = creaFormPanel2();
         JTextField campoIdBagaglio = creaCampoStandard("ID Bagaglio (opzionale)");
         JTextField campoNumeroPrenotazione = creaCampoStandard("Numero Prenotazione (opzionale)");
         sincronizzaCampi(campoIdBagaglio, campoNumeroPrenotazione);
@@ -855,13 +874,12 @@ public class Controller {
     /**
      * Crea un pannello verticale a una colonna con numero righe personalizzato.
      *
-     * @param righe numero di righe desiderate
      * @return pannello form configurato
      */
 
 
-    private JPanel creaFormPanel(int righe) {
-        JPanel form = new JPanel(new GridLayout(righe, 1, 10, 10));
+    private JPanel creaFormPanel2() {
+        JPanel form = new JPanel(new GridLayout(3, 1, 10, 10));
         form.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
         form.setBackground(new Color(43, 48, 52));
         return form;
@@ -913,46 +931,17 @@ public class Controller {
             return;
         }
 
-        JPanel listaPanel = new JPanel();
-        listaPanel.setLayout(new BoxLayout(listaPanel, BoxLayout.Y_AXIS));
-        listaPanel.setBackground(new Color(43, 48, 52));
+        JPanel listaPanel =initListaPanel(risultati);
 
-        for (Bagaglio b : risultati) {
-            String testo = String.format(
-                    "ID Bagaglio: %d - Stato: %s - Prenotazione: %d",
-                    b.getCodiceBagaglio(),
-                    b.getStatoBagaglio(),
-                    b.getPrenotazione() != null ? b.getPrenotazione().getNumeroBiglietto() : null
-            );
+        JScrollPane scrollPane =  initScrollPanel(listaPanel);
+        scrollPane.setVisible(true);
+    }
 
-            JPanel riga = new JPanel(new BorderLayout());
-            riga.setBackground(new Color(60, 63, 65));
-            riga.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(new Color(80, 80, 80)),
-                    BorderFactory.createEmptyBorder(6, 12, 6, 12)
-            ));
-            riga.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
-
-            JLabel label = new JLabel(testo);
-            label.setForeground(Color.WHITE);
-            riga.add(label, BorderLayout.CENTER);
-
-            listaPanel.add(riga);
-            listaPanel.add(Box.createVerticalStrut(8));
-        }
-
-        JScrollPane scrollPane = new JScrollPane(listaPanel);
-        scrollPane.setPreferredSize(new Dimension(700, 350));
-        scrollPane.getViewport().setBackground(new Color(43, 48, 52));
-        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-
-        JDialog popup = new JDialog();
-        popup.setTitle("Risultati Ricerca Bagagli");
-        popup.setModal(true);
-        popup.setContentPane(scrollPane);
-        popup.pack();
-        popup.setLocationRelativeTo(null);
-        popup.setVisible(true);
+    private JPanel initFormPanelAB() {
+        JPanel formPanel = new JPanel(new GridLayout(3, 1, 10, 10));
+        formPanel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
+        formPanel.setBackground(new Color(43, 48, 52));
+        return formPanel;
     }
 
     /**
@@ -966,9 +955,7 @@ public class Controller {
     public void handlerAggiornaBagaglio(JPanel panel, JDialog dialog, DashBoardAdmin d) {
         panel.setLayout(new GridLayout(1, 1));
 
-        JPanel formPanelAB = new JPanel(new GridLayout(3, 1, 10, 10));
-        formPanelAB.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
-        formPanelAB.setBackground(new Color(43, 48, 52));
+        JPanel formPanelAB = initFormPanelAB();
 
         JTextField codiceBagaglioField = creaCampo(codiceBagaglio);
         codiceBagaglioField.setForeground(Color.WHITE);
@@ -1047,14 +1034,7 @@ public class Controller {
         scrollPane.setPreferredSize(new Dimension(600, 300));
         scrollPane.getViewport().setBackground(new Color(43, 48, 52));
 
-        JPanel contenitore = new JPanel(new GridBagLayout());
-        contenitore.setBackground(new Color(43, 48, 52));
-
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.weightx = 1;
-        gbc.weighty = 1;
-        contenitore.add(scrollPane, gbc);
+        JPanel contenitore = initContenitore(scrollPane);
 
         JDialog popup = new JDialog();
         popup.setTitle("Bagagli Smarriti");
@@ -1200,6 +1180,25 @@ public class Controller {
         passwordField.setCaretColor(Color.WHITE);
 
         // Bottone registrazione
+        JButton registrati = getRegistrati(emailField, passwordField, dialog);
+
+        // Aggiunta componenti
+        formPanel.add(labelEmail);
+        formPanel.add(emailField);
+        formPanel.add(labelPassword);
+        formPanel.add(passwordField);
+        formPanel.add(registrati);
+
+        panel.add(formPanel);
+
+        dialog.setContentPane(panel);
+        dialog.pack();
+        dialog.setResizable(false);
+        dialog.setLocationRelativeTo(null);
+        dialog.setVisible(true);
+    }
+
+    private JButton getRegistrati(JTextField emailField, JPasswordField passwordField, JDialog dialog) {
         JButton registrati = new JButton("Registrati");
         registrati.setBackground(new Color(255, 162, 35));
         registrati.setForeground(Color.BLACK);
@@ -1222,21 +1221,7 @@ public class Controller {
                 }
             }
         });
-
-        // Aggiunta componenti
-        formPanel.add(labelEmail);
-        formPanel.add(emailField);
-        formPanel.add(labelPassword);
-        formPanel.add(passwordField);
-        formPanel.add(registrati);
-
-        panel.add(formPanel);
-
-        dialog.setContentPane(panel);
-        dialog.pack();
-        dialog.setResizable(false);
-        dialog.setLocationRelativeTo(null);
-        dialog.setVisible(true);
+        return registrati;
     }
 
     /**
@@ -1252,16 +1237,7 @@ public class Controller {
         return tmp.registrazione(email, password);
     }
 
-    /**
-     * Carica e visualizza i voli in una tabella HTML nella dashboard utente.
-     *
-     * @param view interfaccia grafica {@code DashBoardUser} in cui mostrare i voli
-     */
-
-    public void visualizzaVoli(DashBoardUser view) {
-        AmministratoreImplementazionePostgresDAO adao = new AmministratoreImplementazionePostgresDAO();
-        ArrayList<Volo> voli = adao.visualizzaVoli();
-
+    private StringBuilder tableBuild() {
         StringBuilder html = new StringBuilder("<html><body style='color:white;font-family:sans-serif;'>");
         html.append("<table border='1' cellpadding='4' cellspacing='0'>")
                 .append(tabletr)
@@ -1275,6 +1251,20 @@ public class Controller {
                 .append("<th>Destinazione</th>")
                 .append("<th>Gate</th>")
                 .append(closetabletr);
+        return html;
+    }
+
+    /**
+     * Carica e visualizza i voli in una tabella HTML nella dashboard utente.
+     *
+     * @param view interfaccia grafica {@code DashBoardUser} in cui mostrare i voli
+     */
+
+    public void visualizzaVoli(DashBoardUser view) {
+        UtenteGenericoImplementazionePostgresDAO adao = new UtenteGenericoImplementazionePostgresDAO();
+        ArrayList<Volo> voli = adao.visualizzaVoli();
+
+        StringBuilder html = tableBuild();
 
         for (Volo v : voli) {
             html.append(tabletr)
@@ -1315,19 +1305,7 @@ public class Controller {
         AmministratoreImplementazionePostgresDAO adao = new AmministratoreImplementazionePostgresDAO();
         ArrayList<Volo> voli = adao.visualizzaVoli();
 
-        StringBuilder html = new StringBuilder("<html><body style='color:white;font-family:sans-serif;'>");
-        html.append("<table border='1' cellpadding='4' cellspacing='0'>")
-                .append(tabletr)
-                .append("<th>Codice</th>")
-                .append("<th>Compagnia</th>")
-                .append("<th>Data</th>")
-                .append("<th>Orario</th>")
-                .append("<th>Ritardo</th>")
-                .append("<th>Stato</th>")
-                .append("<th>Origine</th>")
-                .append("<th>Destinazione</th>")
-                .append("<th>Gate</th>")
-                .append(closetabletr);
+        StringBuilder html = tableBuild();
 
         for (Volo v : voli) {
             html.append("<tr>")

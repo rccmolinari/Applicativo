@@ -33,6 +33,7 @@ public class DashBoardAdmin {
      * @param username   identificativo dell'amministratore
      * @param controller riferimento al controller per le operazioni logiche
      */
+
     public DashBoardAdmin(String username, Controller controller) {
         this.controller = controller;
         this.username = username;

@@ -13,10 +13,10 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
 
     private static final Logger LOGGER = Logger.getLogger(AmministratoreImplementazionePostgresDAO.class.getName());
     private final Connection connection;
-    private String inPartenza = "inPartenza";
-    private String inArrivo = "inArrivo";
-    private String idBagaglio = "id_bagaglio";
-    private String statoBagaglio = "stato_bagaglio";
+    private static final String IN_PARTENZA = "inPartenza";
+    private static final String IN_ARRIVO = "inArrivo";
+    private static final String ID_BAGAGLIO = "id_bagaglio";
+    private static final String STATO_BAGAGLIO = "stato_bagaglio";
 
     /**
      * Costruttore della classe. Inizializza la connessione al database tramite singleton.
@@ -49,7 +49,7 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """;
 
-        String tipo = (v instanceof VoloInPartenza) ? inPartenza : inArrivo;
+        String tipo = (v instanceof VoloInPartenza) ? IN_PARTENZA : IN_ARRIVO;
 
         try (PreparedStatement ps = connection.prepareStatement(SQL)) {
             ps.setInt(1, v.getCodiceVolo());
@@ -92,7 +92,7 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
             WHERE codice_volo = ?
             """;
 
-        String tipo = (v instanceof VoloInPartenza) ? inPartenza : inArrivo;
+        String tipo = (v instanceof VoloInPartenza) ? IN_PARTENZA : IN_ARRIVO;
 
         try (PreparedStatement ps = connection.prepareStatement(SQL)) {
             ps.setString(1, v.getCompagnia());
@@ -145,7 +145,7 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
                 }
 
                 String tipoVolo = rs.getString("tipo_volo");
-                if (!"inPartenza".equalsIgnoreCase(tipoVolo)) {
+                if (!IN_PARTENZA.equalsIgnoreCase(tipoVolo)) {
                     throw new CustomExc("Il gate può essere modificato solo per voli in partenza.", new RuntimeException());
                 }
             }
@@ -223,8 +223,8 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
 
             while (rs.next()) {
                 Bagaglio b = new Bagaglio();
-                b.setCodiceBagaglio(rs.getInt(idBagaglio));
-                b.setStatoBagaglio(StatoBagaglio.fromString(rs.getString(statoBagaglio)));
+                b.setCodiceBagaglio(rs.getInt(ID_BAGAGLIO));
+                b.setStatoBagaglio(StatoBagaglio.fromString(rs.getString(STATO_BAGAGLIO)));
 
                 Prenotazione p = new Prenotazione();
                 p.setNumeroBiglietto(rs.getInt("numero_biglietto"));
@@ -263,7 +263,7 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
             while (rs.next()) {
                 String tipo = rs.getString("tipo_volo");
 
-                if (inPartenza.equalsIgnoreCase(tipo)) {
+                if (IN_PARTENZA.equalsIgnoreCase(tipo)) {
                     VoloInPartenza v = new VoloInPartenza();
                     v.setCodiceVolo(rs.getInt("codice_volo"));
                     v.setCompagnia(rs.getString("compagnia"));
@@ -275,7 +275,7 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
                     v.setOrigine(rs.getString("aeroporto_origine"));
                     v.setGate(rs.getInt("gate"));
                     lista.add(v);
-                } else if (inArrivo.equalsIgnoreCase(tipo)) {
+                } else if (IN_ARRIVO.equalsIgnoreCase(tipo)) {
                     VoloInArrivo v = new VoloInArrivo();
                     v.setCodiceVolo(rs.getInt("codice_volo"));
                     v.setCompagnia(rs.getString("compagnia"));
@@ -323,8 +323,8 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Bagaglio bag = new Bagaglio();
-                    bag.setCodiceBagaglio(rs.getInt(idBagaglio));
-                    bag.setStatoBagaglio(StatoBagaglio.fromString(rs.getString(statoBagaglio)));
+                    bag.setCodiceBagaglio(rs.getInt(ID_BAGAGLIO));
+                    bag.setStatoBagaglio(StatoBagaglio.fromString(rs.getString(STATO_BAGAGLIO)));
 
                     Prenotazione pren = new Prenotazione();
                     pren.setNumeroBiglietto(rs.getInt("numero_biglietto"));
@@ -368,8 +368,8 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Bagaglio bag = new Bagaglio();
-                    bag.setCodiceBagaglio(rs.getInt(idBagaglio));
-                    bag.setStatoBagaglio(StatoBagaglio.fromString(rs.getString(statoBagaglio)));
+                    bag.setCodiceBagaglio(rs.getInt(ID_BAGAGLIO));
+                    bag.setStatoBagaglio(StatoBagaglio.fromString(rs.getString(STATO_BAGAGLIO)));
                     bag.setPrenotazione(p);
                     lista.add(bag);
                 }
