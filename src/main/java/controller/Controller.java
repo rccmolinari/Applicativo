@@ -1234,6 +1234,94 @@ public class Controller {
         visualizzaVoli(d);
     }
 
+    private void handlerCercaPasseggero(JPanel panel, JDialog dialog) {
+        panel.setLayout(new GridLayout(1, 1));
+        JPanel formPanel = new JPanel(new GridLayout(2, 1, 10, 10));
+        formPanel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
+        formPanel.setBackground(new Color(43, 48, 52));
+
+        JTextField idField = creaCampo("ID Documento Passeggero");
+        JButton cercaBtn = creaBottoneConAzione("Cerca", () -> eseguiRicercaPasseggero(idField, dialog), dialog);
+
+        formPanel.add(idField);
+        formPanel.add(cercaBtn);
+        panel.add(formPanel);
+
+        dialog.setTitle("Cerca Prenotazioni Passeggero");
+        dialog.setContentPane(panel);
+        dialog.pack();
+        dialog.setLocationRelativeTo(null);
+        dialog.setModal(true);
+        dialog.setVisible(true);
+    }
+
+    private void eseguiRicercaPasseggero(JTextField idField, JDialog dialog) {
+        String id = idField.getText().trim();
+
+        if (id.isEmpty()) {
+            JOptionPane.showMessageDialog(dialog, "Inserisci un ID documento.", errore, JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        Passeggero p = new Passeggero();
+        p.setIdDocumento(id);
+
+        ArrayList<Prenotazione> risultati = new AmministratoreImplementazionePostgresDAO().cercaPasseggero(p);
+
+        if (risultati.isEmpty()) {
+            JOptionPane.showMessageDialog(dialog, "Nessuna prenotazione trovata per il passeggero.", "Risultato", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            mostraPrenotazioniInPopup(risultati, dialog);
+        }
+    }
+
+    private void mostraPrenotazioniInPopup(ArrayList<Prenotazione> prenotazioni, JDialog parentDialog) {
+        JDialog popup = new JDialog(parentDialog, "Prenotazioni del Passeggero", true);
+        popup.setSize(700, 500);
+        popup.setLocationRelativeTo(parentDialog);
+        popup.setResizable(false);
+        popup.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+
+        JPanel contenuto = new JPanel(new BorderLayout());
+        contenuto.setBackground(new Color(43, 48, 52));
+        contenuto.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        JTextArea area = new JTextArea();
+        area.setEditable(false);
+        area.setFont(new Font("Monospaced", Font.PLAIN, 14));
+        area.setBackground(new Color(43, 48, 52));
+        area.setForeground(Color.WHITE);
+        area.setBorder(null);
+
+        StringBuilder sb = new StringBuilder();
+        for (Prenotazione pr : prenotazioni) {
+            sb.append("Codice Prenotazione: ").append(pr.getNumeroBiglietto()).append("\n")
+                    .append("Stato: ").append(pr.getStatoPrenotazione()).append("\n")
+                    .append("Passeggero: ").append(pr.getPasseggero().getNome()).append(" ").append(pr.getPasseggero().getCognome()).append("\n")
+                    .append("Volo: ").append(pr.getVolo().getCodiceVolo()).append(" - ").append(pr.getVolo().getCompagnia()).append("\n")
+                    .append("Da: ").append(pr.getVolo().getOrigine()).append(" a ").append(pr.getVolo().getDestinazione()).append("\n")
+                    .append("Data: ").append(pr.getVolo().getData()).append("  Orario: ").append(pr.getVolo().getOrario()).append("\n")
+                    .append("Ritardo: ").append(pr.getVolo().getRitardo()).append(" min\n")
+                    .append("Stato Volo: ").append(pr.getVolo().getStato()).append("\n");
+
+            if (pr.getVolo() instanceof VoloInPartenza vpart) {
+                sb.append("Gate: ").append(vpart.getGate()).append("\n");
+            }
+
+            sb.append("------------------------------\n");
+        }
+
+        area.setText(sb.toString());
+        JScrollPane scrollPane = new JScrollPane(area);
+        scrollPane.setBorder(null);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+
+        contenuto.add(scrollPane, BorderLayout.CENTER);
+        popup.setContentPane(contenuto);
+        popup.setVisible(true);
+    }
+
+
     /** Metodo che gestisce la selezione di un elemento dal menu a tendina della dashboard admin.
      * In base all'elemento selezionato, apre un dialog con le opzioni corrispondenti.
      *
@@ -1278,6 +1366,11 @@ public class Controller {
             case "Cerca Volo":
                 handlerCercaVolo(panel, dialog);
                 break;
+
+            case "Cerca Passeggero":
+                handlerCercaPasseggero(panel, dialog);
+                break;
+
             default:
         }
 

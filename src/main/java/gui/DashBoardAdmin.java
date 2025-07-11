@@ -38,7 +38,7 @@ public class DashBoardAdmin {
         this.controller = controller;
         this.username = username;
 
-        String[] choices = {"", "Inserisci Volo", "Aggiorna Volo", "Modifica Gate", "Cerca Bagagli", "Cerca Volo", "Aggiorna Bagaglio", "Visualizza Smarrimenti"};
+        String[] choices = {"", "Inserisci Volo", "Aggiorna Volo", "Modifica Gate", "Cerca Bagagli", "Cerca Volo", "Cerca Passeggero", "Aggiorna Bagaglio", "Visualizza Smarrimenti"};
 
         comboBox1.setEnabled(true);
         outputLabel.setVisible(false);

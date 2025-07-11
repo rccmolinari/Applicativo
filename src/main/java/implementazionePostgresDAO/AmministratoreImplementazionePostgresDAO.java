@@ -437,34 +437,72 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
 
         return lista;
     }
-    public ArrayList<Prenotazione> cercaPasseggero(Passeggero p) {
+    @Override
+    public ArrayList<Prenotazione> cercaPasseggero(Passeggero passeggero) {
         ArrayList<Prenotazione> lista = new ArrayList<>();
-        final String SQL = """
-            SELECT pr.*
-            FROM prenotazione pr
-            JOIN passeggero pas ON pr.numero_biglietto = pas.numero_biglietto
-            WHERE pas.nome = ? AND pas.cognome = ?
-            """;
+        final String QUERY = """
+        SELECT p.numero_biglietto, p.stato_prenotazione, 
+               v.*, pa.nome, pa.cognome
+        FROM prenotazione p
+        JOIN volo v ON p.codice_volo = v.codice_volo
+        JOIN passeggero pa ON p.documento_passeggero = pa.id_documento
+        WHERE pa.id_documento = ?
+        ORDER BY p.numero_biglietto
+    """;
 
-        try (PreparedStatement ps = connection.prepareStatement(SQL)) {
-            ps.setString(1, p.getNome());
-            ps.setString(2, p.getCognome());
+        try (PreparedStatement ps = connection.prepareStatement(QUERY)) {
+            ps.setString(1, passeggero.getIdDocumento());
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
+                    // Crea il volo dinamico in base al tipo
+                    Volo volo;
+                    String tipo = rs.getString("tipo_volo");
+
+                    if ("inPartenza".equalsIgnoreCase(tipo)) {
+                        volo = new VoloInPartenza();
+                        ((VoloInPartenza) volo).setGate(rs.getInt("gate"));
+                    } else if ("inArrivo".equalsIgnoreCase(tipo)) {
+                        volo = new VoloInArrivo();
+                    } else {
+                        continue; // tipo non valido
+                    }
+
+                    volo.setCodiceVolo(rs.getInt("codice_volo"));
+                    volo.setCompagnia(rs.getString("compagnia"));
+                    volo.setData(rs.getDate("data_volo"));
+                    volo.setOrario(rs.getTime("orario_previsto"));
+                    volo.setRitardo(rs.getInt("ritardo"));
+                    volo.setStato(StatoVolo.fromString(rs.getString("stato_volo")));
+                    volo.setOrigine(rs.getString("aeroporto_origine"));
+                    volo.setDestinazione(rs.getString("aeroporto_destinazione"));
+
+                    // Costruisci il passeggero
+                    Passeggero p = new Passeggero();
+                    p.setIdDocumento(passeggero.getIdDocumento());
+                    p.setNome(rs.getString("nome"));
+                    p.setCognome(rs.getString("cognome"));
+
+                    // Crea la prenotazione
                     Prenotazione pren = new Prenotazione();
                     pren.setNumeroBiglietto(rs.getInt("numero_biglietto"));
-                    pren.setVolo(new Volo()); // Popolare con i dati del volo se necessario
+                    pren.setStatoPrenotazione(StatoPrenotazione.valueOf(rs.getString("stato_prenotazione").toUpperCase()));
+                    pren.setPasseggero(p);
+                    pren.setVolo(volo);
+
                     lista.add(pren);
                 }
             }
 
         } catch (SQLException e) {
-            throw new CustomExc("Errore durante la ricerca del passeggero", e);
+            throw new CustomExc("Errore durante la ricerca delle prenotazioni del passeggero", e);
         }
 
         return lista;
     }
+
+
+
     /**
      * Eccezione personalizzata per mascherare le eccezioni SQL come {@link RuntimeException}.
      * Utilizzata per propagare errori critici durante l’accesso al database.
