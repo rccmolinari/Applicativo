@@ -13,16 +13,22 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
 
     private static final Logger LOGGER = Logger.getLogger(AmministratoreImplementazionePostgresDAO.class.getName());
     private final Connection connection;
+
+    // Costanti colonna
     private static final String IN_PARTENZA = "inPartenza";
     private static final String IN_ARRIVO = "inArrivo";
     private static final String ID_BAGAGLIO = "id_bagaglio";
     private static final String STATO_BAGAGLIO = "stato_bagaglio";
-
-    /**
-     * Costruttore della classe. Inizializza la connessione al database tramite singleton.
-     *
-     * @throws CustomExc se la connessione al database fallisce.
-     */
+    private static final String COL_CODICE_VOLO = "codice_volo";
+    private static final String COL_COMPAGNIA = "compagnia";
+    private static final String COL_DATA_VOLO = "data_volo";
+    private static final String COL_ORARIO = "orario_previsto";
+    private static final String COL_RITARDO = "ritardo";
+    private static final String COL_STATO_VOLO = "stato_volo";
+    private static final String COL_TIPO_VOLO = "tipo_volo";
+    private static final String COL_DESTINAZIONE = "aeroporto_destinazione";
+    private static final String COL_ORIGINE = "aeroporto_origine";
+    private static final String COL_NUMERO_BIGLIETTO = "numero_biglietto";
 
     public AmministratoreImplementazionePostgresDAO() {
         try {
@@ -31,14 +37,6 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
             throw new CustomExc("Errore nella connessione al database", e);
         }
     }
-
-    /**
-     * Inserisce un nuovo volo nel database, specificando tutte le informazioni essenziali,
-     * inclusi data, orario, tipo volo (arrivo o partenza), gate (solo per voli in partenza) e stato.
-     *
-     * @param v il volo da inserire, può essere istanza di {@link VoloInPartenza} o {@link VoloInArrivo}.
-     * @throws CustomExc se si verifica un errore durante l'inserimento nel database.
-     */
 
     @Override
     public void inserisciVolo(Volo v) {
@@ -61,28 +59,13 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
             ps.setString(7, tipo);
             ps.setString(8, v.getDestinazione());
             ps.setString(9, v.getOrigine());
-
-            if (v instanceof VoloInPartenza voloinp) {
-                ps.setInt(10, (voloinp.getGate()));
-            } else {
-                ps.setNull(10, java.sql.Types.INTEGER);
-            }
-
+            ps.setObject(10, (v instanceof VoloInPartenza voloPart) ? voloPart.getGate() : null);
             ps.executeUpdate();
             LOGGER.info("Volo inserito con successo: " + v.getCodiceVolo());
-
         } catch (SQLException e) {
             throw new CustomExc("Errore durante l'inserimento del volo: " + v.getCodiceVolo(), e);
         }
     }
-
-    /**
-     * Aggiorna i dati di un volo già esistente, identificato tramite il codice volo.
-     *  È aggiornabile solo il campo della destinazione / origine.
-     *
-     * @param v il volo aggiornato con le nuove informazioni.
-     * @throws CustomExc se si verifica un errore o se il codice volo non è presente nel database.
-     */
 
     @Override
     public void aggiornaVolo(Volo v) {
@@ -103,13 +86,7 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
             ps.setString(6, tipo);
             ps.setString(7, v.getDestinazione());
             ps.setString(8, v.getOrigine());
-
-            if (v instanceof VoloInPartenza voloinp) {
-                ps.setInt(9, (voloinp.getGate()));
-            } else {
-                ps.setNull(9, java.sql.Types.INTEGER);
-            }
-
+            ps.setObject(9, (v instanceof VoloInPartenza voloPart) ? voloPart.getGate() : null);
             ps.setInt(10, v.getCodiceVolo());
 
             int updated = ps.executeUpdate();
@@ -118,19 +95,10 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
             } else {
                 LOGGER.info("Volo aggiornato con successo: " + v.getCodiceVolo());
             }
-
         } catch (SQLException e) {
             throw new CustomExc("Errore durante l'aggiornamento del volo: " + v.getCodiceVolo(), e);
         }
     }
-
-    /**
-     * Modifica il gate di un volo in partenza.
-     * L'operazione è valida solo per voli con tipo "inPartenza".
-     *
-     * @param volo il volo in partenza di cui aggiornare il gate.
-     * @throws CustomExc se il volo non esiste, non è un volo in partenza, o si verifica un errore SQL.
-     */
 
     @Override
     public void modificaGate(VoloInPartenza volo) {
@@ -140,13 +108,8 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
         try (PreparedStatement checkStmt = connection.prepareStatement(CHECK_SQL)) {
             checkStmt.setInt(1, volo.getCodiceVolo());
             try (ResultSet rs = checkStmt.executeQuery()) {
-                if (!rs.next()) {
-                    throw new CustomExc("Il volo con codice " + volo.getCodiceVolo() + " non esiste.", new RuntimeException());
-                }
-
-                String tipoVolo = rs.getString("tipo_volo");
-                if (!IN_PARTENZA.equalsIgnoreCase(tipoVolo)) {
-                    throw new CustomExc("Il gate può essere modificato solo per voli in partenza.", new RuntimeException());
+                if (!rs.next() || !IN_PARTENZA.equalsIgnoreCase(rs.getString(COL_TIPO_VOLO))) {
+                    throw new CustomExc("Gate modificabile solo per voli in partenza.", new RuntimeException());
                 }
             }
 
@@ -162,25 +125,14 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
         }
     }
 
-    /**
-     * Aggiorna lo stato di un bagaglio specifico nel database.
-     * L'operazione è consentita solo se il bagaglio esiste.
-     *
-     * @param bagaglio oggetto contenente l’ID del bagaglio da aggiornare.
-     * @param stato nuovo stato da impostare, ad esempio {@code CONSEGNATO}, {@code SMARRITO}, ecc.
-     * @throws CustomExc se il bagaglio non esiste o si verifica un errore nell’update.
-     */
-
     @Override
     public void aggiornaBagaglio(Bagaglio bagaglio, StatoBagaglio stato) {
         final String CHECK_SQL = "SELECT 1 FROM bagaglio WHERE id_bagaglio = ?";
         final String UPDATE_SQL = "UPDATE bagaglio SET stato_bagaglio = ? WHERE id_bagaglio = ?";
 
-        try (
-                PreparedStatement checkStmt = connection.prepareStatement(CHECK_SQL);
-                PreparedStatement updateStmt = connection.prepareStatement(UPDATE_SQL)
-        ) {
-            // Verifica esistenza del bagaglio
+        try (PreparedStatement checkStmt = connection.prepareStatement(CHECK_SQL);
+             PreparedStatement updateStmt = connection.prepareStatement(UPDATE_SQL)) {
+
             checkStmt.setInt(1, bagaglio.getCodiceBagaglio());
             try (ResultSet rs = checkStmt.executeQuery()) {
                 if (!rs.next()) {
@@ -188,11 +140,9 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
                 }
             }
 
-            // Esegue aggiornamento
             updateStmt.setString(1, stato.toString());
             updateStmt.setInt(2, bagaglio.getCodiceBagaglio());
             updateStmt.executeUpdate();
-
             LOGGER.log(Level.INFO, "Stato bagaglio aggiornato a {0} per ID {1}", new Object[]{stato, bagaglio.getCodiceBagaglio()});
 
         } catch (SQLException e) {
@@ -223,26 +173,26 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    String tipo = rs.getString("tipo_volo");
+                    String tipo = rs.getString(COL_TIPO_VOLO);
                     Volo risultato;
 
-                    if ("inPartenza".equalsIgnoreCase(tipo)) {
+                    if (IN_PARTENZA.equalsIgnoreCase(tipo)) {
                         risultato = new VoloInPartenza();
                         ((VoloInPartenza) risultato).setGate(rs.getInt("gate"));
-                    } else if ("inArrivo".equalsIgnoreCase(tipo)) {
+                    } else if (IN_ARRIVO.equalsIgnoreCase(tipo)) {
                         risultato = new VoloInArrivo();
                     } else {
                         continue;
                     }
 
-                    risultato.setCodiceVolo(rs.getInt("codice_volo"));
-                    risultato.setCompagnia(rs.getString("compagnia"));
-                    risultato.setData(rs.getDate("data_volo"));
-                    risultato.setOrario(rs.getTime("orario_previsto"));
-                    risultato.setRitardo(rs.getInt("ritardo"));
-                    risultato.setStato(StatoVolo.fromString(rs.getString("stato_volo")));
-                    risultato.setOrigine(rs.getString("aeroporto_origine"));
-                    risultato.setDestinazione(rs.getString("aeroporto_destinazione"));
+                    risultato.setCodiceVolo(rs.getInt(COL_CODICE_VOLO));
+                    risultato.setCompagnia(rs.getString(COL_COMPAGNIA));
+                    risultato.setData(rs.getDate(COL_DATA_VOLO));
+                    risultato.setOrario(rs.getTime(COL_ORARIO));
+                    risultato.setRitardo(rs.getInt(COL_RITARDO));
+                    risultato.setStato(StatoVolo.fromString(rs.getString(COL_STATO_VOLO)));
+                    risultato.setOrigine(rs.getString(COL_ORIGINE));
+                    risultato.setDestinazione(rs.getString(COL_DESTINAZIONE));
 
                     risultati.add(risultato);
                 }
@@ -283,7 +233,7 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
                 b.setStatoBagaglio(StatoBagaglio.fromString(rs.getString(STATO_BAGAGLIO)));
 
                 Prenotazione p = new Prenotazione();
-                p.setNumeroBiglietto(rs.getInt("numero_biglietto"));
+                p.setNumeroBiglietto(rs.getInt(COL_NUMERO_BIGLIETTO));
 
                 b.setPrenotazione(p);
                 lista.add(b);
@@ -317,30 +267,30 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-                String tipo = rs.getString("tipo_volo");
+                String tipo = rs.getString(COL_TIPO_VOLO);
 
                 if (IN_PARTENZA.equalsIgnoreCase(tipo)) {
                     VoloInPartenza v = new VoloInPartenza();
-                    v.setCodiceVolo(rs.getInt("codice_volo"));
-                    v.setCompagnia(rs.getString("compagnia"));
-                    v.setData(rs.getDate("data_volo"));
-                    v.setOrario(rs.getTime("orario_previsto"));
-                    v.setRitardo(rs.getInt("ritardo"));
-                    v.setStato(StatoVolo.fromString(rs.getString("stato_volo").toLowerCase()));
-                    v.setDestinazione(rs.getString("aeroporto_destinazione"));
-                    v.setOrigine(rs.getString("aeroporto_origine"));
+                    v.setCodiceVolo(rs.getInt(COL_CODICE_VOLO));
+                    v.setCompagnia(rs.getString(COL_COMPAGNIA));
+                    v.setData(rs.getDate(COL_DATA_VOLO));
+                    v.setOrario(rs.getTime(COL_ORARIO));
+                    v.setRitardo(rs.getInt(COL_RITARDO));
+                    v.setStato(StatoVolo.fromString(rs.getString(COL_STATO_VOLO).toLowerCase()));
+                    v.setDestinazione(rs.getString(COL_DESTINAZIONE));
+                    v.setOrigine(rs.getString(COL_ORIGINE));
                     v.setGate(rs.getInt("gate"));
                     lista.add(v);
                 } else if (IN_ARRIVO.equalsIgnoreCase(tipo)) {
                     VoloInArrivo v = new VoloInArrivo();
-                    v.setCodiceVolo(rs.getInt("codice_volo"));
-                    v.setCompagnia(rs.getString("compagnia"));
-                    v.setData(rs.getDate("data_volo"));
-                    v.setOrario(rs.getTime("orario_previsto"));
-                    v.setRitardo(rs.getInt("ritardo"));
-                    v.setStato(StatoVolo.fromString(rs.getString("stato_volo").toLowerCase()));
-                    v.setDestinazione(rs.getString("aeroporto_destinazione"));
-                    v.setOrigine(rs.getString("aeroporto_origine"));
+                    v.setCodiceVolo(rs.getInt(COL_CODICE_VOLO));
+                    v.setCompagnia(rs.getString(COL_COMPAGNIA));
+                    v.setData(rs.getDate(COL_DATA_VOLO));
+                    v.setOrario(rs.getTime(COL_ORARIO));
+                    v.setRitardo(rs.getInt(COL_RITARDO));
+                    v.setStato(StatoVolo.fromString(rs.getString(COL_STATO_VOLO).toLowerCase()));
+                    v.setDestinazione(rs.getString(COL_DESTINAZIONE));
+                    v.setOrigine(rs.getString(COL_ORIGINE));
                     lista.add(v);
                 }
             }
@@ -383,7 +333,7 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
                     bag.setStatoBagaglio(StatoBagaglio.fromString(rs.getString(STATO_BAGAGLIO)));
 
                     Prenotazione pren = new Prenotazione();
-                    pren.setNumeroBiglietto(rs.getInt("numero_biglietto"));
+                    pren.setNumeroBiglietto(rs.getInt(COL_NUMERO_BIGLIETTO));
                     bag.setPrenotazione(pren);
 
                     lista.add(bag);
@@ -457,25 +407,25 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
                 while (rs.next()) {
                     // Crea il volo dinamico in base al tipo
                     Volo volo;
-                    String tipo = rs.getString("tipo_volo");
+                    String tipo = rs.getString(COL_TIPO_VOLO);
 
-                    if ("inPartenza".equalsIgnoreCase(tipo)) {
+                    if (IN_PARTENZA.equalsIgnoreCase(tipo)) {
                         volo = new VoloInPartenza();
                         ((VoloInPartenza) volo).setGate(rs.getInt("gate"));
-                    } else if ("inArrivo".equalsIgnoreCase(tipo)) {
+                    } else if (IN_ARRIVO.equalsIgnoreCase(tipo)) {
                         volo = new VoloInArrivo();
                     } else {
                         continue; // tipo non valido
                     }
 
-                    volo.setCodiceVolo(rs.getInt("codice_volo"));
-                    volo.setCompagnia(rs.getString("compagnia"));
-                    volo.setData(rs.getDate("data_volo"));
-                    volo.setOrario(rs.getTime("orario_previsto"));
-                    volo.setRitardo(rs.getInt("ritardo"));
-                    volo.setStato(StatoVolo.fromString(rs.getString("stato_volo")));
-                    volo.setOrigine(rs.getString("aeroporto_origine"));
-                    volo.setDestinazione(rs.getString("aeroporto_destinazione"));
+                    volo.setCodiceVolo(rs.getInt(COL_CODICE_VOLO));
+                    volo.setCompagnia(rs.getString(COL_COMPAGNIA));
+                    volo.setData(rs.getDate(COL_DATA_VOLO));
+                    volo.setOrario(rs.getTime(COL_ORARIO));
+                    volo.setRitardo(rs.getInt(COL_RITARDO));
+                    volo.setStato(StatoVolo.fromString(rs.getString(COL_STATO_VOLO)));
+                    volo.setOrigine(rs.getString(COL_ORIGINE));
+                    volo.setDestinazione(rs.getString(COL_DESTINAZIONE));
 
                     // Costruisci il passeggero
                     Passeggero p = new Passeggero();
@@ -485,7 +435,7 @@ public class AmministratoreImplementazionePostgresDAO implements AmministratoreD
 
                     // Crea la prenotazione
                     Prenotazione pren = new Prenotazione();
-                    pren.setNumeroBiglietto(rs.getInt("numero_biglietto"));
+                    pren.setNumeroBiglietto(rs.getInt(COL_NUMERO_BIGLIETTO));
                     pren.setStatoPrenotazione(StatoPrenotazione.valueOf(rs.getString("stato_prenotazione").toUpperCase()));
                     pren.setPasseggero(p);
                     pren.setVolo(volo);

@@ -42,6 +42,13 @@ public class Controller {
     String modifica = "Modifica";
     String risultato ="Risultato";
     String codiceVolo = "Codice Volo";
+    String monospaced = "Monospaced";
+    String min = " min\n";
+    String data = "Data: ";
+    String stato ="Stato: ";
+    String gate = "Gate: ";
+    String errore1 = "Errore";
+    String ritardo = "Ritardo: ";
 
     /**
      * Visualizza in una tabella tutte le prenotazioni effettuate dall'utente corrente.
@@ -91,7 +98,7 @@ public class Controller {
         JDialog popup = new JDialog();
         popup.setTitle("Prenotazioni Effettuate");
         popup.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
-        popup.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        popup.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         popup.setContentPane(scrollPane);
         popup.pack();
         popup.setLocationRelativeTo(null);
@@ -127,22 +134,22 @@ public class Controller {
         StringBuilder msg = new StringBuilder();
         msg.append("Codice: ").append(volo.getCodiceVolo()).append("\n")
                 .append("Compagnia: ").append(volo.getCompagnia()).append("\n")
-                .append("Data: ").append(volo.getData()).append("\n")
+                .append(data).append(volo.getData()).append("\n")
                 .append("Orario: ").append(volo.getOrario()).append("\n")
-                .append("Ritardo: ").append(volo.getRitardo()).append(" min\n")
-                .append("Stato: ").append(volo.getStato()).append("\n")
+                .append(ritardo).append(volo.getRitardo()).append(min)
+                .append(stato).append(volo.getStato()).append("\n")
                 .append("Origine: ").append(volo.getOrigine()).append("\n")
                 .append("Destinazione: ").append(volo.getDestinazione()).append("\n");
 
         if (volo instanceof VoloInPartenza vp) {
-            msg.append("Gate: ").append(vp.getGate()).append("\n");
+            msg.append(gate).append(vp.getGate()).append("\n");
         }
 
         JTextArea area = new JTextArea(msg.toString());
         area.setEditable(false);
         area.setBackground(new Color(43, 48, 52));
         area.setForeground(Color.WHITE);
-        area.setFont(new Font("Monospaced", Font.PLAIN, 14));
+        area.setFont(new Font(monospaced, Font.PLAIN, 14));
         area.setBorder(null);
 
         JScrollPane scrollPane = new JScrollPane(area);
@@ -158,7 +165,7 @@ public class Controller {
         JDialog dialog = new JDialog();
         dialog.setTitle("Dettagli Volo");
         dialog.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
-        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        dialog.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         dialog.setContentPane(contenitore);
         dialog.pack();
         dialog.setLocationRelativeTo(null);
@@ -666,7 +673,7 @@ public class Controller {
             ArrayList<Volo> risultati = new UtenteGenericoImplementazionePostgresDAO().cercaVolo(v);
 
             if (risultati.isEmpty()) {
-                JOptionPane.showMessageDialog(dialog, "Nessun volo trovato.", "Risultato", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(dialog, "Nessun volo trovato.", risultato, JOptionPane.INFORMATION_MESSAGE);
                 return;
             }
 
@@ -682,7 +689,7 @@ public class Controller {
         popup.setSize(700, 500);
         popup.setLocationRelativeTo(parentDialog);
         popup.setResizable(false);
-        popup.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        popup.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         JPanel contenuto = new JPanel(new BorderLayout());
         contenuto.setBackground(new Color(43, 48, 52));
@@ -690,7 +697,7 @@ public class Controller {
 
         JTextArea area = new JTextArea();
         area.setEditable(false);
-        area.setFont(new Font("Monospaced", Font.PLAIN, 14));
+        area.setFont(new Font(monospaced, Font.PLAIN, 14));
         area.setBackground(new Color(43, 48, 52));
         area.setForeground(Color.WHITE);
         area.setBorder(null);
@@ -714,15 +721,15 @@ public class Controller {
         StringBuilder msg = new StringBuilder();
         msg.append("Codice: ").append(v.getCodiceVolo()).append("\n")
                 .append("Compagnia: ").append(v.getCompagnia()).append("\n")
-                .append("Data: ").append(v.getData()).append("\n")
+                .append(data).append(v.getData()).append("\n")
                 .append("Orario: ").append(v.getOrario()).append("\n")
-                .append("Ritardo: ").append(v.getRitardo()).append(" min\n")
-                .append("Stato: ").append(v.getStato()).append("\n")
+                .append(ritardo).append(v.getRitardo()).append(min)
+                .append(stato).append(v.getStato()).append("\n")
                 .append("Origine: ").append(v.getOrigine()).append("\n")
                 .append("Destinazione: ").append(v.getDestinazione()).append("\n");
 
         if (v instanceof VoloInPartenza vpart) {
-            msg.append("Gate: ").append(vpart.getGate()).append("\n");
+            msg.append(gate).append(vpart.getGate()).append("\n");
         }
 
         return msg.toString();
@@ -916,25 +923,25 @@ public class Controller {
                                        JTextField gateField) {
         int codice = Integer.parseInt(codiceField.getText());
         String compagnia = compagniaField.getText();
-        Date data = Date.valueOf(dataField.getText());
+        Date data2 = Date.valueOf(dataField.getText());
         Time orario = Time.valueOf(orarioField.getText());
         String localita = localitaField.getText();
-        int gate = -1;
+        int gate2 = -1;
 
         if (!inArrivo) {
             if (gateField.getText().isBlank()) {
                 throw new IllegalArgumentException(errore + "gate non valido");
             }
-            gate = Integer.parseInt(gateField.getText());
-            if (gate <= 0) {
+            gate2 = Integer.parseInt(gateField.getText());
+            if (gate2 <= 0) {
                 throw new IllegalArgumentException(errore + "il numero di gate deve essere maggiore di 0");
             }
         }
 
         if (inArrivo) {
-            return new VoloInArrivo(codice, compagnia, data, orario, 0, StatoVolo.PROGRAMMATO, localita, new ArrayList<>());
+            return new VoloInArrivo(codice, compagnia, data2, orario, 0, StatoVolo.PROGRAMMATO, localita, new ArrayList<>());
         } else {
-            return new VoloInPartenza(codice, compagnia, data, orario, 0, StatoVolo.PROGRAMMATO, localita, new ArrayList<>(), gate);
+            return new VoloInPartenza(codice, compagnia, data2, orario, 0, StatoVolo.PROGRAMMATO, localita, new ArrayList<>(), gate2);
         }
     }
 
@@ -1231,13 +1238,13 @@ public class Controller {
             try {
                 int codice = Integer.parseInt(codiceBagaglioField.getText().trim());
                 String statoSelezionato = (String) statoComboBox.getSelectedItem();
-                StatoBagaglio stato = StatoBagaglio.fromString(statoSelezionato);
+                StatoBagaglio stato2 = StatoBagaglio.fromString(statoSelezionato);
 
                 Bagaglio b = new Bagaglio();
                 b.setCodiceBagaglio(codice);
-                b.setStatoBagaglio(stato);
+                b.setStatoBagaglio(stato2);
 
-                new AmministratoreImplementazionePostgresDAO().aggiornaBagaglio(b, stato);
+                new AmministratoreImplementazionePostgresDAO().aggiornaBagaglio(b, stato2);
                 JOptionPane.showMessageDialog(dialog, "Stato del bagaglio aggiornato correttamente.");
             } catch (NumberFormatException e1) {
                 JOptionPane.showMessageDialog(dialog, "Codice bagaglio non valido.", errore, JOptionPane.ERROR_MESSAGE);
@@ -1340,7 +1347,7 @@ public class Controller {
         ArrayList<Prenotazione> risultati = new AmministratoreImplementazionePostgresDAO().cercaPasseggero(p);
 
         if (risultati.isEmpty()) {
-            JOptionPane.showMessageDialog(dialog, "Nessuna prenotazione trovata per il passeggero.", "Risultato", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(dialog, "Nessuna prenotazione trovata per il passeggero.", risultato, JOptionPane.INFORMATION_MESSAGE);
         } else {
             mostraPrenotazioniInPopup(risultati, dialog);
         }
@@ -1351,7 +1358,7 @@ public class Controller {
         popup.setSize(700, 500);
         popup.setLocationRelativeTo(parentDialog);
         popup.setResizable(false);
-        popup.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        popup.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         JPanel contenuto = new JPanel(new BorderLayout());
         contenuto.setBackground(new Color(43, 48, 52));
@@ -1359,7 +1366,7 @@ public class Controller {
 
         JTextArea area = new JTextArea();
         area.setEditable(false);
-        area.setFont(new Font("Monospaced", Font.PLAIN, 14));
+        area.setFont(new Font(monospaced, Font.PLAIN, 14));
         area.setBackground(new Color(43, 48, 52));
         area.setForeground(Color.WHITE);
         area.setBorder(null);
@@ -1371,12 +1378,12 @@ public class Controller {
                     .append("Passeggero: ").append(pr.getPasseggero().getNome()).append(" ").append(pr.getPasseggero().getCognome()).append("\n")
                     .append("Volo: ").append(pr.getVolo().getCodiceVolo()).append(" - ").append(pr.getVolo().getCompagnia()).append("\n")
                     .append("Da: ").append(pr.getVolo().getOrigine()).append(" a ").append(pr.getVolo().getDestinazione()).append("\n")
-                    .append("Data: ").append(pr.getVolo().getData()).append("  Orario: ").append(pr.getVolo().getOrario()).append("\n")
-                    .append("Ritardo: ").append(pr.getVolo().getRitardo()).append(" min\n")
+                    .append(data).append(pr.getVolo().getData()).append("  Orario: ").append(pr.getVolo().getOrario()).append("\n")
+                    .append("Ritardo: ").append(pr.getVolo().getRitardo()).append(min)
                     .append("Stato Volo: ").append(pr.getVolo().getStato()).append("\n");
 
             if (pr.getVolo() instanceof VoloInPartenza vpart) {
-                sb.append("Gate: ").append(vpart.getGate()).append("\n");
+                sb.append(gate).append(vpart.getGate()).append("\n");
             }
 
             sb.append("------------------------------\n");
@@ -1741,86 +1748,87 @@ public class Controller {
         panel.setBackground(new Color(43, 48, 52));
         panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
-        // Campi
-        JTextField codiceField = creaCampo(String.valueOf(volo.getCodiceVolo()));
-        codiceField.setEditable(false);
-        JTextField compagniaField = creaCampo(volo.getCompagnia());
-        compagniaField.setEditable(false);
-        JTextField dataField = creaCampo(volo.getData().toString());
-        dataField.setEditable(false);
-        JTextField orarioField = creaCampo(volo.getOrario().toString());
-        orarioField.setEditable(false);
-        JTextField ritardoField = creaCampo(String.valueOf(volo.getRitardo()));
-        JTextField statoField = creaCampo(volo.getStato().name());
-        JTextField origineField = creaCampo(volo.getOrigine());
-        JTextField destinazioneField = creaCampo(volo.getDestinazione());
-        JTextField gateField = null;
+        JTextField codice2 = creaCampo(String.valueOf(volo.getCodiceVolo()));
+        codice2.setEditable(false);
+        JTextField compagnia2 = creaCampo(volo.getCompagnia());
+        compagnia2.setEditable(false);
+        JTextField data2 = creaCampo(volo.getData().toString());
+        data2.setEditable(false);
+        JTextField orario2 = creaCampo(volo.getOrario().toString());
+        orario2.setEditable(false);
+        JTextField ritardo2 = creaCampo(String.valueOf(volo.getRitardo()));
+        JTextField stato2 = creaCampo(volo.getStato().name());
+        JTextField origine2 = creaCampo(volo.getOrigine());
+        JTextField destinazione2 = creaCampo(volo.getDestinazione());
+        JTextField gate2 = null;
 
-        // Etichette bianche
-        panel.add(creaEtichetta("Codice Volo:")); panel.add(codiceField);
-        panel.add(creaEtichetta("Compagnia:")); panel.add(compagniaField);
-        panel.add(creaEtichetta("Data (YYYY-MM-DD):")); panel.add(dataField);
-        panel.add(creaEtichetta("Orario (HH:MM:SS):")); panel.add(orarioField);
-        panel.add(creaEtichetta("Ritardo (minuti):")); panel.add(ritardoField);
-        panel.add(creaEtichetta("Stato:")); panel.add(statoField);
-        panel.add(creaEtichetta("Origine:")); panel.add(origineField);
-        panel.add(creaEtichetta("Destinazione:")); panel.add(destinazioneField);
+        panel.add(creaEtichetta("Codice Volo:")); panel.add(codice2);
+        panel.add(creaEtichetta("Compagnia:")); panel.add(compagnia2);
+        panel.add(creaEtichetta("Data (YYYY-MM-DD):")); panel.add(data2);
+        panel.add(creaEtichetta("Orario (HH:MM:SS):")); panel.add(orario2);
+        panel.add(creaEtichetta("Ritardo (minuti):")); panel.add(ritardo2);
+        panel.add(creaEtichetta("Stato:")); panel.add(stato2);
+        panel.add(creaEtichetta("Origine:")); panel.add(origine2);
+        panel.add(creaEtichetta("Destinazione:")); panel.add(destinazione2);
 
         if (volo instanceof VoloInPartenza v) {
-            origineField.setEditable(false);
-            gateField = creaCampo(String.valueOf(v.getGate()));
-            panel.add(creaEtichetta("Gate:")); panel.add(gateField);
+            origine2.setEditable(false);
+            gate2 = creaCampo(String.valueOf(v.getGate()));
+            panel.add(creaEtichetta("Gate:")); panel.add(gate2);
         } else {
-            destinazioneField.setEditable(false);
+            destinazione2.setEditable(false);
         }
 
-        JButton conferma = new JButton("Conferma modifica");
-        conferma.setBackground(new Color(255, 162, 35));
-        conferma.setForeground(Color.BLACK);
+        JButton conferma2 = new JButton("Conferma modifica");
+        conferma2.setBackground(new Color(255, 162, 35));
+        conferma2.setForeground(Color.BLACK);
 
-        JTextField finalGateField = gateField;
+        JTextField finalGate2 = gate2;
 
-        conferma.addActionListener(e -> {
+        conferma2.addActionListener(e -> {
             try {
-                int nuovoCodice = Integer.parseInt(codiceField.getText());
-                String compagnia = compagniaField.getText();
-                Date data = Date.valueOf(dataField.getText());
-                Time orario = Time.valueOf(orarioField.getText());
-                int ritardo = Integer.parseInt(ritardoField.getText());
-                StatoVolo stato = StatoVolo.valueOf(statoField.getText().toUpperCase());
-                String origine = origineField.getText();
-                String destinazione = destinazioneField.getText();
-                if(origine.equals(destinazione)) {
+                int codiceV = Integer.parseInt(codice2.getText());
+                String compV = compagnia2.getText();
+                Date dataV = Date.valueOf(data2.getText());
+                Time orarioV = Time.valueOf(orario2.getText());
+                int ritardoV = Integer.parseInt(ritardo2.getText());
+                StatoVolo statoV = StatoVolo.valueOf(stato2.getText().toUpperCase());
+                String origV = origine2.getText();
+                String destV = destinazione2.getText();
+
+                if (origV.equals(destV)) {
                     throw new Mpmv(errore + "origine e destinazione non possono essere uguali");
                 }
+
                 if (volo instanceof VoloInPartenza) {
-                    int gate = Integer.parseInt(finalGateField.getText());
-                    if(gate <= 0) {
+                    int gateV = Integer.parseInt(finalGate2.getText());
+                    if (gateV <= 0) {
                         throw new Mpmv(errore + "il numero di gate deve essere maggiore di 0");
                     }
-                    VoloInPartenza vPartModificato = new VoloInPartenza(
-                            nuovoCodice, compagnia, data, orario, ritardo,
-                            stato, destinazione, new ArrayList<>(), gate
-                    );
-                    new AmministratoreImplementazionePostgresDAO().aggiornaVolo(vPartModificato);
-                } else {
-                    VoloInArrivo vArrModificato = new VoloInArrivo(
-                            nuovoCodice, compagnia, data, orario, ritardo,
-                            stato, origine, new ArrayList<>()
-                    );
-                    new AmministratoreImplementazionePostgresDAO().aggiornaVolo(vArrModificato);
-                }
 
+                    VoloInPartenza nuovoPart = new VoloInPartenza(
+                            codiceV, compV, dataV, orarioV, ritardoV,
+                            statoV, destV, new ArrayList<>(), gateV
+                    );
+                    new AmministratoreImplementazionePostgresDAO().aggiornaVolo(nuovoPart);
+                } else {
+                    VoloInArrivo nuovoArr = new VoloInArrivo(
+                            codiceV, compV, dataV, orarioV, ritardoV,
+                            statoV, origV, new ArrayList<>()
+                    );
+                    new AmministratoreImplementazionePostgresDAO().aggiornaVolo(nuovoArr);
+                }
 
                 JOptionPane.showMessageDialog(null, "Volo aggiornato con successo!");
                 dialog.dispose();
+
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(null, errore + ex.getMessage(), errore, JOptionPane.ERROR_MESSAGE);
             }
         });
 
-        panel.add(new JLabel()); // spazio vuoto
-        panel.add(conferma);
+        panel.add(new JLabel());
+        panel.add(conferma2);
 
         dialog.setContentPane(panel);
         dialog.pack();
@@ -1954,10 +1962,10 @@ public class Controller {
                 JOptionPane.showMessageDialog(null, "Numero bagagli aggiornato con successo!");
                 dialog.dispose();
             } catch (NumberFormatException nfe) {
-                JOptionPane.showMessageDialog(null, "Inserisci un numero valido di bagagli.", "Errore", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Inserisci un numero valido di bagagli.", errore1, JOptionPane.ERROR_MESSAGE);
             } catch (Exception ex) {
                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Errore durante l'aggiornamento", ex);
-                JOptionPane.showMessageDialog(null, "Errore durante l'aggiornamento.", "Errore", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Errore durante l'aggiornamento.", errore1, JOptionPane.ERROR_MESSAGE);
             }
         });
 
