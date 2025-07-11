@@ -29,7 +29,18 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
     private static final String STATO_VOLO = "stato_volo";
     private static final String NUMERO_BIGLIETTO = "numero_biglietto";
     private static final String POSTO_ASSEGNATO = "posto_assegnato";
-    private static final String ID_BAGAGLIO = "id_bagaglio";
+    private static final String ID_BAGAGLIO = "id_bagaglio";// Costanti aggiunte in cima alla classe:
+    private static final String TIPO_VOLO = "tipo_volo";
+    private static final String IN_PARTENZA = "inPartenza";
+    private static final String IN_ARRIVO = "inArrivo";
+    private static final String COMPAGNIA = "compagnia";
+    private static final String DATA_VOLO = "data_volo";
+    private static final String ORARIO_PREVISTO = "orario_previsto";
+    private static final String RITARDO = "ritardo";
+    private static final String AEROPORTO_ORIGINE = "aeroporto_origine";
+    private static final String AEROPORTO_DESTINAZIONE = "aeroporto_destinazione";
+
+
     private Connection connection;
 
     /**
@@ -62,26 +73,26 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-                String tipo = rs.getString("tipo_volo");
+                String tipo = rs.getString(TIPO_VOLO);
 
                 Volo v;
-                if ("inPartenza".equalsIgnoreCase(tipo)) {
+                if (IN_PARTENZA.equalsIgnoreCase(tipo)) {
                     v = new VoloInPartenza();
                     ((VoloInPartenza) v).setGate(rs.getInt("gate"));
-                } else if ("inArrivo".equalsIgnoreCase(tipo)) {
+                } else if (IN_ARRIVO.equalsIgnoreCase(tipo)) {
                     v = new VoloInArrivo();
                 } else {
                     continue; // ignora tipi sconosciuti
                 }
 
                 v.setCodiceVolo(rs.getInt(CODICE_VOLO));
-                v.setCompagnia(rs.getString("compagnia"));
-                v.setData(rs.getDate("data_volo"));
-                v.setOrario(rs.getTime("orario_previsto"));
-                v.setRitardo(rs.getInt("ritardo"));
+                v.setCompagnia(rs.getString(COMPAGNIA));
+                v.setData(rs.getDate(DATA_VOLO));
+                v.setOrario(rs.getTime(ORARIO_PREVISTO));
+                v.setRitardo(rs.getInt(RITARDO));
                 v.setStato(StatoVolo.fromString(rs.getString(STATO_VOLO)));
-                v.setDestinazione(rs.getString("aeroporto_destinazione"));
-                v.setOrigine(rs.getString("aeroporto_origine"));
+                v.setDestinazione(rs.getString(AEROPORTO_DESTINAZIONE));
+                v.setOrigine(rs.getString(AEROPORTO_ORIGINE));
 
                 lista.add(v);
             }
@@ -133,25 +144,25 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
 
                         // Costruzione volo
                         Volo volo;
-                        String tipo = rs.getString("tipo_volo");
+                        String tipo = rs.getString(TIPO_VOLO);
 
-                        if ("inPartenza".equalsIgnoreCase(tipo)) {
+                        if (IN_PARTENZA.equalsIgnoreCase(tipo)) {
                             volo = new VoloInPartenza();
                             ((VoloInPartenza) volo).setGate(rs.getInt("gate"));
-                        } else if ("inArrivo".equalsIgnoreCase(tipo)) {
+                        } else if (IN_ARRIVO.equalsIgnoreCase(tipo)) {
                             volo = new VoloInArrivo();
                         } else {
                             continue;
                         }
 
-                        volo.setCodiceVolo(rs.getInt("codice_volo"));
-                        volo.setCompagnia(rs.getString("compagnia"));
-                        volo.setData(rs.getDate("data_volo"));
-                        volo.setOrario(rs.getTime("orario_previsto"));
-                        volo.setRitardo(rs.getInt("ritardo"));
-                        volo.setStato(StatoVolo.fromString(rs.getString("stato_volo")));
-                        volo.setOrigine(rs.getString("aeroporto_origine"));
-                        volo.setDestinazione(rs.getString("aeroporto_destinazione"));
+                        volo.setCodiceVolo(rs.getInt(CODICE_VOLO));
+                        volo.setCompagnia(rs.getString(COMPAGNIA));
+                        volo.setData(rs.getDate(DATA_VOLO));
+                        volo.setOrario(rs.getTime(ORARIO_PREVISTO));
+                        volo.setRitardo(rs.getInt(RITARDO));
+                        volo.setStato(StatoVolo.fromString(rs.getString(STATO_VOLO)));
+                        volo.setOrigine(rs.getString(AEROPORTO_ORIGINE));
+                        volo.setDestinazione(rs.getString(AEROPORTO_DESTINAZIONE));
 
                         p = new Prenotazione();
                         p.setNumeroBiglietto(numeroBiglietto);
@@ -318,26 +329,26 @@ public class UtenteGenericoImplementazionePostgresDAO implements UtenteGenericoD
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    String tipo = rs.getString("tipo_volo");
+                    String tipo = rs.getString(TIPO_VOLO);
                     Volo risultato;
 
-                    if ("inPartenza".equalsIgnoreCase(tipo)) {
+                    if (IN_PARTENZA.equalsIgnoreCase(tipo)) {
                         risultato = new VoloInPartenza();
                         ((VoloInPartenza) risultato).setGate(rs.getInt("gate"));
-                    } else if ("inArrivo".equalsIgnoreCase(tipo)) {
+                    } else if (IN_ARRIVO.equalsIgnoreCase(tipo)) {
                         risultato = new VoloInArrivo();
                     } else {
                         continue;
                     }
 
-                    risultato.setCodiceVolo(rs.getInt("codice_volo"));
-                    risultato.setCompagnia(rs.getString("compagnia"));
-                    risultato.setData(rs.getDate("data_volo"));
-                    risultato.setOrario(rs.getTime("orario_previsto"));
-                    risultato.setRitardo(rs.getInt("ritardo"));
-                    risultato.setStato(StatoVolo.fromString(rs.getString("stato_volo")));
-                    risultato.setOrigine(rs.getString("aeroporto_origine"));
-                    risultato.setDestinazione(rs.getString("aeroporto_destinazione"));
+                    risultato.setCodiceVolo(rs.getInt(CODICE_VOLO));
+                    risultato.setCompagnia(rs.getString(COMPAGNIA));
+                    risultato.setData(rs.getDate(DATA_VOLO));
+                    risultato.setOrario(rs.getTime(ORARIO_PREVISTO));
+                    risultato.setRitardo(rs.getInt(RITARDO));
+                    risultato.setStato(StatoVolo.fromString(rs.getString(STATO_VOLO)));
+                    risultato.setOrigine(rs.getString(AEROPORTO_ORIGINE));
+                    risultato.setDestinazione(rs.getString(AEROPORTO_DESTINAZIONE));
 
                     risultati.add(risultato);
                 }
