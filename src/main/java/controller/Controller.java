@@ -1156,7 +1156,7 @@ public class Controller {
      */
 
     private ArrayList<Bagaglio> eseguiRicercaBagagli(JTextField idField, JTextField prenotazioneField) {
-        AmministratoreImplementazionePostgresDAO dao = new AmministratoreImplementazionePostgresDAO();
+
         boolean perId = !idField.getText().trim().isEmpty();
         boolean perPren = !prenotazioneField.getText().trim().isEmpty();
 
@@ -1166,16 +1166,31 @@ public class Controller {
         if (!perId && !perPren) {
             throw new IllegalArgumentException("Inserisci almeno uno dei due campi.");
         }
-
-        if (perId) {
-            Bagaglio b = new Bagaglio();
-            b.setCodiceBagaglio(Integer.parseInt(idField.getText().trim()));
-            return dao.cercaBagaglio(b, null);
-        } else {
-            Prenotazione p = new Prenotazione();
-            p.setNumeroBiglietto(Integer.parseInt(prenotazioneField.getText().trim()));
-            return dao.cercaBagaglio(p, null);
+        if(admin == null) {
+            UtenteGenericoImplementazionePostgresDAO dao = new UtenteGenericoImplementazionePostgresDAO();
+            if (perId) {
+                Bagaglio b = new Bagaglio();
+                b.setCodiceBagaglio(Integer.parseInt(idField.getText().trim()));
+                return dao.cercaBagaglio(b, utente);
+            } else {
+                Prenotazione p = new Prenotazione();
+                p.setNumeroBiglietto(Integer.parseInt(prenotazioneField.getText().trim()));
+                return dao.cercaBagaglio(p, utente);
+            }
         }
+        else {
+            AmministratoreImplementazionePostgresDAO dao = new AmministratoreImplementazionePostgresDAO();
+            if (perId) {
+                Bagaglio b = new Bagaglio();
+                b.setCodiceBagaglio(Integer.parseInt(idField.getText().trim()));
+                return dao.cercaBagaglio(b, null);
+            } else {
+                Prenotazione p = new Prenotazione();
+                p.setNumeroBiglietto(Integer.parseInt(prenotazioneField.getText().trim()));
+                return dao.cercaBagaglio(p, null);
+            }
+        }
+
     }
 
     /**
