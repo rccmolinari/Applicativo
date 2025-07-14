@@ -654,13 +654,7 @@ public class Controller {
             Volo v = new Volo();
             if (cercaPerCodice) {
                 int codice;
-                try {
                     codice = Integer.parseInt(codStr);
-                } catch (NumberFormatException e) {
-                    JOptionPane.showMessageDialog(dialog, "Il codice volo deve essere un numero intero.", errore, JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-
                 if (codice <= 0) {
                     JOptionPane.showMessageDialog(dialog, "Il codice volo deve essere un numero positivo.", errore, JOptionPane.ERROR_MESSAGE);
                     return;
